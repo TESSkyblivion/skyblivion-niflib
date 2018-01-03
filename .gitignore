@@ -7,3 +7,8 @@ include/obj/
 src/gen/
 src/obj/
 gen/*.pyc
+include/compoundImpl.cpp
+include/compound_visitor.h
+include/objImpl.cpp
+include/visitor.h
+src/compound_visitor.cpp
