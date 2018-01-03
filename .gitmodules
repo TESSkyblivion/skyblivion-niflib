@@ -1,0 +1,3 @@
+[submodule "gen/nifxml"]
+	path = gen/nifxml
+	url = https://github.com/TESSkyblivion/nifxml

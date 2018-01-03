@@ -1,0 +1,9 @@
+sources.cmake
+gen/LAST_GEN_MOD_DATE
+build/
+doc/doxygen/
+include/gen/
+include/obj/
+src/gen/
+src/obj/
+gen/*.pyc
