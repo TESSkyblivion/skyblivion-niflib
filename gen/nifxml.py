@@ -88,6 +88,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 from xml.dom.minidom import *
 from textwrap import fill
+from sets import Set
 
 import sys
 import os
@@ -113,6 +114,8 @@ enum_names = []
 flag_names = []
 block_names = []
 version_names = []
+
+c_types_set = Set()
 
 NATIVETYPES = {
     'bool' : 'bool',
@@ -508,6 +511,7 @@ class CFile(file):
             self.code('public:')
             counter = 0
             for y in block.members:
+                c_types_set.add(y.type_declare())
                 if not y.is_duplicate:
                     if isinstance(block, Block) and block.inherit:
                         self.code('static const unsigned int %s%s = %s::FIELDS::LAST_FIELD + %s;'%(prefix, y.cname, block.inherit.cname, counter))
@@ -545,18 +549,36 @@ class CFile(file):
             refList = {}
 
             if isinstance(block, Block) and block.inherit:
-                self.code( 'NIFLIB_API template <unsigned int field> auto get() {return %s::get<field>();}'%block.inherit.cname )
+                self.code( 'NIFLIB_API template <unsigned int field> const auto& get() {return %s::get<field>();}'%block.inherit.cname )
             else:
-                self.code( 'NIFLIB_API template <unsigned int field> auto get() {}')
+                self.code( 'NIFLIB_API template <unsigned int field> const auto& get() {throw std::runtime_error("Invalid Field Requested"); return NULL;}')
             for y in block.members:
                 if not y.is_duplicate:
-                    ctype = ("%s"%(y.type_declare()))
-                    self.code('NIFLIB_API template<> auto get<FIELDS::%s%s>();'%(prefix, y.cname))           
+                    if not block.template:
+                        ctype = ("%s"%(y.type_declare()))
+                        self.code('NIFLIB_API template<> const auto& get<FIELDS::%s%s>();'%(prefix, y.cname))           
             return
         if action == ACTION_RTTI_GET:
             for y in block.members:
                 if not y.is_duplicate:
-                    self.code('template<> auto %s::get<%s::FIELDS::%s%s>() {return %s%s;}'%(block.cname, block.cname, prefix, y.cname, prefix, y.cname))
+                    if not block.template:
+                        self.code('template<> const auto& %s::get<%s::FIELDS::%s%s>() {return %s%s;}'%(block.cname, block.cname, prefix, y.cname, prefix, y.cname))
+                    else:
+                        self.code('NIFLIB_API template<> const auto& get<FIELDS::%s%s>() {return %s%s;}'%(prefix, y.cname, prefix, y.cname))
+            # FieldVisitor
+            if not block.template:
+                self.code( 'void %s::accept(class FieldVisitor& visitor) {'%(block.cname) )
+            else:
+                self.code( 'NIFLIB_API void accept(class FieldVisitor& visitor) {' )
+            if isinstance(block, Block) and block.inherit:
+                self.code( '%s::accept(visitor);'%block.inherit.cname )
+            for y in block.members:
+                if not y.is_duplicate:
+                    self.code('visitor.visit(%s%s, FIELDS::%s%s);'%(prefix, y.cname, prefix, y.cname))
+                    #else:
+                    #    self.code('NIFLIB_API template<> const auto& get<FIELDS::%s%s>() {return %s%s;}'%(prefix, y.cname, prefix, y.cname))
+            self.code( '}' )
+                        
             return      
         # declare and calculate local variables (TODO: GET RID OF THIS; PREFERABLY NO LOCAL VARIABLES AT ALL)
         if action in [ACTION_READ, ACTION_WRITE, ACTION_OUT]:
@@ -623,6 +645,7 @@ class CFile(file):
         # now comes the difficult part: processing all members recursively
         for y in block.members:
             # get block
+            
             if y.type in basic_types:
                 subblock = basic_types[y.type]
             elif y.type in compound_types:
@@ -2196,7 +2219,7 @@ class Compound(Basic):
         return result    
         
     def code_include_cpp(self, usedirs=False, gen_dir=None, obj_dir=None):
-        return '/*LOL*/'.join(self.code_include_cpp_set(True, gen_dir, obj_dir))
+        return ''.join(self.code_include_cpp_set(True, gen_dir, obj_dir))
 
     # find member by name
     def find_member(self, name, inherit=False):

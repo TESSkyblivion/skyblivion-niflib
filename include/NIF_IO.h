@@ -126,6 +126,11 @@ namespace Niflib {
 	void NifStream(short & val, istream& in, const NifInfo & info);
 	void NifStream(short const & val, ostream& out, const NifInfo & info);
 
+	//half float
+	void NifStream(hfloat & val, istream& in, const NifInfo & info);
+	void NifStream(hfloat const & val, ostream& out, const NifInfo & info);
+	ostream & operator<<(ostream & out, hfloat const & val);
+
 	//byte
 	void NifStream(byte & val, istream& in, const NifInfo & info);
 	void NifStream(byte const & val, ostream& out, const NifInfo & info);

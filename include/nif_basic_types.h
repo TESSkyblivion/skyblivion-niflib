@@ -91,7 +91,16 @@ struct ByteArray : public std::vector<Niflib::byte>, public Compound {};
 
 // Fallout 4 Declaration of half float
 #ifndef hfloat
-typedef unsigned short	hfloat;
+struct hfloat { 
+
+	unsigned short value = 0;
+
+	hfloat() {};
+	hfloat(unsigned short val) { value = val; };
+	hfloat& operator=(const unsigned short & ref) {value = ref; return *this; }
+	bool operator==(const hfloat& other) const { return value == other.value; }
+};
+//typedef unsigned short	hfloat;
 #endif
 
 //--Structures--//

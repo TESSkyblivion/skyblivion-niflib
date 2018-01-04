@@ -23,8 +23,8 @@ All rights reserved.  Please see niflib.h for license. */
 #include <visitor.h>
 #include <compound_visitor.h>
 
-#include <objImpl.cpp>
-#include <compoundImpl.cpp>
+#include <objDecl.cpp>
+//#include <compoundImpl.cpp>
 
 #include "../include/gen/Header.h"
 #include "../include/gen/Footer.h"

@@ -266,6 +266,7 @@ for n in compound_names:
     h.write( "namespace Niflib {\n" )
     if not x.template:
         h.code( "class CompoundVisitor;" )
+        h.code( "class FieldVisitor;" )
     h.code( x.code_fwd_decl() )
     cmp = h.get_dependent_arg_class(x)
     if cmp != None:
@@ -331,6 +332,8 @@ for n in compound_names:
             h.code()
             h.code( 'NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);' )
             h.code()
+            h.code( 'NIFLIB_API virtual void accept(class FieldVisitor& visitor);' )
+            h.code()
             h.stream(x, ACTION_RTTI_GET_DECLARE)
         else:
             if cmp != None:
@@ -344,7 +347,10 @@ for n in compound_names:
             h.code( 'visitor.visit(*this, in);')
             h.code( '}')
             h.code()
-            h.code( 'NIFLIB_API template<typename Type> Type get(const unsigned int member) {throw std::runtime_error("Wrong Type"); return Type();}')
+            h.stream(x, ACTION_RTTI_GET_DECLARE)
+            h.code()
+            h.stream(x, ACTION_RTTI_GET)
+            h.code()
 
         
             
@@ -491,8 +497,8 @@ for n in compound_names:
             cpp.code("std::list<Compound * > %s::GetCompounds() const {"%x.cname)
             cpp.stream(x, ACTION_GETCOMPOUNDS)
             cpp.code("}")
-            cpp.code()
-            cpp.stream(x, ACTION_RTTI_GET)
+            #cpp.code()
+            #cpp.stream(x, ACTION_RTTI_GET)
         
         cpp.code()
         cpp.code( '//--BEGIN MISC CUSTOM CODE--//' )
@@ -630,20 +636,7 @@ if GENALLFILES:
     # NiObject Registration Function
     #
     
-    out = CFile(ROOT_DIR + '/include/objImpl.cpp', 'w')
-    out.code( '/* Copyright (c) 2018, NIF File Format Library and Tools' )
-    out.code( 'All rights reserved.  Please see niflib.h for license. */' )
-    out.code()
-    out.code( '//---THIS FILE WAS AUTOMATICALLY GENERATED.  DO NOT EDIT---//' )
-    out.code()
-    out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
-    out.code()
-    for n in block_names:
-        x = block_types[n]
-        out.code( '#include <obj/' + x.cname + '.h>' )
-    out.close()
-    
-    out = CFile(ROOT_DIR + '/include/compoundImpl.cpp', 'w')
+    out = CFile(ROOT_DIR + '/include/objDecl.cpp', 'w')
     out.code( '/* Copyright (c) 2018, NIF File Format Library and Tools' )
     out.code( 'All rights reserved.  Please see niflib.h for license. */' )
     out.code()
@@ -655,6 +648,38 @@ if GENALLFILES:
         if not NATIVETYPES.has_key(n) and not n in ['Header', 'Footer']:
             x = compound_types[n]
             out.code( '#include <gen/' + x.cname + '.h>' )
+    for n in block_names:
+        x = block_types[n]
+        out.code( '#include <obj/' + x.cname + '.h>' )
+    out.close()
+    
+    out = CFile(ROOT_DIR + '/include/objTmpl.cpp', 'w')
+    out.code( '/* Copyright (c) 2018, NIF File Format Library and Tools' )
+    out.code( 'All rights reserved.  Please see niflib.h for license. */' )
+    out.code()
+    out.code( '//---THIS FILE WAS AUTOMATICALLY GENERATED.  DO NOT EDIT---//' )
+    out.code()
+    out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
+    out.code()
+    out.code( '#include <visitor.h>' )
+    out.code( '#include <field_visitor.h>' )
+    out.code( '#include <objDecl.cpp>' )
+    out.code()
+    out.code( 'namespace Niflib {' )
+    for n in compound_names :
+        if not NATIVETYPES.has_key(n) and not n in ['Header', 'Footer']:
+            x = compound_types[n]
+            if not x.template:
+                out.code()
+                out.stream(x, ACTION_RTTI_GET)
+                out.code()
+    for n in block_names:
+        x = block_types[n]
+        #if not n == 'NiObject':
+        out.code()
+        out.stream(x, ACTION_RTTI_GET)
+        out.code()
+    out.code( '}' )   
     out.close()
     
     sourceList.write( 'src/gen/register.cpp\n')
@@ -667,7 +692,7 @@ if GENALLFILES:
     out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
     out.code()
     out.code( '#include "../../include/ObjectRegistry.h"' )
-    out.code( '#include <objImpl.cpp>' )
+    out.code( '#include <objDecl.cpp>' )
     #for n in block_names:
     #    x = block_types[n]
     #    out.code( '#include "../../include/obj/' + x.cname + '.h"' )
@@ -782,36 +807,10 @@ if GENALLFILES:
     out.code( 'public:' )
     out.code( 'CompoundVisitorImpl(Delegate& impl) : delegate(impl) {}')
     out.code( '};' )
-    out.code()
-    out.code( 'bool isVisitableCompound(type_info* t);')
     out.code( '}' )
     out.code('#endif')
     out.close()
     
-    out = CFile(ROOT_DIR + '/src/compound_visitor.cpp', 'w')
-    out.code( '/* Copyright (c) 2018, NIF File Format Library and Tools' )
-    out.code( 'All rights reserved.  Please see niflib.h for license. */' )
-    out.code()
-    out.code( '//---THIS FILE WAS AUTOMATICALLY GENERATED.  DO NOT EDIT---//' )
-    out.code()
-    out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
-    out.code()
-    out.code('#include <compound_visitor.h>')
-    out.code('#include <typeinfo>')
-    out.code()
-    out.code('using namespace Niflib;')
-    out.code()
-    out.code( 'bool Niflib::isVisitableCompound(type_info* t) {')
-    for n in compound_names:
-        if not NATIVETYPES.has_key(n) and not n in ['Header', 'Footer']:
-            x = compound_types[n]
-            if not x.template:
-                out.code(' if (t == const_cast<type_info*>(&typeid('+ x.cname +'))) return true;' )
-    out.code( 'return false;')
-    out.code( '}' )
-    out.close()
-    
-sourceList.write( 'src/compound_visitor.cpp\n')
 sourceList.write(')\n')
 sourceList.write('set(niobjects\n')
 #
@@ -931,6 +930,8 @@ for n in block_names:
         out.code( 'NIFLIB_API virtual void accept(class Visitor& visitor, const NifInfo &);' )
     else:
         out.code( 'NIFLIB_API virtual void accept(class Visitor& visitor, const NifInfo &) = 0;' )
+    out.code()
+    out.code( 'NIFLIB_API virtual void accept(class FieldVisitor& visitor);' )
     out.code()
     #out.code( 'NIFLIB_API template<typename Type> Type get(const unsigned int member) {throw std::runtime_error("Wrong Type"); return Type();}')
     #out.code()
@@ -1197,9 +1198,9 @@ for n in block_names:
     out.code("}")
     out.code()
     
-    out.code()
-    out.stream(x, ACTION_RTTI_GET)
-    out.code()
+    #out.code()
+    #out.stream(x, ACTION_RTTI_GET)
+    #out.code()
     
     #out.code("void %s::CreateStringTable(Header* in) const {"%x.cname)
     #out.stream(x, ACTION_STRINGTABLE)
@@ -1261,6 +1262,60 @@ for n in block_names:
     ##Check if the temp file is identical to the target file
     #OverwriteIfChanged( file_name, 'temp' )
 
+    out.close()
+    
+    #
+    # Field Abstract visitor
+    #
+    out = CFile(ROOT_DIR + '/include/field_visitor.h', 'w')
+    out.code( '#ifndef __FIELD_VISITOR_H_' )
+    out.code( '#define __FIELD_VISITOR_H_' )
+    out.code( '/* Copyright (c) 2018, NIF File Format Library and Tools' )
+    out.code( 'All rights reserved.  Please see niflib.h for license. */' )
+    out.code()
+    out.code( '//---THIS FILE WAS AUTOMATICALLY GENERATED.  DO NOT EDIT---//' )
+    out.code()
+    out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
+    out.code()
+    out.code( 'namespace Niflib {' )
+    out.code( 'struct NifInfo;')
+    for n in compound_names:
+        x = compound_types[n]
+        if not NATIVETYPES.has_key(n) and not n in ['Header', 'Footer']:
+            if not x.template:
+                out.code( 'struct ' + x.cname + ';')
+            else:
+                out.code( 'template <typename T> struct ' + x.cname +';')  
+    for n in block_names:
+        x = block_types[n]
+        out.code( 'class ' + x.cname + ';') 
+    out.code()
+    out.code( 'class FieldVisitor {' )
+    out.code( 'public:' )
+    out.code()
+    for ct in c_types_set:
+        if ct.find("<T >") is -1:
+            out.code( 'virtual inline void visit( ' + ct + '&, const unsigned int field_index ) = 0;' )
+        else:
+            out.code( 'template <typename T> inline void visit( ' + ct + '&, const unsigned int field_index );' )
+    out.code()
+    out.code( '};' )
+    out.code()
+    out.code( 'template <typename Delegate>' )
+    out.code( 'class FieldVisitorImpl : public FieldVisitor {' )
+    out.code( 'public:' )
+    for ct in c_types_set:
+        if ct.find("<T >") is -1:
+            out.code( 'virtual inline void visit( ' + ct + '& in, const unsigned int field_index ) { delegate.visit(in, field_index);}' )
+        else:
+            out.code( 'template <typename T> inline void visit( ' + ct + '&, const unsigned int field_index ) { delegate.visit(in, field_index);}' )
+    out.code( 'protected:' )
+    out.code( 'Delegate& delegate;')
+    out.code( 'public:' )
+    out.code( 'FieldVisitorImpl(Delegate& impl) : delegate(impl) {}')
+    out.code( '};' )
+    out.code( '}' )
+    out.code('#endif')
     out.close()
 
 sourceList.write( ')\n')

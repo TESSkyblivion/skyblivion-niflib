@@ -373,6 +373,29 @@ void NifStream( short const & val, ostream& out, const NifInfo & info ) {
 	}
 }
 
+//hfloat
+void NifStream(hfloat & val, istream& in, const NifInfo & info) {
+	if (info.endian == sys_endian) {
+		val.value = ReadShort(in);
+	}
+	else {
+		val.value = SwapEndian(ReadShort(in));
+	}
+}
+
+void NifStream(hfloat const & val, ostream& out, const NifInfo & info) {
+	if (info.endian == sys_endian) {
+		WriteShort(val.value, out);
+	}
+	else {
+		WriteShort(SwapEndian(val.value), out);
+	}
+}
+
+ostream & operator<<(ostream & out, hfloat const & val) {
+	return out << val.value;
+}
+
 //byte
 void NifStream( byte & val, istream& in, const NifInfo & info ) {
 	val = ReadByte( in );

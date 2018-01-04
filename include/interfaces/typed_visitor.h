@@ -71,6 +71,7 @@ namespace Niflib {
 	protected:
 		niobjects_queue stack;
 	};
+
 }
 
 

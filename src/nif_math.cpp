@@ -31,7 +31,7 @@ const InertiaMatrix InertiaMatrix::IDENTITY(
 
 
 float Niflib::ConvertHFloatToFloat(hfloat h) {
-	uint32_t tmp = half_to_float(h);
+	uint32_t tmp = half_to_float(h.value);
 	return *static_cast<float*>(static_cast<void*>(&tmp));
 }
 

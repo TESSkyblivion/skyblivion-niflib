@@ -8,9 +8,9 @@
 #include <niflib.h>
 #include <obj\NiObject.h>
 #include <obj\BSFadeNode.h>
+#include <field_visitor.h>
 #include <interfaces\typed_visitor.h>
-#include <objImpl.cpp>
-#include <compoundImpl.cpp>
+#include <objTmpl.cpp>
 
 //hierarchy
 #include <obj/NiTimeController.h>
@@ -23,6 +23,7 @@
 #include <iterator>
 #include <string>
 #include <fstream>
+#include <utility>
 
 using namespace std::experimental::filesystem;
 using namespace Niflib;
@@ -413,3 +414,43 @@ TEST(Read, KF) {
 //	NiObjectRef root = ReadNifTree(nifs[0].str(), &info);
 ////	StackVisitorImpl testVisitor = StackVisitorImpl(TemplateVisitor(), *root, info);
 //}
+
+
+class TestFieldVisitor : public VisitorImpl<TestFieldVisitor>, public CompoundVisitorImpl<TestFieldVisitor> {
+	NiObjectRef parent;
+
+	class InnerFieldVisitor : public FieldVisitorImpl<InnerFieldVisitor> {
+	public:
+		template<class FieldT>
+		inline void visit(FieldT& obj, const unsigned int field_index) {
+			string type_name(typeid(obj).name());
+			ASSERT_TRUE(type_name.size()>0);
+		}
+		InnerFieldVisitor() : FieldVisitorImpl<InnerFieldVisitor>(*this) {}
+	};
+
+	InnerFieldVisitor fVisitor;
+
+public:
+
+	TestFieldVisitor() : VisitorImpl<TestFieldVisitor>(*this), CompoundVisitorImpl<TestFieldVisitor>(*this) {}
+
+	template<class ObjectT>
+	inline void visit(ObjectT& obj, const NifInfo& info)
+	{		
+		obj.accept(fVisitor);
+	}
+
+	inline void start(NiObject&, const NifInfo&) {}
+	inline void end(NiObject&, const NifInfo&) {}
+};
+
+TEST(ReadWriteTest, FieldVisitorTest) {
+	NifInfo info;
+	vector<path> nifs;
+	findFiles(test_nifs_in_path, ".nif", nifs);
+	if (nifs.empty()) return;
+	NiObjectRef root = ReadNifTree(nifs[0].string().c_str(), &info);
+	TestFieldVisitor fimpl;
+	root->accept(fimpl, info);
+}
