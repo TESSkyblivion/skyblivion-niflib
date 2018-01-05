@@ -23,7 +23,9 @@ All rights reserved.  Please see niflib.h for license. */
 #include <visitor.h>
 #include <compound_visitor.h>
 
-#include <objDecl.cpp>
+#include <type_traits>
+#include <field_visitor.h>
+#include <objTmpl.cpp>
 //#include <compoundImpl.cpp>
 
 #include "../include/gen/Header.h"
@@ -845,6 +847,206 @@ public:
 
 };
 
+template<typename C>
+struct is_iterable
+{
+	typedef long false_type;
+	typedef char true_type;
+
+	template<class T> static false_type check(...);
+	template<class T> static true_type  check(int,
+		typename T::const_iterator = C().end());
+
+	enum { value = sizeof(check<C>(0)) == sizeof(true_type) };
+};
+
+template <template <typename...> class Base, typename Derived>
+struct is_base_of_template
+{
+	using U = typename std::remove_cv<Derived>::type;
+
+	template <typename... Args>
+	static std::true_type test(Base<Args...>*);
+
+	static std::false_type test(void*);
+
+	using type = decltype(test(std::declval<U*>()));
+};
+
+template <template <typename...> class Base, typename Derived>
+using is_base_of_template_t = typename is_base_of_template<Base, Derived>::type;
+
+class StringFieldVisitor :
+	public VisitorImpl<StringFieldVisitor>,
+	public CompoundVisitorImpl<StringFieldVisitor>,
+	public FieldVisitorImpl<StringFieldVisitor> {
+
+	NiObjectRef parent;
+	Header& header;
+	vector<unsigned int> valid_field_indices;
+	const NifInfo& nif_info;
+
+public:
+
+	StringFieldVisitor(Header& an_header, const NifInfo& info) : header(an_header), nif_info(info),
+		VisitorImpl<StringFieldVisitor>(*this),
+		CompoundVisitorImpl<StringFieldVisitor>(*this),
+		FieldVisitorImpl<StringFieldVisitor>(*this) {}
+
+	template<class ObjectT, typename std::enable_if<std::is_base_of<NiObject, ObjectT>::value>::type* = nullptr>
+	inline void visit(ObjectT& obj, const NifInfo& info)
+	{
+		//save frame
+		NiObjectRef old_parent = parent;
+		vector<unsigned int> old_valid_indices = valid_field_indices;
+		
+		//new frame
+		parent = StaticCast<NiObject>(&obj);
+		valid_field_indices = obj.GetValidFieldsIndices(info);
+
+		obj.accept(*this);
+		
+		//restore frame
+		valid_field_indices = old_valid_indices;
+		parent = old_parent;
+	}
+
+	template<class ObjectT, typename std::enable_if<std::is_base_of<Compound, ObjectT>::value>::type* = nullptr>
+	inline void visit(ObjectT& obj, const NifInfo& info)
+	{
+		//save frame
+		vector<unsigned int> old_valid_indices = valid_field_indices;
+
+		//new frame
+		valid_field_indices = obj.GetValidFieldsIndices(info);
+
+		obj.accept(*this);
+
+		//restore frame
+		valid_field_indices = old_valid_indices;
+	}
+
+	//Handle special cases of NiObjects which need the parent to determine the
+	//valid fields
+	template<>
+	inline void visit<BoneData>(BoneData& obj, const NifInfo& info)
+	{
+		NiSkinDataRef this_parent = DynamicCast<NiSkinData>(&*parent);
+		valid_field_indices = obj.GetValidFieldsIndices(info, *this_parent);
+		obj.accept(*this);
+	}
+
+	template<>
+	inline void visit<Morph>(Morph& obj, const NifInfo& info)
+	{
+		NiMorphDataRef this_parent = DynamicCast<NiMorphData>(&*parent);
+		valid_field_indices = obj.GetValidFieldsIndices(info, *this_parent);
+		obj.accept(*this);
+	}
+
+	//Valid
+	template<class FieldT>
+	inline void visit(FieldT& field, const unsigned int field_index) {
+		if (std::find(valid_field_indices.begin(), valid_field_indices.end(), field_index) != valid_field_indices.end()) {
+			visit(field);
+		}
+	}
+
+	//Bethesda mess
+	template<>
+	inline void visit<NiControllerSequence>(NiControllerSequence& obj, const NifInfo& info)
+	{
+		//save frame
+		NiObjectRef old_parent = parent;
+		vector<unsigned int> old_valid_indices = valid_field_indices;
+
+		//new frame
+		parent = StaticCast<NiObject>(&obj);
+		valid_field_indices = obj.GetValidFieldsIndices(info);
+
+		//Go to extra data before visiting this
+		obj.GetTextKeys()->accept(*this, info);
+
+		obj.accept(*this);
+
+		//restore frame
+		valid_field_indices = old_valid_indices;
+		parent = old_parent;
+	}
+
+	template<typename T>
+	static constexpr bool IsIndexString =
+		std::is_base_of<IndexString, T>::value ||
+		std::is_base_of<Key<IndexString>, T>::value ||
+		std::is_base_of<vector<IndexString>, T>::value ||
+		std::is_base_of<vector<Key<IndexString>>, T>::value
+		;
+
+	template<typename T>
+	static constexpr bool IsIterable = is_iterable<T>::value && 
+		!std::is_base_of<IndexString, T>::value;
+
+	//Iterable
+	template<typename T, typename std::enable_if<IsIterable<T>>::type* = nullptr >
+	inline void visit(T& field) {
+		for (T::iterator it = field.begin(); it != field.end(); ++it)
+			visit(*it);
+	}
+
+	//Single value, handle
+	template<typename T, typename std::enable_if<!IsIterable<T>>::type* = nullptr >
+	inline void visit(T& field) {
+		handle(field);
+	}
+
+	//references
+	template<typename T>
+	static constexpr bool IsVisitableRef =
+		is_base_of_template_t<Ref, T>::value;
+
+	template<typename T, typename std::enable_if<IsVisitableRef<T>>::type* = nullptr >
+	inline void handle(T& field) {
+		if (field != NULL) {
+			field->accept(*this, nif_info);
+		}
+	}
+
+	//single values
+	template<typename T, typename std::enable_if<!IsVisitableRef<T>>::type* = nullptr >
+	inline void handle(T& field) {
+		handleValue(field);
+	}
+
+	//Single visitable
+	template<typename T>
+	static constexpr bool IsVisitable =
+		std::is_base_of<Compound, T>::value && !std::is_base_of<IndexString, T>::value;
+
+	template<typename T, typename std::enable_if<IsVisitable<T>>::type* = nullptr >
+	inline void handleValue(T& field) {
+		field.accept(*this, nif_info);
+	}
+
+	template<typename T, typename std::enable_if<!IsVisitable<T>>::type* = nullptr >
+	inline void handleValue(T& field) {
+		visitImpl(field);
+	}
+
+	//Actual Handling
+
+	template<class T, typename std::enable_if<IsIndexString<T>>::type* = nullptr>
+	inline void visitImpl(T& field) {
+		unsigned int idx = 0xffffffff;
+		FromIndexString(field, &header, idx);
+	}
+
+	template<class T, typename std::enable_if<!IsIndexString<T>>::type* = nullptr>
+	inline void visitImpl(T& field) {}
+
+	inline void start(NiObject&, const NifInfo&) {}
+	inline void end(NiObject&, const NifInfo&) {}
+};
+
 // Writes a valid Nif File given an ostream, a list to the root objects of a file tree
 // (missing_link_stack stores a stack of links which are referred to but which
 // are not inside the tree rooted by roots)
@@ -920,7 +1122,7 @@ void WriteNifTree( ostream & out, list<NiObjectRef> const & roots, list<NiObject
 
 		//Apply the string table order policy
 		for (list<NiObjectRef>::const_iterator it = roots.begin(); it != roots.end(); ++it) {
-			StringVisitor().visit(*it, header, info);
+			(*it)->accept(StringFieldVisitor(header, info), info);
 		}
 
 		NifSizeStream ostr;

@@ -985,6 +985,10 @@ void FromIndexString(IndexString const &value, Header* header, unsigned int& idx
 	}
 }
 
+void FromIndexString(Key<IndexString> const &value, Header* header, unsigned int& idx) {
+	FromIndexString(value.data, header, idx);
+}
+
 void FromIndexString(std::vector<IndexString> const &value, Header* header, unsigned int& idx) {
 	for (size_t i = 0; i < value.size(); i++)
 		FromIndexString(value[i], header, idx);

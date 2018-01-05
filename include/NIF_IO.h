@@ -399,6 +399,8 @@ namespace Niflib {
 
 	void FromIndexString(IndexString const &value, Header* header, unsigned int& idx);
 
+	void FromIndexString(Key<IndexString> const &value, Header* header, unsigned int& idx);
+
 	void FromIndexString(vector<IndexString> const &value, Header* header, unsigned int& idx);
 
 	void FromIndexString(vector<Key<IndexString>> const &value, Header* header, unsigned int& idx);
