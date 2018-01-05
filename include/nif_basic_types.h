@@ -28,18 +28,29 @@ struct HeaderString : public Compound {
 
 	bool operator==(const HeaderString& other) const { return header == other.header; }
 
+	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
+
+	virtual void accept(class FieldVisitor& visitor);
 };
 
 struct ShortString : public Compound {
 	string str;
 
 	bool operator==(const ShortString& other) const { return str == other.str; }
+
+	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
+
+	virtual void accept(class FieldVisitor& visitor);
 };
 
 struct LineString : public Compound {
 	string line;
 
 	bool operator==(const LineString& other) const { return line == other.line; }
+
+	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
+
+	virtual void accept(class FieldVisitor& visitor);
 };
 
 struct IndexString : public std::string, public Compound {
@@ -78,6 +89,10 @@ struct ByteColor4 : public Compound {
 	};
 
 	bool operator==(const ByteColor4& other) const { return desc == other.desc; }
+
+	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
+
+	virtual void accept(class FieldVisitor& visitor);
 };
 
 //--Non-mathematical Basic Types--//

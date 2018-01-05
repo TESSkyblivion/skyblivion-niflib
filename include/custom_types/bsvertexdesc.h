@@ -2,6 +2,7 @@
 #define _BSVERTEXDESC_H_
 
 #include "gen/enums.h"
+#include <dll_export.h>
 #include <nif_basic_types.h>
 
 //Taken from outfit studio
@@ -80,6 +81,10 @@ namespace Niflib {
 
 		VertexFlags GetFlags() const;
 		void SetFlags(VertexFlags flags);
+
+		NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
+
+		NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 	};
 
 }

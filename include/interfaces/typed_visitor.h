@@ -43,19 +43,19 @@ namespace Niflib {
 		typename enable_if<is_base_of<NiObject, NiObjectT>::value, bool>::type
 		inline visit(NiObjectT& obj, const NifInfo& info)
 		{
-			start(obj, info);
-			for (Compound* cref : obj.GetCompounds()) { cref->accept(*this, info); }
-			for (NiObjectRef ref : obj.GetRefs()) { ref->accept(*this, info); }
-			end(obj, info);
+			//start(obj, info);
+			//for (Compound* cref : obj.GetCompounds()) { cref->accept(*this, info); }
+			//for (NiObjectRef ref : obj.GetRefs()) { ref->accept(*this, info); }
+			//end(obj, info);
 		}
 
 		template<typename CompoundT>
 		typename enable_if<is_base_of<Compound, CompoundT>::value, bool>::type
 		inline visit(CompoundT& obj, const NifInfo& info)
 		{
-			start(obj, info, getRoot());
-			for (Compound* cref : obj.GetCompounds()) { cref->accept(*this, info); }
-			end(obj, info, getRoot());
+			//start(obj, info, getRoot());
+			//for (Compound* cref : obj.GetCompounds()) { cref->accept(*this, info); }
+			//end(obj, info, getRoot());
 		}
 
 		virtual inline void start(NiObject& in, const NifInfo& info, NiObject& parent) = 0;
