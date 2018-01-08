@@ -2095,6 +2095,7 @@ namespace Niflib {
 	template<> const auto& NiBlendInterpolator::get<NiBlendInterpolator::FIELDS::flags>() {return flags;}
 	template<> const auto& NiBlendInterpolator::get<NiBlendInterpolator::FIELDS::arraySize>() {return arraySize;}
 	template<> const auto& NiBlendInterpolator::get<NiBlendInterpolator::FIELDS::arrayGrowBy>() {return arrayGrowBy;}
+	template<> const auto& NiBlendInterpolator::get<NiBlendInterpolator::FIELDS::unknownByte>() {return unknownByte;}
 	template<> const auto& NiBlendInterpolator::get<NiBlendInterpolator::FIELDS::weightThreshold>() {return weightThreshold;}
 	template<> const auto& NiBlendInterpolator::get<NiBlendInterpolator::FIELDS::interpCount>() {return interpCount;}
 	template<> const auto& NiBlendInterpolator::get<NiBlendInterpolator::FIELDS::singleIndex>() {return singleIndex;}
@@ -2113,6 +2114,7 @@ namespace Niflib {
 		visitor.visit(flags, FIELDS::flags);
 		visitor.visit(arraySize, FIELDS::arraySize);
 		visitor.visit(arrayGrowBy, FIELDS::arrayGrowBy);
+		visitor.visit(unknownByte, FIELDS::unknownByte);
 		visitor.visit(weightThreshold, FIELDS::weightThreshold);
 		visitor.visit(interpCount, FIELDS::interpCount);
 		visitor.visit(singleIndex, FIELDS::singleIndex);

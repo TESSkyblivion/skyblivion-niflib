@@ -397,6 +397,9 @@ namespace Niflib {
 		void reset() { _buf.reset(); }
 	};
 
+	//Can insert empty strings into the table
+	void ForcedFromIndexString(IndexString const &value, Header* header, unsigned int& idx);
+
 	void FromIndexString(IndexString const &value, Header* header, unsigned int& idx);
 
 	void FromIndexString(Key<IndexString> const &value, Header* header, unsigned int& idx);

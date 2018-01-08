@@ -60,7 +60,8 @@ byte Niflib::ConvertFloatToByte(float value) {
  */
 
 bool TexCoord::operator==( const TexCoord & n ) const {
-	return ( u == n.u && v == n.v );
+	return  (( u == n.u || u!=u && n.u != n.u) && 
+			 (v == n.v || v!=v && n.v != n.v));
 }
 
 
@@ -175,7 +176,10 @@ Vector3 & Vector3::operator/=( const float & rh ) {
 }
 
 bool Vector3::operator==( const Vector3 & rh) const {
-	if (rh.x == x && rh.y == y && rh.z == z)
+	
+	if ( (rh.x == x || std::isnan(x) && std::isnan(rh.x)) && 
+		 (rh.y == y || std::isnan(y) && std::isnan(rh.y)) && 
+		 (rh.z == z || std::isnan(z) && std::isnan(rh.z)))
 		return true;
 	else
 		return false;

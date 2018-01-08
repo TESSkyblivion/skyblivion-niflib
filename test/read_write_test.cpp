@@ -84,13 +84,26 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
 
 TEST(ReadWriteTest, ReadWriteTest) {
 	NifInfo info;
+	NifInfo newinfo;
 	vector<path> nifs;
-	findFiles(test_nifs_in_path / "skyrim", "nif", nifs);
+	findFiles(test_nifs_in_path / "skyrim", ".nif", nifs);
 	for (size_t i = 0; i < nifs.size(); i++) {
-		NiObjectRef root = ReadNifTree(nifs[i].string().c_str(), &info);
+		string in_path = nifs[i].string();
+		vector<NiObjectRef> objects = ReadNifList(in_path.c_str(), &info);
+		if (info.userVersion2 == 32)
+			//Some Oblivion models somehow slipped into skyrim release
+			continue;
+		NiObjectRef root = GetFirstRoot(objects);
 		path out_path = test_resources_path / "nifs" / "out" / "test.nif";
 		WriteNifTree(out_path.string().c_str(), root, info);
-		ASSERT_EQ(compare_files(nifs[i].string().c_str(), out_path.string().c_str()), true);
+		vector<NiObjectRef> new_objects = ReadNifList(out_path.string().c_str(), &newinfo);
+		NiObjectRef new_root = GetFirstRoot(new_objects);
+		ASSERT_TRUE(*root == *new_root);
+		ASSERT_EQ(objects.size(), new_objects.size());
+		for (int j = 0; j < objects.size(); j++) {
+			ASSERT_EQ(*objects[j], *new_objects[j]) << "on Object[" << j << "], file " << in_path <<  std::endl;
+		}
+		ASSERT_EQ(compare_files(nifs[i].string().c_str(), out_path.string().c_str()), true) << "File corrupted: " + nifs[i].string();
 	}
 }
 
@@ -342,24 +355,32 @@ TEST(Read, KF) {
 //	ASSERT_EQ(compare_files(in_path.str(), out_path.str()), true);
 //}
 //
-//TEST(Read, SingleFileMustBeEqualToWriteReadAlduin) {
-//	NifInfo info;
-//	NifInfo newinfo;
-//	vector<path> nifs;
-//	path in_path = test_resources_path / "nifs" / "in" / "skyrim" / "meshes" / "actors" / "alduin" / "alduin.nif";
-//	vector<NiObjectRef> objects = ReadNifList(in_path.str(), &info);
-//	path out_path = test_resources_path / "nifs" / "out" / in_path.filename();
-//	NiObjectRef root = GetFirstRoot(objects);
-//	WriteNifTree(out_path.str(), root, info);
-//	vector<NiObjectRef> new_objects = ReadNifList(out_path.str(), &newinfo);
-//	NiObjectRef new_root = GetFirstRoot(new_objects);
-//	ASSERT_TRUE(*root == *new_root);
-//	ASSERT_EQ(objects.size(), new_objects.size());
-//	for (int i = 0; i < objects.size(); i++) {
-//		ASSERT_EQ(*objects[i], *new_objects[i]) << "on Object[" << i << "]" << std::endl;
-//	}
-//	ASSERT_EQ(compare_files(in_path.str(), out_path.str()), true);
-//}
+TEST(Read, SingleFileMustBeEqualToWriteReadAlduin) {
+	NifInfo info;
+	NifInfo newinfo;
+	vector<path> nifs;
+	//D:\git\skyblivion\resources\nifs\in\skyrim\meshes\actors\character
+	path in_path = test_resources_path / "nifs" / "in" / "skyrim" / "meshes" / "clutter" / "dwemer" / "dwechest01.nif";
+	vector<NiObjectRef> objects = ReadNifList(in_path.string().c_str(), &info);
+	path out_path = test_resources_path / "nifs" / "out" / in_path.filename();
+	NiObjectRef root = GetFirstRoot(objects);
+	WriteNifTree(out_path.string().c_str(), root, info);
+	vector<NiObjectRef> new_objects = ReadNifList(out_path.string().c_str(), &newinfo);
+	NiObjectRef new_root = GetFirstRoot(new_objects);
+	ASSERT_TRUE(*root == *new_root);
+	ASSERT_EQ(objects.size(), new_objects.size());
+	for (int i = 0; i < objects.size(); i++) {
+		bool result = *objects[i] == *new_objects[i];
+		if (!result) {
+			auto orig_obj = objects[i];
+			auto new_obj = new_objects[i];
+			*objects[i] == *new_objects[i];
+			throw std::runtime_error("Object inequality");
+		}
+		ASSERT_EQ(*objects[i], *new_objects[i]) << "on Object[" << i << "]" << std::endl << objects[i]->asString() << std::endl << new_objects[i]->asString() << std::endl;
+	}
+	ASSERT_EQ(compare_files(in_path.string().c_str(), out_path.string().c_str()), true);
+}
 //
 //class TemplateVisitor {
 //	Visitor* visitor;

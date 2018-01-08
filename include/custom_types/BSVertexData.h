@@ -17,7 +17,7 @@ namespace Niflib {
 
 
 /*!  */
-struct BSVertexData : Compound {
+struct BSVertexData : Native {
 	/*! Default Constructor */
 	NIFLIB_API BSVertexData();
 	/*! Default Destructor */

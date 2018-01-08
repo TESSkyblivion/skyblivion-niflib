@@ -29,7 +29,7 @@ namespace Niflib {
 	const uint64_t DESC_MASK_OFFSET = 0xFFFFFF0000000000;
 	const uint64_t DESC_MASK_FLAGS  = ~(DESC_MASK_OFFSET);
 
-	struct BSVertexDesc : public Compound {
+	struct BSVertexDesc : public Native {
 
 		union {
 			uint64_t desc = 0;
@@ -81,10 +81,6 @@ namespace Niflib {
 
 		VertexFlags GetFlags() const;
 		void SetFlags(VertexFlags flags);
-
-		NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-		NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 	};
 
 }

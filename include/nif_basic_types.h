@@ -15,45 +15,35 @@ namespace Niflib {
 using namespace std;
 
 struct NifInfo;
-class CompoundVisitor;
+class NativeVisitor;
 
-struct Compound {
-	//virtual void accept(Niflib::CompoundVisitor&, const Niflib::NifInfo&) = 0;
-};
+
+struct Native {};
+
+struct Compound {};
 
 struct HalfVector3;
 
-struct HeaderString : public Compound {
+struct HeaderString : public Native {
 	string header;
 
 	bool operator==(const HeaderString& other) const { return header == other.header; }
 
-	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	virtual void accept(class FieldVisitor& visitor);
 };
 
-struct ShortString : public Compound {
+struct ShortString : public Native {
 	string str;
 
 	bool operator==(const ShortString& other) const { return str == other.str; }
-
-	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	virtual void accept(class FieldVisitor& visitor);
 };
 
-struct LineString : public Compound {
+struct LineString : public Native {
 	string line;
 
 	bool operator==(const LineString& other) const { return line == other.line; }
-
-	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	virtual void accept(class FieldVisitor& visitor);
 };
 
-struct IndexString : public std::string, public Compound {
+struct IndexString : public std::string, public Native {
 	IndexString() {}
 	IndexString( const IndexString & ref ) : std::string((std::string const &)ref) {}
 	IndexString( const std::string & ref ) : std::string(ref) {}
@@ -63,7 +53,7 @@ struct IndexString : public std::string, public Compound {
 	operator std::string &() { return *this; }
 };
 
-struct Char8String : public std::string, public Compound{
+struct Char8String : public std::string, public Native {
 	Char8String() {}
 	Char8String( const Char8String & ref ) : std::string((std::string const &)ref) {}
 	Char8String( const std::string & ref ) : std::string(ref) {}
@@ -73,7 +63,7 @@ struct Char8String : public std::string, public Compound{
 	operator std::string &() { return *this; }
 };
 
-struct ByteColor4 : public Compound {
+struct ByteColor4 : public Native {
 	union {
 		uint32_t desc = 0;
 		struct {
@@ -89,10 +79,6 @@ struct ByteColor4 : public Compound {
 	};
 
 	bool operator==(const ByteColor4& other) const { return desc == other.desc; }
-
-	virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	virtual void accept(class FieldVisitor& visitor);
 };
 
 //--Non-mathematical Basic Types--//

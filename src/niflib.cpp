@@ -22,10 +22,10 @@ All rights reserved.  Please see niflib.h for license. */
 
 #include <visitor.h>
 #include <compound_visitor.h>
+#include <field_visitor.h>
 
 #include <type_traits>
-#include <field_visitor.h>
-#include <objTmpl.cpp>
+#include <objDecl.cpp>
 //#include <compoundImpl.cpp>
 
 #include "../include/gen/Header.h"
@@ -581,9 +581,101 @@ class MapVisitor {
 			}
 		}
 
+		template <> inline void visit(NiParticleSystem& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				registerObject(obj);
+				for (NiExtraDataRef eref : obj.GetExtraDataList()) {
+					eref->accept(*visitor, info);
+				}
+				if (obj.GetController()!=NULL)
+					obj.GetController()->accept(*visitor, info);
+				if (obj.NiGeometry::GetData() != NULL)
+					obj.NiGeometry::GetData()->accept(*visitor, info);
+				if (obj.GetShaderProperty() != NULL)
+					obj.GetShaderProperty()->accept(*visitor, info);
+				if (obj.GetAlphaProperty() != NULL)
+					obj.GetAlphaProperty()->accept(*visitor, info);
+				for (NiPSysModifierRef ref : obj.GetModifiers()) {
+					if (ref != NULL) {
+						registerObject(*ref);
+						//dlc2
+						if (ref->IsDerivedType(NiPSysColliderManager::TYPE))
+							ref->accept(*visitor, info);
+					}
+				}
+				visitChildren(obj, info);
+			}
+		}
+
+		template <> inline void visit(BSStripParticleSystem& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				registerObject(obj);
+				if (obj.GetController() != NULL)
+					obj.GetController()->accept(*visitor, info);
+				if (obj.NiGeometry::GetData() != NULL)
+					obj.NiGeometry::GetData()->accept(*visitor, info);
+				if (obj.GetShaderProperty() != NULL)
+					obj.GetShaderProperty()->accept(*visitor, info);
+				if (obj.GetAlphaProperty() != NULL)
+					obj.GetAlphaProperty()->accept(*visitor, info);
+				for (NiPSysModifierRef ref : obj.GetModifiers()) {
+					if (ref != NULL) {
+						registerObject(*ref);
+						//dlc2
+						if (ref->IsDerivedType(NiPSysColliderManager::TYPE))
+							ref->accept(*visitor, info);
+					}
+				}
+				visitChildren(obj, info);
+			}
+		}
+
 		template <> inline void visit(bhkRigidBody& obj, const NifInfo& info) {
 			if (isNotAlreadyVisited(obj)) {
 				obj.GetShape()->accept(*visitor, info);
+				registerObject(obj);
+				visitChildren(obj, info);
+			}
+		}
+
+		template <> inline void visit(bhkRigidBodyT& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				obj.GetShape()->accept(*visitor, info);
+				registerObject(obj);
+				visitChildren(obj, info);
+			}
+		}
+
+		template <> inline void visit(NiSkinInstance& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				registerObject(obj);
+				if (obj.GetData() != NULL)
+					obj.GetData()->accept(*visitor, info);
+				if (obj.GetSkinPartition() != NULL)
+					obj.GetSkinPartition()->accept(*visitor, info);
+				if (obj.GetSkeletonRoot() != NULL)
+					obj.GetSkeletonRoot()->accept(*visitor, info);
+				for (NiNode* ptr : obj.GetBones()) {
+					if (ptr != NULL)
+						ptr->accept(*visitor, info);
+				}
+				visitChildren(obj, info);
+			}
+		}
+
+		template <> inline void visit(bhkCompressedMeshShape& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				obj.GetData()->accept(*visitor, info);
+				registerObject(obj);
+				visitChildren(obj, info);
+			}
+		}
+
+		template <> inline void visit(bhkNiTriStripsShape& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				for (NiTriStripsDataRef ref : obj.GetStripsData())
+					if (ref!=NULL)
+						ref->accept(*visitor, info);
 				registerObject(obj);
 				visitChildren(obj, info);
 			}
@@ -614,238 +706,6 @@ public:
 
 };
 
-class StringVisitor {
-
-
-	class CompoundDelegate {
-		friend class StringVisitor; 
-
-		CompoundVisitor* visitor;
-		NiObjectRef parent;
-
-		set<Compound*> alreadyVisitedCompounds;
-		Header* header;
-
-		bool isNotAlreadyVisited(Compound& node) {
-			std::pair<set<Compound*>::iterator, bool> result = alreadyVisitedCompounds.insert(&node);
-			return result.second;
-		}
-
-	public:
-		template <typename CompoundT> inline void visit(CompoundT& obj, const NifInfo& info) {
-			if (isNotAlreadyVisited(obj)) {
-				/*vector<unsigned int> validFields = obj.GetValidFieldsIndices(info);
-				map<unsigned int, type_info*> rtti_map = CompoundT::type_map;
-
-				for (size_t i = 0; i < validFields.size(); i++) {
-					type_info* t = rtti_map[validFields[i]];
-					if (isVisitableCompound(t)) {
-						obj.get<Compound*>(validFields[i])->accept(*visitor, info);
-					}
-					if (t == const_cast<type_info*>(&typeid(IndexString))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<IndexString>(validFields[i]), header, idx);
-					}
-					else if (t == const_cast<type_info*>(&typeid(vector<IndexString>))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<vector<IndexString>>(validFields[i]), header, idx);
-					}
-					else if (t == const_cast<type_info*>(&typeid(vector<Key<IndexString>>))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<vector<Key<IndexString>>>(validFields[i]), header, idx);
-					}
-				}*/
-			}
-		}
-
-		template <> inline void visit(Morph& obj, const NifInfo& info) {
-			if (isNotAlreadyVisited(obj)) {
-				/*vector<unsigned int> validFields = obj.GetValidFieldsIndices(info, *((NiMorphData*)&*parent));
-				map<unsigned int, type_info*> rtti_map = Morph::type_map;
-
-				for (size_t i = 0; i < validFields.size(); i++) {
-					type_info* t = rtti_map[validFields[i]];
-					if (isVisitableCompound(t)) {
-						obj.get<Compound*>(validFields[i])->accept(*visitor, info);
-					}
-					if (t == const_cast<type_info*>(&typeid(IndexString))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<IndexString>(validFields[i]), header, idx);
-					}
-					else if (t == const_cast<type_info*>(&typeid(vector<IndexString>))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<vector<IndexString>>(validFields[i]), header, idx);
-					}
-					else if (t == const_cast<type_info*>(&typeid(vector<Key<IndexString>>))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<vector<Key<IndexString>>>(validFields[i]), header, idx);
-					}
-				}*/
-			}
-		}
-
-		template <> inline void visit(BoneData& obj, const NifInfo& info) {
-			if (isNotAlreadyVisited(obj)) {
-				/*vector<unsigned int> validFields = obj.GetValidFieldsIndices(info, *((NiSkinData*)&*parent));
-				map<unsigned int, type_info*> rtti_map = BoneData::type_map;
-
-				for (size_t i = 0; i < validFields.size(); i++) {
-					type_info* t = rtti_map[validFields[i]];
-					if (isVisitableCompound(t)) {
-						obj.get<Compound*>(validFields[i])->accept(*visitor, info);
-					}
-					if (t == const_cast<type_info*>(&typeid(IndexString))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<IndexString>(validFields[i]), header, idx);
-					}
-					else if (t == const_cast<type_info*>(&typeid(vector<IndexString>))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<vector<IndexString>>(validFields[i]), header, idx);
-					}
-					else if (t == const_cast<type_info*>(&typeid(vector<Key<IndexString>>))) {
-						unsigned int idx = 0xffffffff;
-						FromIndexString(obj.get<vector<Key<IndexString>>>(validFields[i]), header, idx);
-					}
-				}*/
-			}
-		}
-	};
-
-	CompoundDelegate compoundDelegate;
-
-	class InnerCompoundVisitor;
-
-	class Delegate {
-		friend class StringVisitor;
-		Visitor* visitor;
-		InnerCompoundVisitor* compound_visitor;
-
-		set<NiObjectRef> alreadyVisited;
-
-		Header* header;
-
-		void visitChildren(NiObject& obj, const NifInfo& info) {
-			for (Ref<NiObject> ref : obj.GetRefs())
-				ref->accept(*visitor, info);
-		}
-
-		bool isNotAlreadyVisited(NiObject& node) {
-			if (alreadyVisited.find(Ref<NiObject>(&node)) == alreadyVisited.end()) {
-				alreadyVisited.insert(Ref<NiObject>(&node));
-				return true;
-			}
-			return false;
-		}
-
-		//class NiReferences : public Compound, public NiObject {};
-
-		//template<typename Link> void visitLink(Link* field ) {}
-
-		//template<typename NiObjectT, typename FieldT> void visitFields(NiObjectT obj, uint32_t i, const NifInfo& info) {
-		//	
-		//}
-
-		//template<> visitFields<NiObject*()
-
-		//template<> void visitField<NiObject*>(NiObject* obj, uint32_t index, const NifInfo& info) {
-		//	obj->get<NiObject*>(index)->accept(*visitor, info);
-		//}
-
-		//template<> void visitField<NiObject*>(NiObject* obj, uint32_t index, const NifInfo& info) {
-		//	obj->get<NiObject*>(index)->accept(*visitor, info);
-		//}
-
-		class DefaultDelegate {};
-
-		template<typename T>
-		struct FieldDelegate{
-			template< typename FieldT> inline FieldT fieldHandler(T& obj, uint32_t index, const NifInfo& info) { FieldT f; return f; }
-
-			template <> NiObject* fieldHandler<NiObject*>(T& obj, uint32_t index, const NifInfo& info) {
-				NiObject* link = obj.get<NiObject*>(index);
-				return link;
-			}
-		};
-
-	public:
-		template <typename NiObjectT> inline void visit(NiObjectT& obj, const NifInfo& info)
-		{
-			if (isNotAlreadyVisited(obj)) {
-				vector<unsigned int> validFields = obj.GetValidFieldsIndices(info);
-//				map<unsigned int, type_info*> rtti_map = NiObjectT::type_map;				
-//				for (size_t i = 0; i < validFields.size(); i++) {
-//					auto field = obj.get(validFields[i]);
-//					NiObject* link = FieldDelegate<NiObjectT>().fieldHandler(obj, validFields[i], info);
-					//if (isVisitableCompound(t))
-					//	visitField<Compound, Compound>(obj.get<Compound*>(validFields[i]));
-					//if (isVisitableNiObject(t))
-					//	visitField<NiObject, NiObject>(obj.get<NiObject*>(validFields[i]));
-//				}
-					
-
-					//visit(&obj.get(validFields[i]), info);
-					//type_info* t = rtti_map[validFields[i]];
-					//if (isVisitableCompound(t)) {
-					//	compound_visitor->setParent(Ref<NiObject>(&obj));
-					//	obj.get<Compound*>(validFields[i])->accept(*compound_visitor, info);
-					//}
-					//if (t == const_cast<type_info*>(&typeid(IndexString))) {
-					//	unsigned int idx = 0xffffffff;
-					//	FromIndexString(obj.get<IndexString>(validFields[i]), header, idx);
-					//}
-					//else if (t == const_cast<type_info*>(&typeid(vector<IndexString>))) {
-					//	unsigned int idx = 0xffffffff;
-					//	FromIndexString(obj.get<vector<IndexString>>(validFields[i]), header, idx);
-					//}
-					//else if (t == const_cast<type_info*>(&typeid(vector<Key<IndexString>>))) {
-					//	unsigned int idx = 0xffffffff;
-					//	FromIndexString(obj.get<vector<Key<IndexString>>>(validFields[i]), header, idx);
-					//}
-				
-	
-				//visitChildren(obj, info);
-			}
-		}
-	};
-
-	Delegate delegate;
-
-	class InnerObjectVisitor : public VisitorImpl<Delegate> {
-	public:
-
-		virtual inline void start(NiObject& in, const NifInfo& info) {}
-		virtual inline void end(NiObject& in, const NifInfo& info) {}
-
-		InnerObjectVisitor(Delegate& d) : VisitorImpl<Delegate>(d) {}
-
-	};
-
-	class InnerCompoundVisitor : public CompoundVisitorImpl<CompoundDelegate> {
-	public:
-
-		InnerCompoundVisitor(CompoundDelegate& d) : CompoundVisitorImpl<CompoundDelegate>(d) {}
-
-		void setParent(NiObjectRef parent) {
-			delegate.parent = parent;
-		}
-	};
-
-	InnerCompoundVisitor compound_impl = InnerCompoundVisitor(compoundDelegate);
-	InnerObjectVisitor object_impl = InnerObjectVisitor(delegate);
-public:
-	StringVisitor() {
-		delegate.visitor = &object_impl;
-		delegate.compound_visitor = &compound_impl;
-		compoundDelegate.visitor = &compound_impl;
-	}
-
-	void visit(NiObjectRef obj, Header& header, const NifInfo& info) {
-		delegate.header = &header;
-		compoundDelegate.header = &header;
-		obj->accept(object_impl, info);
-	}
-
-};
 
 template<typename C>
 struct is_iterable
@@ -911,6 +771,12 @@ public:
 		parent = old_parent;
 	}
 
+	template<>
+	inline void visit(NiDefaultAVObjectPalette& obj, const NifInfo& info)
+	{
+		//NTD
+	}
+
 	template<class ObjectT, typename std::enable_if<std::is_base_of<Compound, ObjectT>::value>::type* = nullptr>
 	inline void visit(ObjectT& obj, const NifInfo& info)
 	{
@@ -932,16 +798,33 @@ public:
 	inline void visit<BoneData>(BoneData& obj, const NifInfo& info)
 	{
 		NiSkinDataRef this_parent = DynamicCast<NiSkinData>(&*parent);
+
+		//save frame
+		vector<unsigned int> old_valid_indices = valid_field_indices;
+
+		//new frame
 		valid_field_indices = obj.GetValidFieldsIndices(info, *this_parent);
+
 		obj.accept(*this);
+
+		//restore frame
+		valid_field_indices = old_valid_indices;
 	}
 
 	template<>
 	inline void visit<Morph>(Morph& obj, const NifInfo& info)
 	{
 		NiMorphDataRef this_parent = DynamicCast<NiMorphData>(&*parent);
+		//save frame
+		vector<unsigned int> old_valid_indices = valid_field_indices;
+
+		//new frame
 		valid_field_indices = obj.GetValidFieldsIndices(info, *this_parent);
+
 		obj.accept(*this);
+
+		//restore frame
+		valid_field_indices = old_valid_indices;
 	}
 
 	//Valid
@@ -964,6 +847,10 @@ public:
 		parent = StaticCast<NiObject>(&obj);
 		valid_field_indices = obj.GetValidFieldsIndices(info);
 
+		//stream controlled blocks
+		for (ControlledBlock block : obj.GetControlledBlocks())
+			block.accept(*this, info);
+
 		//Go to extra data before visiting this
 		obj.GetTextKeys()->accept(*this, info);
 
@@ -974,13 +861,57 @@ public:
 		parent = old_parent;
 	}
 
+	template<>
+	inline void visit<BoneLOD>(BoneLOD& obj, const NifInfo& info) {
+		//NTD
+	}
+
+	template<>
+	inline void visit<NiSkinInstance>(NiSkinInstance& obj, const NifInfo& info) {
+		//save frame
+		NiObjectRef old_parent = parent;
+		vector<unsigned int> old_valid_indices = valid_field_indices;
+
+		//new frame
+		parent = StaticCast<NiObject>(&obj);
+		valid_field_indices = obj.GetValidFieldsIndices(info);
+
+		if (obj.GetData() != NULL)
+			obj.GetData()->accept(*this, info);
+		if (obj.GetSkinPartition() != NULL)
+			obj.GetSkinPartition()->accept(*this, info);
+		//if (obj.GetSkeletonRoot() != NULL)
+		//	obj.GetSkeletonRoot()->accept(*this, info);
+
+		for (NiNode* ptr : obj.GetBones()) {
+			unsigned int idx = 0xffffffff;
+			FromIndexString(ptr->GetName(), &header, idx);
+		}
+
+		obj.accept(*this);
+
+		//restore frame
+		valid_field_indices = old_valid_indices;
+		parent = old_parent;
+	}
+
+	//Apparently keys can have null string but still valid. See riftendoor02.nif
+	template<>
+	inline void visit(NiTextKeyExtraData& obj, const NifInfo& info) {
+		unsigned int idx = 0xffffffff;
+		FromIndexString(obj.GetName(), &header, idx);
+		for (Key<IndexString> k : obj.GetTextKeys()) {
+			unsigned int idx = 0xffffffff;
+			ForcedFromIndexString(k.data, &header, idx);
+		}
+	}
+
 	template<typename T>
 	static constexpr bool IsIndexString =
 		std::is_base_of<IndexString, T>::value ||
 		std::is_base_of<Key<IndexString>, T>::value ||
 		std::is_base_of<vector<IndexString>, T>::value ||
-		std::is_base_of<vector<Key<IndexString>>, T>::value
-		;
+		std::is_base_of<vector<Key<IndexString>>, T>::value ;
 
 	template<typename T>
 	static constexpr bool IsIterable = is_iterable<T>::value && 
@@ -1020,7 +951,7 @@ public:
 	//Single visitable
 	template<typename T>
 	static constexpr bool IsVisitable =
-		std::is_base_of<Compound, T>::value && !std::is_base_of<IndexString, T>::value;
+		std::is_base_of<Compound, T>::value;
 
 	template<typename T, typename std::enable_if<IsVisitable<T>>::type* = nullptr >
 	inline void handleValue(T& field) {
@@ -1039,6 +970,8 @@ public:
 		unsigned int idx = 0xffffffff;
 		FromIndexString(field, &header, idx);
 	}
+
+	//void ForcedFromIndexString(IndexString const &value, Header* header, unsigned int& idx)
 
 	template<class T, typename std::enable_if<!IsIndexString<T>>::type* = nullptr>
 	inline void visitImpl(T& field) {}

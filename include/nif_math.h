@@ -40,7 +40,7 @@ struct Matrix44;
 struct InertiaMatrix;
 
 /*! Stores 2D texture coordinates as two floating point variables, u and v. */
-struct TexCoord : public Compound {
+struct TexCoord : public Native {
 	float u; /*!< The U value in this coordinate pair. */ 
 	float v; /*!< The V value in this coordinate pair. */ 
 
@@ -96,14 +96,10 @@ struct TexCoord : public Compound {
 	}
 
 	bool operator==( const TexCoord & n ) const;
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Represents a triangle face formed between three vertices referenced by number */
-struct Triangle : public Compound {
+struct Triangle : public Native {
 	unsigned short v1; /*!< The index of the first vertex. */ 
 	unsigned short v2; /*!< The index of the second vertex. */ 
 	unsigned short v3; /*!< The index of the third vertex. */ 
@@ -164,14 +160,10 @@ struct Triangle : public Compound {
 			(v1 == other.v3 && v2 == other.v1 && v3 == other.v2) ||
 			(v1 == other.v3 && v2 == other.v2 && v3 == other.v1);
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*!Represents a position or direction in 3D space*/
-struct Vector3 : public Compound {
+struct Vector3 : public Native {
 	float x; /*!< The X component of this vector. */ 
 	float y; /*!< The Y component of this vector. */ 
 	float z; /*!< The Z component of this vector. */ 
@@ -323,14 +315,10 @@ struct Vector3 : public Compound {
 	// * \return This vector is returned.
 	// */
 	//Vector3 & operator*=( const Matrix44 & rh );
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*!Represents a position or direction in 3D space*/
-struct Vector4 : public Compound {
+struct Vector4 : public Native {
 	float x; /*!< The X component of this vector. */ 
 	float y; /*!< The Y component of this vector. */ 
 	float z; /*!< The Z component of this vector. */ 
@@ -474,14 +462,10 @@ struct Vector4 : public Compound {
 	*/
 	NIFLIB_API float operator[](int n) const;
 
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
-
 };
 
 /* Stores two floating point numbers.  Used as a row of a Matrix22 */
-struct Float2 : public Compound {
+struct Float2 : public Native {
 	float data[2]; /*!< The two floating point numbers stored as an array. */ 
 	
 	/*! The bracket operator makes it possible to use this structure like a C++ array.
@@ -520,14 +504,10 @@ struct Float2 : public Compound {
 		data[0] = f1;
 		data[1] = f2;
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Stores a 2 by 2 matrix used for bump maps. */
-struct Matrix22 : public Compound {
+struct Matrix22 : public Native {
 	/*! The 2x2 identity matrix constant */
 	NIFLIB_API static const Matrix22 IDENTITY;
 
@@ -581,14 +561,10 @@ struct Matrix22 : public Compound {
 			m.rows[1][0] == rows[1][0] && m.rows[1][1] == rows[1][1] 
 		);
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /* Stores three floating point numbers.  Used as a row of a Matrix33 and to store the data in attr_vector3 and attr_color3 type attributes. */
-struct Float3 : public Compound {
+struct Float3 : public Native {
 	float data[3]; /*!< The three floating point numbers stored as an array. */ 
 
 	/*! The bracket operator makes it possible to use this structure like a C++ array.
@@ -631,14 +607,10 @@ struct Float3 : public Compound {
 		data[1] = f2;
 		data[2] = f3;
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Stores a 3 by 3 matrix used for rotation. */
-struct Matrix33 : public Compound {
+struct Matrix33 : public Native {
 	/*! The 3x3 identity matrix constant*/
 	NIFLIB_API static const Matrix33 IDENTITY;
 
@@ -729,14 +701,10 @@ struct Matrix33 : public Compound {
 	}
 
    NIFLIB_API Matrix33 operator*( const Matrix33 & m ) const;
-
-   NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-   NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /* Stores four floating point numbers.  Used as a row of a Matrix44. */
-struct Float4 : public Compound {
+struct Float4 : public Native {
 	float data[4]; /*!< The four floating point numbers stored as an array. */ 
 
 	/*! The bracket operator makes it possible to use this structure like a C++ array.
@@ -788,14 +756,10 @@ struct Float4 : public Compound {
 		data[2] = f3;
 		data[3] = f4;
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Stores a 3 by 4 matrix used for combined transformations. */
-struct Matrix34 : public Compound {
+struct Matrix34 : public Native {
 	/*! The 4x4 identity matrix constant */
 	NIFLIB_API static const Matrix34 IDENTITY;
 
@@ -882,14 +846,10 @@ struct Matrix34 : public Compound {
 			m.rows[2][0] == rows[2][0] && m.rows[2][1] == rows[2][1] && m.rows[2][2] == rows[2][2] && m.rows[2][3] == rows[2][3]
 		);
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Stores a 4 by 4 matrix used for combined transformations. */
-struct Matrix44 : public Compound {
+struct Matrix44 : public Native {
 	/*! The 4x4 identity matrix constant */
 	NIFLIB_API static const Matrix44 IDENTITY;
 
@@ -1111,14 +1071,10 @@ struct Matrix44 : public Compound {
 
    // undocumented
    NIFLIB_API void Decompose( Vector3 & translate, Matrix33 & rotation, float & scale ) const;
-
-   NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-   NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Stores a color along with alpha translucency */
-struct Color3 : public Compound {
+struct Color3 : public Native {
 	float r; /*!< The red component of this color.  Should be between 0.0f and 1.0f. */ 
 	float g; /*!< The green component of this color.  Should be between 0.0f and 1.0f. */ 
 	float b; /*!< The blue component of this color.  Should be between 0.0f and 1.0f. */ 
@@ -1162,14 +1118,10 @@ struct Color3 : public Compound {
 			b == other.b
 			);
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Stores a color along with alpha translucency */
-struct Color4 : public Compound {
+struct Color4 : public Native {
 	float r; /*!< The red component of this color.  Should be between 0.0f and 1.0f. */ 
 	float g; /*!< The green component of this color.  Should be between 0.0f and 1.0f. */ 
 	float b; /*!< The blue component of this color.  Should be between 0.0f and 1.0f. */ 
@@ -1280,14 +1232,10 @@ struct Color4 : public Compound {
 	NIFLIB_API bool operator!=( const Color4 & n ) const {
 		return ( r != n.r || g != n.g || b != n.b || a != n.a );
 	}
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 /*! Represents a quaternion - a 4D extention of complex numbers used as an alternitive to matrices to represent rotation.*/
-struct Quaternion : public Compound {
+struct Quaternion : public Native {
 	float w; /*!< The W scalar component of this Quaternion. */ 
 	float x; /*!< The X vector component of this Quaternion. */ 
 	float y; /*!< The Y vector component of this Quaternion. */ 
@@ -1341,7 +1289,13 @@ struct Quaternion : public Compound {
 
 	/* Equality */
 	NIFLIB_API bool operator==( const Quaternion & n ) const {
-		return ( x == n.x && y == n.y && z == n.z && w == n.w );
+		//dragonmound.nif has NaNs
+		return ( 
+			(x == n.x || std::isnan(x) && std::isnan(n.x)) &&
+			(y == n.y || std::isnan(y) && std::isnan(n.y)) &&
+			(z == n.z || std::isnan(z) && std::isnan(n.z)) &&
+			(w == n.w || std::isnan(w) && std::isnan(n.w))
+		);
 	}
 
 	/*! This function can be used to set all values in the structure at the same time.
@@ -1383,15 +1337,11 @@ struct Quaternion : public Compound {
 	* direction but with a magnitude, or length, of 1.
 	*/
 	NIFLIB_API Quaternion Normalized() const;
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 
 /*! Stores a 4 by 3 matrix used for tensors. */
-struct InertiaMatrix : public Compound {
+struct InertiaMatrix : public Native {
 	/*! The 4x3 identity matrix constant */
 	NIFLIB_API static const InertiaMatrix IDENTITY;
 
@@ -1570,10 +1520,6 @@ struct InertiaMatrix : public Compound {
 	* \return The adjunct obtained by skipping the indicated row and column.
 	*/
 	NIFLIB_API float Adjoint( int skip_r, int skip_c ) const;
-
-	NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo &);
-
-	NIFLIB_API virtual void accept(class FieldVisitor& visitor);
 };
 
 NIFLIB_API float ConvertHFloatToFloat(hfloat h);

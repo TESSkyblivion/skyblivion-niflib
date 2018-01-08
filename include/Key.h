@@ -13,9 +13,14 @@ All rights reserved.  Please see niflib.h for license. */
 namespace Niflib {
 using namespace std;
 
+class CompoundVisitor;
+class FieldVisitor;
+struct NifInfo;
+
+
 /*! Stores an animation key and the time in the animation that it takes affect. It is a template class so it can hold any kind of data as different objects key different sorts of information to the animation timeline.*/
 template <class T> 
-struct Key : public Compound {
+struct Key : public Native {
 	float time; /*!< The time on the animation timeline that this keyframe takes affect. */ 
 	T data; /*!< The data being keyed to the timeline. */ 
 	T forward_tangent; /*!< A piece of data of the same type as is being keyed to the time line used as the forward tangent in quadratic interpolation.  Ignored if key type is set as something else. */ 
@@ -24,10 +29,18 @@ struct Key : public Compound {
 	float bias; /*!< The amount of bias to use in tension, bias, continuity interpolation.  Ignored if key type is something else.*/
 	float continuity; /*!< The amount of continuity to use in tension, bias, continuity interpolation.  Ignored if key type is something else.*/
 
+	template<typename T> bool equality(const T& an_obj, const T& another_obj) const {
+		return an_obj == another_obj;
+	}
+
+	template<> bool equality(const float& an_obj, const float& another_obj) const {
+		return an_obj == another_obj || an_obj!=an_obj && another_obj != another_obj;
+	}
+
 	bool operator==(const Key<T>& other) const {
 		return (
 			time == other.time &&
-			data == other.data &&
+			equality(data, other.data) &&
 			forward_tangent == other.forward_tangent &&
 			backward_tangent == other.backward_tangent &&
 			tension == other.tension &&

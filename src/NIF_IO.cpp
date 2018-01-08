@@ -960,6 +960,32 @@ void NifStream( Key<Quaternion> const & key, ostream& file, const NifInfo & info
 	}
 }
 
+void ForcedFromIndexString(IndexString const &value, Header* header, unsigned int& idx)
+{
+	if (header == NULL)
+		throw runtime_error("stream not properly configured");
+	//if (value.empty()) {
+	//	idx = 0xffffffff;
+	//}
+	//else {
+		size_t i = 0;
+		for (; i < header->strings.size(); i++) {
+			//AIS: seriously? ==?
+			if (header->strings[i].compare(value) == 0) {
+				idx = i;
+				return;
+			}
+		}
+		if (i >= header->numStrings)
+			header->numStrings = i;
+		size_t len = value.length();
+		if (header->maxStringLength < len)
+			header->maxStringLength = len;
+		header->strings.push_back(value);
+		idx = i;
+	//}
+}
+
 void FromIndexString(IndexString const &value, Header* header, unsigned int& idx)
 {
 	if (header == NULL)
@@ -1066,7 +1092,7 @@ template <> void NifStream( Key<IndexString> const & key, ostream& file, const N
 		ikey.tension = key.tension;
 		ikey.bias = key.bias;
 		ikey.continuity = key.continuity;
-		FromIndexString(key.data, hdrInfo::getInfo(file), ikey.data);
+		ForcedFromIndexString(key.data, hdrInfo::getInfo(file), ikey.data);
 		NifStream(ikey, file, info, type);
 	} else {
 		Key<string> skey;
