@@ -16,6 +16,9 @@ using namespace std;
  * Smart Pointer Template
  */
 
+ //references
+
+
 template<class T> class Ref;
 template<class T> ostream & operator<<(ostream &, const Ref<T> &);
 

@@ -18,6 +18,22 @@ All rights reserved.  Please see niflib.h for license. */
 #include <nif_members_expr.h>
 
 namespace Niflib {
+
+	template<typename T>
+	static constexpr bool IsVisitableRef = is_base_of_template_t<Ref, T>::value;
+
+
+	template<typename T>
+	static constexpr bool IsIndexString =
+		std::is_base_of<IndexString, T>::value ||
+		std::is_base_of<Key<IndexString>, T>::value ||
+		std::is_base_of<vector<IndexString>, T>::value ||
+		std::is_base_of<vector<Key<IndexString>>, T>::value;
+
+	template<typename T>
+	static constexpr bool IsIterable = is_iterable<T>::value &&
+		!std::is_base_of<IndexString, T>::value;
+
 	using namespace std;
 
 #ifndef NULL

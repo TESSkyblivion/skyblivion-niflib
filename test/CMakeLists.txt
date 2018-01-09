@@ -1,4 +1,3 @@
-# We need thread support
 find_package(Threads REQUIRED)
 
 #It seems Cmake does not set default build type so we force it
@@ -39,16 +38,14 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-# Now simply link against gtest or gtest_main as needed. Eg
-#add_executable(example example.cpp)
-#target_link_libraries(example gtest_main)
-#add_test(NAME example_test COMMAND example)
-
 ##########################
 
-#FileSystem
-include_directories(${PROJECT_SOURCE_DIR}/test/filesystem/filesystem)
-
+# Visitor should be used in a single module, but for test we can avoid that
+if (MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS "/FORCE:MULTIPLE" CACHE INTERNAL "" FORCE)
+else()
+	set(CMAKE_EXE_LINKER_FLAGS "-z muldefs" CACHE INTERNAL "" FORCE)
+endif()
 
 file(GLOB SRCS *.cpp)
 
@@ -59,3 +56,4 @@ target_link_libraries(test_niflib
 	niflib
 	gtest_main
 )
+

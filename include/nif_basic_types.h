@@ -12,16 +12,42 @@ All rights reserved.  Please see niflib.h for license. */
 #include <array>
 
 namespace Niflib {
+
+	template<typename C>
+	struct is_iterable
+	{
+		typedef long false_type;
+		typedef char true_type;
+
+		template<class T> static false_type check(...);
+		template<class T> static true_type  check(int,
+			typename T::const_iterator = C().end());
+
+		enum { value = sizeof(check<C>(0)) == sizeof(true_type) };
+	};
+
+	template <template <typename...> class Base, typename Derived>
+	struct is_base_of_template
+	{
+		using U = typename std::remove_cv<Derived>::type;
+
+		template <typename... Args>
+		static std::true_type test(Base<Args...>*);
+
+		static std::false_type test(void*);
+
+		using type = decltype(test(std::declval<U*>()));
+	};
+
+	template <template <typename...> class Base, typename Derived>
+	using is_base_of_template_t = typename is_base_of_template<Base, Derived>::type;
+
 using namespace std;
 
 struct NifInfo;
-class NativeVisitor;
-
 
 struct Native {};
-
 struct Compound {};
-
 struct HalfVector3;
 
 struct HeaderString : public Native {

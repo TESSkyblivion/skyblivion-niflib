@@ -1,86 +1,35 @@
  /* Copyright (c) 2018, NIF File Format Library and Tools 
  All rights reserved. Please see niflib.h for license. */
 
-#include <gtest/gtest.h>
+#include "test_utils.h"
 
-#include <filesystem>
+//#include <gtest/gtest.h>
+//
+//#include <filesystem>
+//
+//#include <niflib.h>
+//#include <obj\NiObject.h>
+//#include <obj\BSFadeNode.h>
+//#include <field_visitor.h>
+//#include <interfaces\typed_visitor.h>
+//#include <objTmpl.cpp>
+//
+////hierarchy
+//#include <obj/NiTimeController.h>
+//#include <obj/NiExtraData.h>
+//#include <obj/NiCollisionObject.h>
+//#include <obj/NiProperty.h>
+//#include <obj/NiDynamicEffect.h>
+//
+//#include <algorithm>
+//#include <iterator>
+//#include <string>
+//#include <fstream>
+//#include <utility>
 
-#include <niflib.h>
-#include <obj\NiObject.h>
-#include <obj\BSFadeNode.h>
-#include <field_visitor.h>
-#include <interfaces\typed_visitor.h>
-#include <objTmpl.cpp>
+//#include <objTmpl.cpp>
 
-//hierarchy
-#include <obj/NiTimeController.h>
-#include <obj/NiExtraData.h>
-#include <obj/NiCollisionObject.h>
-#include <obj/NiProperty.h>
-#include <obj/NiDynamicEffect.h>
 
-#include <algorithm>
-#include <iterator>
-#include <string>
-#include <fstream>
-#include <utility>
-
-using namespace std::experimental::filesystem;
-using namespace Niflib;
-using namespace std;
-
-static const path test_resources_path = "..\\..\\..\\..\\resources\\";
-static const path test_nifs_in_path = "..\\..\\..\\..\\resources\\nifs\\in\\";
-static const path test_kf_in_path = "..\\..\\..\\..\\resources\\kfs\\in\\";
-
-void findFiles(path startingDir, string extension, vector<path>& results) {
-	if (!exists(startingDir) || !is_directory(startingDir)) return;
-	for (auto& dirEntry : std::experimental::filesystem::recursive_directory_iterator(startingDir))
-	{
-		if (is_directory(dirEntry.path()))
-			continue;
-		std::string entry_extension = dirEntry.path().extension().string();
-		transform(entry_extension.begin(), entry_extension.end(), entry_extension.begin(), ::tolower);
-		if (entry_extension == extension) {
-			results.push_back(dirEntry.path().string());
-		}
-	}
-}
-
-template<typename InputIterator1, typename InputIterator2>
-bool
-range_equal(InputIterator1 first1, InputIterator1 last1,
-	InputIterator2 first2, InputIterator2 last2)
-{
-	while (first1 != last1 && first2 != last2)
-	{
-		if (*first1 != *first2) return false;
-		++first1;
-		++first2;
-	}
-	return (first1 == last1) && (first2 == last2);
-}
-
-bool compare_files(const std::string& filename1, const std::string& filename2)
-{
-	std::ifstream file1(filename1);
-	std::ifstream file2(filename2);
-
-	std::istreambuf_iterator<char> begin1(file1);
-	std::istreambuf_iterator<char> begin2(file2);
-
-	std::istreambuf_iterator<char> end;
-
-	return range_equal(begin1, end, begin2, end);
-}
-
-bool replace(std::string& str, const std::string& from, const std::string& to) {
-	size_t start_pos = str.find(from);
-	if (start_pos == std::string::npos)
-		return false;
-	str.replace(start_pos, from.length(), to);
-	return true;
-}
 
 TEST(ReadWriteTest, ReadWriteTest) {
 	NifInfo info;
@@ -177,8 +126,7 @@ public:
 //	}
 //};
 
-class CollectionStatsHolder {
-
+class CollectionStatsHolder : public FieldVisitorImpl<CollectionStatsHolder> {
 
 public:
 	std::set<string> collections_paths;
@@ -188,12 +136,24 @@ public:
 	std::map<string, int> classes_hits;
 	std::map<string, std::vector<NiObjectRef>> classes;
 	std::set<string> path_roots;
+	std::map<string, set<string>> node_values;
+
+	CollectionStatsHolder() : FieldVisitorImpl<CollectionStatsHolder>(*this) {}
+
+	template<typename Ref/*, typename std::enable_if<IsVisitableRef<Ref>>::type* = nullptr */>
+	inline void visit(Ref& obj, const unsigned int field_index) { /*NTD*/ }
+
+	//template<typename Type, typename std::enable_if<!IsVisitableRef<Type>>::type* = nullptr >
+	//inline void visit(Type& obj, const unsigned int field_index) {
+	//	stringstream ss; ss << obj;
+	//	ss.str();
+	//}
 
 	void addObject(NiObjectRef object) {
 		string key = object->GetInternalType().GetTypeName();
+		node_values[key].insert(object->asString(true));
 		int hits = classes_hits[key] != NULL ? classes_hits[key] + 1 : 1;
 		classes_hits[key] = hits;
-//		classes[key].push_back(object);
 		typenames.insert(key);
 		size++;
 	}
@@ -380,6 +340,65 @@ TEST(Read, SingleFileMustBeEqualToWriteReadAlduin) {
 		ASSERT_EQ(*objects[i], *new_objects[i]) << "on Object[" << i << "]" << std::endl << objects[i]->asString() << std::endl << new_objects[i]->asString() << std::endl;
 	}
 	ASSERT_EQ(compare_files(in_path.string().c_str(), out_path.string().c_str()), true);
+}
+
+TEST(TEST, OblivionToSkyrimAssets) {
+	NifInfo info;
+	NifInfo newinfo;
+	vector<path> oblivion_nifs;
+	vector<path> skyblivion_nifs;
+	//D:\git\skyblivion\resources\nifs\in\skyrim\meshes\actors\character
+	path oblp = absolute(test_nifs_in_path / "oblivion" / "meshes");
+	path skblp = absolute(test_nifs_in_path / "skyblivion_orig" / "tes4");
+	current_path(oblp);
+	findFiles(".", ".nif", oblivion_nifs);
+	current_path(skblp);
+	findFiles(".", ".nif", skyblivion_nifs);
+
+	set<string> obl; 
+	for (int i = 0; i < oblivion_nifs.size(); i++) {
+		string data = oblivion_nifs[i].string();
+		std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+		obl.insert(data);
+	}
+	set<string> skbl;
+	for (int i = 0; i < skyblivion_nifs.size(); i++) {
+		string data = skyblivion_nifs[i].string();
+		std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+		skbl.insert(data);
+	}
+
+	std::set<string> v_intersection;
+
+	std::set_intersection(obl.begin(), obl.end(),
+		skbl.begin(), skbl.end(),
+		std::inserter(v_intersection, v_intersection.begin()));
+
+	set<string> diff;
+
+	std::set_difference(skbl.begin(), skbl.end(), v_intersection.begin(), v_intersection.end(),
+		std::inserter(diff, diff.begin()));
+
+
+	ASSERT_TRUE(oblivion_nifs.size() + diff.size() == skyblivion_nifs.size()) << "Oblivion: " << oblivion_nifs.size() << " / Skyblivion " << skyblivion_nifs.size();
+
+	//NiObjectRef root = GetFirstRoot(objects);
+	//WriteNifTree(out_path.string().c_str(), root, info);
+	//vector<NiObjectRef> new_objects = ReadNifList(out_path.string().c_str(), &newinfo);
+	//NiObjectRef new_root = GetFirstRoot(new_objects);
+	//ASSERT_TRUE(*root == *new_root);
+	//ASSERT_EQ(objects.size(), new_objects.size());
+	//for (int i = 0; i < objects.size(); i++) {
+	//	bool result = *objects[i] == *new_objects[i];
+	//	if (!result) {
+	//		auto orig_obj = objects[i];
+	//		auto new_obj = new_objects[i];
+	//		*objects[i] == *new_objects[i];
+	//		throw std::runtime_error("Object inequality");
+	//	}
+	//	ASSERT_EQ(*objects[i], *new_objects[i]) << "on Object[" << i << "]" << std::endl << objects[i]->asString() << std::endl << new_objects[i]->asString() << std::endl;
+	//}
+	//ASSERT_EQ(compare_files(in_path.string().c_str(), out_path.string().c_str()), true);
 }
 //
 //class TemplateVisitor {

@@ -706,36 +706,6 @@ public:
 
 };
 
-
-template<typename C>
-struct is_iterable
-{
-	typedef long false_type;
-	typedef char true_type;
-
-	template<class T> static false_type check(...);
-	template<class T> static true_type  check(int,
-		typename T::const_iterator = C().end());
-
-	enum { value = sizeof(check<C>(0)) == sizeof(true_type) };
-};
-
-template <template <typename...> class Base, typename Derived>
-struct is_base_of_template
-{
-	using U = typename std::remove_cv<Derived>::type;
-
-	template <typename... Args>
-	static std::true_type test(Base<Args...>*);
-
-	static std::false_type test(void*);
-
-	using type = decltype(test(std::declval<U*>()));
-};
-
-template <template <typename...> class Base, typename Derived>
-using is_base_of_template_t = typename is_base_of_template<Base, Derived>::type;
-
 class StringFieldVisitor :
 	public VisitorImpl<StringFieldVisitor>,
 	public CompoundVisitorImpl<StringFieldVisitor>,
@@ -906,17 +876,6 @@ public:
 		}
 	}
 
-	template<typename T>
-	static constexpr bool IsIndexString =
-		std::is_base_of<IndexString, T>::value ||
-		std::is_base_of<Key<IndexString>, T>::value ||
-		std::is_base_of<vector<IndexString>, T>::value ||
-		std::is_base_of<vector<Key<IndexString>>, T>::value ;
-
-	template<typename T>
-	static constexpr bool IsIterable = is_iterable<T>::value && 
-		!std::is_base_of<IndexString, T>::value;
-
 	//Iterable
 	template<typename T, typename std::enable_if<IsIterable<T>>::type* = nullptr >
 	inline void visit(T& field) {
@@ -929,11 +888,6 @@ public:
 	inline void visit(T& field) {
 		handle(field);
 	}
-
-	//references
-	template<typename T>
-	static constexpr bool IsVisitableRef =
-		is_base_of_template_t<Ref, T>::value;
 
 	template<typename T, typename std::enable_if<IsVisitableRef<T>>::type* = nullptr >
 	inline void handle(T& field) {

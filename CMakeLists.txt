@@ -8,10 +8,15 @@ endif()
 
 # Fix for wrong scoping from the main project
 if (MSVC)
+	message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 		add_definitions(/MTd)
 	else()
 		add_definitions(/MT)
+	endif()
+	if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+		message(STATUS "detected Win64 build, adding /bigobj")
+		add_definitions(/bigobj)
 	endif()
 endif()
 
