@@ -7,6 +7,32 @@ All rights reserved. Please see niflib.h for license. */
 
 //#include <objDecl.cpp>
 
+class AnalyzerVisitor : public RecursiveFieldVisitor<AnalyzerVisitor> {
+
+public:
+	bool hasGeometry = false;
+	bool hasSkinnedGeometry = false;
+	bool hasCollision = false;
+	bool hasRagdoll = false;
+	bool hasAnimation = false;
+	bool hasParticleEffects = false;
+
+
+	AnalyzerVisitor(const NifInfo& info) :
+		RecursiveFieldVisitor(*this, info)
+	{}
+
+	template<class T>
+	inline void visit_object(T& obj) {}
+
+	template<class T>
+	inline void visit_compound(T& obj) {}
+
+	template<class T>
+	inline void visit_field(T& obj) {}
+};
+
+
 class ConverterVisitor : public RecursiveFieldVisitor<ConverterVisitor> {
 public:
 	ConverterVisitor(const NifInfo& info) :
@@ -21,6 +47,271 @@ public:
 
 	template<class T>
 	inline void visit_field(T& obj) {}
+
+	//Path Root Nodes after ninodes :
+
+	//BSBound
+	//	BSFurnitureMarker
+	//	BSKeyframeController
+	//	BSXFlags
+	//	NiAmbientLight
+	//	NiBSBoneLODController
+	//	NiBillboardNode
+	//	NiCamera
+	//	NiControllerManager
+	//	NiDirectionalLight
+	//	NiFogProperty
+	//	NiKeyframeController
+	//	NiMeshParticleSystem
+	//	NiMultiTargetTransformController
+	//	NiParticleSystem
+	//	NiStringExtraData
+	//	NiTextKeyExtraData
+	//	NiTransformController
+	//	NiVertexColorProperty
+	//	NiVisController
+	//	NiZBufferProperty
+
+
+	/*
+	// GEOMETRY
+
+	NiTriShape
+	NiTriStrips
+	NiTriShape/NiTriShapeData/
+	NiTriStrips/NiTriStripsData/
+
+	// TANGENT SPACE
+
+	NiTriShape / NiBinaryExtraData /
+	NiTriStrips / NiBinaryExtraData /
+
+	// LABELS / MISC
+	
+	NiTriShape/NiBooleanExtraData/
+	NiTriStrips/NiBooleanExtraData/
+	NiTriShape/NiIntegerExtraData/
+	NiTriStrips/NiIntegerExtraData/
+	NiTriShape/NiStringExtraData/
+	NiTriStrips/NiStringExtraData/
+	NiTriShape/NiZBufferProperty/
+	
+	// MATERIAL AND TEXTURES
+	
+	// OBLIVION
+	Control Flow
+
+	NiTriShape/NiVertexColorProperty/
+	NiTriStrips/NiVertexColorProperty/
+
+	Property of vertex colors. This object is referred to by the 
+	root object of the NIF file whenever some NiTriShapeData object 
+	has vertex colors with non-default settings; 
+
+	if not present, vertex colors have vertex_mode=2 and lighting_mode=1.
+
+	<enum name="VertMode" storage="uint">
+	Describes how to apply vertex colors for NiVertexColorProperty.
+	<option value="0" name="VERT_MODE_SRC_IGNORE">Emissive, ambient, and diffuse colors are all specified by the NiMaterialProperty.</option>
+	<option value="1" name="VERT_MODE_SRC_EMISSIVE">Emissive colors are specified by the source vertex colors. Ambient+Diffuse are specified by the NiMaterialProperty.</option>
+	<option value="2" name="VERT_MODE_SRC_AMB_DIF">Ambient+Diffuse colors are specified by the source vertex colors. Emissive is specified by the NiMaterialProperty. (Default)</option>
+	</enum>
+
+	<enum name="LightMode" storage="uint">
+	Describes which lighting equation components influence the final vertex color for NiVertexColorProperty.
+	<option value="0" name="LIGHT_MODE_EMISSIVE">Emissive.</option>
+	<option value="1" name="LIGHT_MODE_EMI_AMB_DIF">Emissive + Ambient + Diffuse. (Default)</option>
+	</enum>
+
+	// MATERIAL
+	NiTriShape/NiMaterialProperty/
+	NiTriStrips/NiMaterialProperty/
+	
+	// TEXTURES
+	NiTriShape/NiTexturingProperty/NiFlipController/NiBlendFloatInterpolator/
+	NiTriStrips/NiTexturingProperty/NiFlipController/NiBlendFloatInterpolator/
+	NiTriShape/NiTexturingProperty/NiFlipController/NiFloatInterpolator/NiFloatData/
+	NiTriShape/NiTexturingProperty/NiFlipController/NiSourceTexture/
+	NiTriShape/NiTexturingProperty/NiSourceTexture/
+	NiTriStrips/NiTexturingProperty/NiFlipController/NiFlipController/NiBlendFloatInterpolator/
+	NiTriStrips/NiTexturingProperty/NiFlipController/NiFlipController/NiSourceTexture/
+	NiTriStrips/NiTexturingProperty/NiFlipController/NiSourceTexture/
+	NiTriStrips/NiTexturingProperty/NiSourceTexture/
+	NiTriStrips/NiTexturingProperty/NiTextureTransformController/NiBlendFloatInterpolator/
+	NiTriStrips/NiTexturingProperty/NiTextureTransformController/NiFlipController/NiBlendFloatInterpolator/
+	NiTriStrips/NiTexturingProperty/NiTextureTransformController/NiFlipController/NiSourceTexture/
+	NiTriStrips/NiTexturingProperty/NiTextureTransformController/NiFloatInterpolator/NiFloatData/
+	NiTriStrips/NiTexturingProperty/NiTextureTransformController/NiTextureTransformController/NiBlendFloatInterpolator/
+	NiTriStrips/NiTexturingProperty/NiTextureTransformController/NiTextureTransformController/NiTextureTransformController/NiBlendFloatInterpolator/
+
+	// ALPHAS
+	NiTriShape/NiAlphaProperty/
+	NiTriStrips/NiAlphaProperty/
+
+	// SPECULAR
+	NiTriShape/NiSpecularProperty/
+	NiTriStrips/NiSpecularProperty/
+
+	// MISC
+	NiTriShape/NiStencilProperty/
+	NiTriStrips/NiStencilProperty/
+	NiTriStrips/NiDitherProperty/
+	NiTriStrips/NiWireframeProperty/
+	NiTriStrips/NiZBufferProperty/
+
+	// CONTROLLED
+	NiTriShape/NiTransformController/
+	NiTriStrips/NiTransformController/
+	NiTriShape/NiMaterialProperty/NiAlphaController/NiBlendFloatInterpolator/
+	NiTriStrips/NiMaterialProperty/NiAlphaController/NiBlendFloatInterpolator/
+	NiTriShape/NiMaterialProperty/NiAlphaController/NiFloatInterpolator/NiFloatData/
+	NiTriStrips/NiMaterialProperty/NiAlphaController/NiFloatInterpolator/NiFloatData/
+	NiTriStrips/NiMaterialProperty/NiAlphaController/NiMaterialColorController/NiBlendPoint3Interpolator/
+	NiTriShape/NiMaterialProperty/NiMaterialColorController/NiBlendPoint3Interpolator/
+	NiTriStrips/NiMaterialProperty/NiMaterialColorController/NiBlendPoint3Interpolator/
+	NiTriShape/NiMaterialProperty/NiMaterialColorController/NiPoint3Interpolator/NiPosData/
+	NiTriStrips/NiMaterialProperty/NiMaterialColorController/NiPoint3Interpolator/NiPosData/
+	NiTriStrips/NiMaterialProperty/NiMaterialColorController/NiMaterialColorController/NiBlendPoint3Interpolator/
+	
+	// SKINNED
+	NiTriShape/NiSkinInstance/NiSkinData/
+	NiTriShape/NiSkinInstance/NiSkinData/NiSkinPartition/
+	NiTriShape/NiSkinInstance/NiSkinPartition/
+	
+	// GEOMETRY MORPH
+	//NB: Geom Morpher is not used in Skyrim
+	NiTriShape/NiTransformController/NiGeomMorpherController/NiFloatInterpolator/
+	NiTriShape/NiTransformController/NiGeomMorpherController/NiFloatInterpolator/NiFloatData/
+	NiTriShape/NiTransformController/NiGeomMorpherController/NiMorphData/
+	NiTriStrips/NiGeomMorpherController/NiBlendFloatInterpolator/
+	NiTriStrips/NiGeomMorpherController/NiFloatInterpolator/
+	NiTriStrips/NiGeomMorpherController/NiFloatInterpolator/NiFloatData/
+	NiTriStrips/NiGeomMorpherController/NiMorphData/
+	NiTriStrips/NiTransformController/NiGeomMorpherController/NiFloatInterpolator/
+	NiTriStrips/NiTransformController/NiGeomMorpherController/NiFloatInterpolator/NiFloatData/
+	NiTriStrips/NiTransformController/NiGeomMorpherController/NiMorphData/
+
+	*/
+
+	//Skyrim Paths. do not considerate Strips and triangulate all the shit
+	/*
+	NiTriShape / BSDismemberSkinInstance / NiSkinData /
+	NiTriShape / BSDismemberSkinInstance / NiSkinPartition /
+	NiTriShape / BSEffectShaderProperty /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / NiBlendPoint3Interpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyColorController / NiPoint3Interpolator / NiPosData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSEffectShaderProperty / BSEffectShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyColorController / NiBlendPoint3Interpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyColorController / NiPoint3Interpolator / NiPosData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / NiBlendPoint3Interpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyColorController / NiPoint3Interpolator / NiPosData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / NiBlendFloatInterpolator /
+	NiTriShape / BSLightingShaderProperty / BSLightingShaderPropertyFloatController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / BSLightingShaderProperty / BSShaderTextureSet /
+	NiTriShape / BSSkyShaderProperty /
+	NiTriShape / BSWArray /
+	NiTriShape / NiAlphaProperty /
+	NiTriShape / NiAlphaProperty / BSNiAlphaPropertyTestRefController / NiBlendFloatInterpolator /
+	NiTriShape / NiAlphaProperty / BSNiAlphaPropertyTestRefController / NiFloatInterpolator / NiFloatData /
+	NiTriShape / NiBooleanExtraData /
+	NiTriShape / NiFloatExtraData /
+	NiTriShape / NiIntegerExtraData /
+	NiTriShape / NiSkinInstance / NiSkinData /
+	NiTriShape / NiSkinInstance / NiSkinPartition /
+	NiTriShape / NiStringExtraData /
+	NiTriShape / NiStringsExtraData /
+	NiTriShape / NiTextKeyExtraData /
+	NiTriShape / NiTriShapeData /
+	NiTriShape / NiTriShapeData / NiAdditionalGeometryData /
+	*/
+
+	template<>
+	inline void visit_object(NiTriShape& obj) {
+	
+	}
+
+	//NB: Deprecated after Skyrim, triangulate
+	template<>
+	inline void visit_object(NiTriStrips& obj) {
+		
+	}
+
+	
+
+	//Sequences
+	//NiControllerManager
+	//NiFloatExtraDataController
+	//NiTransformController
+	//NiVisController
+
+
+	//	Havok Collisions
+
+	// Used in creatures' skeleton
+	//	bhkBlendCollisionObject
+	//	bhkBlendController
+	//	bhkCollisionObject
+	//	bhkSPCollisionObject
+	
+	//Starts a collision object
+	template<>
+	inline void visit_object(bhkBlendCollisionObject& obj) {}
+
+	//To Be Checked
+	template<>
+	inline void visit_object(bhkBlendController& obj) {}
+
+	//Static collision
+	template<>
+	inline void visit_object(bhkCollisionObject& obj) {}
+
+	//Phantom collision to be handled by logic instead of the actual solvers
+	template<>
+	inline void visit_object(bhkSPCollisionObject& obj) {}
+
 };
 
 TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
@@ -1119,7 +1410,9 @@ if havoked_entity.mass == 0 :
 
 	havoked_entity.mass = 3
 
-	def parse_shape(self, shape, parent_shape) :
+
+
+def parse_shape(self, shape, parent_shape) :
 
 	# Parsing Rigid body shapes.
 
