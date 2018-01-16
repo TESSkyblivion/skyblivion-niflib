@@ -48,11 +48,14 @@ else()
 endif()
 
 file(GLOB SRCS *.cpp)
+file(GLOB SRCS_MIKTT mikktspace/*.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR}/include )
+include_directories(${PROJECT_SOURCE_DIR}/lib/mikktspace )
 
-add_executable(test_niflib ${SRCS})
+add_executable(test_niflib ${SRCS} ${SRCS_MIKTT})
 target_link_libraries(test_niflib
+	mikktspace
 	niflib
 	gtest_main
 )

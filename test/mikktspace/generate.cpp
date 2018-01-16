@@ -7,6 +7,9 @@
 
 #include "mikktspace.h"
 
+#include <gtest/gtest.h>
+#include "../test_utils.h"
+
 struct tangent {
     // Vector.
     float v[3];
@@ -123,16 +126,20 @@ void set_tspace(
     set_tspace_basic(x, t, op != 0 ? 1.0f : -1.0f, f, v);
 }
 
-int main() {  
+
+
+TEST(MIKKTSPACE, cubeTest) {
     input.nr_vertices = 30;
     input.nr_faces = 24;
 
-    input.positions = calloc(input.nr_vertices, sizeof(*input.positions));
-    input.normals = calloc(input.nr_vertices, sizeof(*input.normals));
-    input.tex_coords = calloc(input.nr_vertices, sizeof(*input.tex_coords));
-    input.faces = calloc(input.nr_faces, sizeof(*input.faces));
+    input.positions = (float(*)[3])calloc(input.nr_vertices, sizeof(*input.positions));
+    input.normals = (float(*)[3])calloc(input.nr_vertices, sizeof(*input.normals));
+    input.tex_coords = (float(*)[2])calloc(input.nr_vertices, sizeof(*input.tex_coords));
+    input.faces = (face*)calloc(input.nr_faces, sizeof(*input.faces));
 
-    FILE *fi = fopen("cube.obj", "rb");
+	path in_path = test_resources_path / "objs" / "cube.obj";
+
+    FILE *fi = fopen(in_path.string().c_str(), "rb");
     assert(fi);
     char buffer[1024];
 
@@ -185,19 +192,34 @@ int main() {
         }
     }
 
-    SMikkTSpaceInterface interface = {
-        .m_getNumFaces = get_num_faces,
-        .m_getNumVerticesOfFace = get_num_vertices_of_face,
-        .m_getPosition = get_position,
-        .m_getNormal = get_normal,
-        .m_getTexCoord = get_tex_coord,
-        .m_setTSpaceBasic = set_tspace_basic,
-        .m_setTSpace = set_tspace,
-    };
-    SMikkTSpaceContext context = {
-        .m_pInterface = &interface,
-        .m_pUserData = NULL,
-    };
+	SMikkTSpaceInterface interface;
+
+	interface.m_getNumFaces = get_num_faces;
+	interface.m_getNumVerticesOfFace = get_num_vertices_of_face;
+	interface.m_getPosition = get_position;
+	interface.m_getNormal = get_normal;
+	interface.m_getTexCoord = get_tex_coord;
+	interface.m_setTSpaceBasic = set_tspace_basic;
+	interface.m_setTSpace = set_tspace;
+
+    //SMikkTSpaceInterface interface = {
+    //    .m_getNumFaces = get_num_faces,
+    //    .m_getNumVerticesOfFace = get_num_vertices_of_face,
+    //    .m_getPosition = get_position,
+    //    .m_getNormal = get_normal,
+    //    .m_getTexCoord = get_tex_coord,
+    //    .m_setTSpaceBasic = set_tspace_basic,
+    //    .m_setTSpace = set_tspace,
+    //};
+
+	SMikkTSpaceContext context;
+	context.m_pInterface = &interface;
+	context.m_pUserData = NULL;
+
+    //SMikkTSpaceContext context = {
+    //    .m_pInterface = &interface,
+    //    .m_pUserData = NULL,
+    //};
 
     genTangSpaceDefault(&context);
 
@@ -207,5 +229,5 @@ int main() {
     free(input.tex_coords);
     free(input.faces);
 
-    return 0;
+//    return 0;
 }

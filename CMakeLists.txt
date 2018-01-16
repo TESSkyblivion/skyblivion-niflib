@@ -33,6 +33,8 @@ add_custom_target(
 	${PROJECT_SOURCE_DIR}/gen/nifxml/nif.xml  
 )
 
+add_subdirectory(lib/mikktspace)
+
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 
 message(STATUS "BUILDING PROJECT niflib")
