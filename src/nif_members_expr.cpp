@@ -16,13 +16,13 @@ namespace Niflib {
 	unsigned int bhkMoppBvTreeShape_moppDataSizeCalc(const bhkMoppBvTreeShape& in, const NifInfo & info) {
 		//[Old MOPP Data] moppDataSize = (moppDataSize - 1)
 		//[MOPP Data] moppDataSize = moppDataSize
-		if (info.version <= 0x0A000100) {
-			return in.GetOldMoppData().size() + 1;
-		};
-		if (info.version >= 0x0A000102) {
+		//if (info.version <= 0x0A000100) {
+		//	return in.GetOldMoppData().size() + 1;
+		//};
+		//if (info.version >= 0x0A000102) {
 			return in.GetMoppData().size();
-		};
-		return 0;
+		//};
+		//return 0;
 	}
 
 	unsigned int NiPixelData_numPixelsCalc(const NiPixelData& in, const NifInfo & info) {
