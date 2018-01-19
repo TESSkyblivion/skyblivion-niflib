@@ -11,5 +11,7 @@ gen/*.pyc
 include/compoundImpl.cpp
 include/compound_visitor.h
 include/objImpl.cpp
+include/objDecl.cpp
+include/objTmpl.cpp
 include/visitor.h
 src/compound_visitor.cpp
