@@ -508,7 +508,7 @@ Vector3 centeroid(const vector<Vector3>& in) {
 }
 
 void CalculateNormals(const vector<Vector3>& vertices, const vector<Triangle> faces,
-	vector<Vector3>& normals, Vector3& COM) {
+	vector<Vector3>& normals, Vector3& COM, bool sphericalNormals = false, bool calculateCOM = false) {
 
 	std::map<unsigned int, vector<Vector3>> normalMap;
 
@@ -524,7 +524,8 @@ void CalculateNormals(const vector<Vector3>& vertices, const vector<Triangle> fa
 		if (faceIndexes.find(i) == faceIndexes.end())
 			throw runtime_error("Found unindexed vertex: "+i);
 	
-	COM = centeroid(vertices);
+	if (calculateCOM)
+		COM = centeroid(vertices);
 
 	for (Triangle face : faces) {
 		Vector3 v1 = vertices[face.v1].Normalized();
@@ -545,12 +546,22 @@ void CalculateNormals(const vector<Vector3>& vertices, const vector<Triangle> fa
 		Vector3 COMtoCOT = Vector3(COT - COM).Normalized();
 
 		//we always want a normal that is faced out of the body
-		if (n1 * COMtoCOT < 0)
-			n1 = Vector3(-n1.x, -n1.y, -n1.z);
-		if (n2 * COMtoCOT < 0)
-			n2 = Vector3(-n2.x, -n2.y, -n2.z);
-		if (n3 * COMtoCOT < 0)
-			n3 = Vector3(-n3.x, -n3.y, -n3.z);
+		if (sphericalNormals) {
+			Vector3 COMv1 = Vector3(v1 - COM);
+			n1 = COMv1.Normalized();
+			Vector3 COMv2 = Vector3(v2 - COM);
+			n2 = COMv2.Normalized();
+			Vector3 COMv3 = Vector3(v3 - COM);
+			n3 = COMv3.Normalized();
+		}
+		else {
+			if (n1 * COMtoCOT < 0)
+				n1 = Vector3(-n1.x, -n1.y, -n1.z);
+			if (n2 * COMtoCOT < 0)
+				n2 = Vector3(-n2.x, -n2.y, -n2.z);
+			if (n3 * COMtoCOT < 0)
+				n3 = Vector3(-n3.x, -n3.y, -n3.z);
+		}
 
 		normalMap[face.v1].push_back(n1);
 		normalMap[face.v2].push_back(n2);
@@ -587,11 +598,11 @@ struct TriGeometryContext : SMikkTSpaceContext {
 	vector<Vector3> tangents;
 	vector<Vector3> bitangents;
 
-	TriGeometryContext(const vector<Vector3>& in_vertices, const vector<Triangle>& in_faces,
+	TriGeometryContext(const vector<Vector3>& in_vertices, Vector3 COM, const vector<Triangle>& in_faces,
 		const vector<TexCoord>& in_uvs, vector<Vector3> in_normals) : vertices(in_vertices), faces(in_faces), uvs(in_uvs), normals(in_normals) {		
 		//if (normals.size() == 0 && !CheckNormals(normals)) {
 			normals.resize(vertices.size());
-			CalculateNormals(vertices, faces, normals, COM);
+			CalculateNormals(vertices, faces, normals, COM, true);
 		//}
 		tangents.resize(vertices.size());
 		bitangents.resize(vertices.size());
@@ -683,6 +694,18 @@ TEST(Calculate, Normals) {
 	findFiles(test_nifs_in_path, ".nif", nifs);
 	for (size_t i = 0; i < nifs.size(); i++) {
 		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
+		//calculate the centeroid first
+		Vector3 COM;
+		for (NiObjectRef block : blocks) {
+			if (block->IsDerivedType(NiTriShapeData::TYPE)) {
+				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
+				vector<Vector3> vertices = ref->GetVertices();
+				if (vertices.size() != 0) {
+					COM = (COM / 2) + (centeroid(vertices) / 2);
+				}
+			}
+		}
+
 		for (NiObjectRef block : blocks) {
 			if (block->IsDerivedType(NiTriShapeData::TYPE)) {
 				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
@@ -694,7 +717,7 @@ TEST(Calculate, Normals) {
 					vector<TexCoord> uvs = ref->GetUvSets()[0];
 					Vector3 COM;					
 					//Tangent Space
-					TriGeometryContext g(vertices, faces, uvs, normals);
+					TriGeometryContext g(vertices, COM, faces, uvs, normals);
 					ref->SetNormals(g.normals);
 					ref->SetTangents(g.tangents);
 					ref->SetBitangents(g.bitangents);

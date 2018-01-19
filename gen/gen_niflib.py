@@ -262,6 +262,7 @@ for n in compound_names:
         h.code( '#include <obj/NiObject.h>' )
     if x.template:
         h.code( '#include <compound_visitor.h>' )
+        h.code( '#include <field_visitor.h>' )
     h.code( x.code_include_h() )
     h.write( "namespace Niflib {\n" )
     if not x.template:
@@ -393,6 +394,7 @@ for n in compound_names:
             cpp.code( '#include <obj/'+cmp.cname+'.h>' )
         if n not in ["Header","Footer"]:
             cpp.code( '#include <compound_visitor.h>' )
+            cpp.code( '#include <field_visitor.h>' )
             cpp.code(x.code_used_decl())
         cpp.code( "using namespace Niflib;" )
         cpp.code()
@@ -497,8 +499,8 @@ for n in compound_names:
             cpp.code("std::list<Compound * > %s::GetCompounds() const {"%x.cname)
             cpp.stream(x, ACTION_GETCOMPOUNDS)
             cpp.code("}")
-            #cpp.code()
-            #cpp.stream(x, ACTION_RTTI_GET)
+            cpp.code()
+            cpp.stream(x, ACTION_RTTI_GET)
         
         cpp.code()
         cpp.code( '//--BEGIN MISC CUSTOM CODE--//' )
@@ -653,34 +655,34 @@ if GENALLFILES:
         out.code( '#include <obj/' + x.cname + '.h>' )
     out.close()
     
-    out = CFile(ROOT_DIR + '/include/objTmpl.cpp', 'w')
-    out.code( '/* Copyright (c) 2018, NIF File Format Library and Tools' )
-    out.code( 'All rights reserved.  Please see niflib.h for license. */' )
-    out.code()
-    out.code( '//---THIS FILE WAS AUTOMATICALLY GENERATED.  DO NOT EDIT---//' )
-    out.code()
-    out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
-    out.code()
-    out.code( '#include <visitor.h>' )
-    out.code( '#include <field_visitor.h>' )
-    out.code( '#include <objDecl.cpp>' )
-    out.code()
-    out.code( 'namespace Niflib {' )
-    for n in compound_names :
-        if not NATIVETYPES.has_key(n) and not n in ['Header', 'Footer']:
-            x = compound_types[n]
-            if not x.template:
-                out.code()
-                out.stream(x, ACTION_RTTI_GET)
-                out.code()
-    for n in block_names:
-        x = block_types[n]
+    #out = CFile(ROOT_DIR + '/include/objTmpl.cpp', 'w')
+    #out.code( '/* Copyright (c) 2018, NIF File Format Library and Tools' )
+    #out.code( 'All rights reserved.  Please see niflib.h for license. */' )
+    #out.code()
+    #out.code( '//---THIS FILE WAS AUTOMATICALLY GENERATED.  DO NOT EDIT---//' )
+    #out.code()
+    #out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
+    #out.code()
+    #out.code( '#include <visitor.h>' )
+    #out.code( '#include <field_visitor.h>' )
+    #out.code( '#include <objDecl.cpp>' )
+    #out.code()
+    #out.code( 'namespace Niflib {' )
+    #for n in compound_names :
+    #    if not NATIVETYPES.has_key(n) and not n in ['Header', 'Footer']:
+    #        x = compound_types[n]
+    #        if not x.template:
+    #            out.code()
+    #            out.stream(x, ACTION_RTTI_GET)
+    #            out.code()
+    #for n in block_names:
+    #    x = block_types[n]
         #if not n == 'NiObject':
-        out.code()
-        out.stream(x, ACTION_RTTI_GET)
-        out.code()
-    out.code( '}' )   
-    out.close()
+    #    out.code()
+    #    out.stream(x, ACTION_RTTI_GET)
+    #    out.code()
+    #out.code( '}' )   
+    #out.close()
     
     sourceList.write( 'src/gen/register.cpp\n')
     out = CFile(ROOT_DIR + '/src/gen/register.cpp', 'w')
@@ -1040,6 +1042,7 @@ for n in block_names:
     out.code( '#include "../../include/ObjectRegistry.h"' )
     out.code( '#include "../../include/NIF_IO.h"' )
     out.code( '#include <visitor.h>' )
+    out.code( '#include <field_visitor.h>' )
     out.code( '#include <gen/Header.h>' )
     out.code( x.code_include_cpp( True, "../../include/gen/", "../../include/obj/" ) )
     out.code( x.code_used_decl() )
@@ -1198,9 +1201,9 @@ for n in block_names:
     out.code("}")
     out.code()
     
-    #out.code()
-    #out.stream(x, ACTION_RTTI_GET)
-    #out.code()
+    out.code()
+    out.stream(x, ACTION_RTTI_GET)
+    out.code()
     
     #out.code("void %s::CreateStringTable(Header* in) const {"%x.cname)
     #out.stream(x, ACTION_STRINGTABLE)
