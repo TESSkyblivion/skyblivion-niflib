@@ -76,6 +76,9 @@ float Vector3::Magnitude() const {
 Vector3 Vector3::Normalized() const {
 	Vector3 v(*this);
 	float m = Magnitude();
+	//NOOOOOOOOO 0.0/0.0 is ind
+	if (m == 0.0)
+		return Vector3(0.0, 0.0, 0.0);
 	return Vector3(
 		x / m, //x
 		y / m, //y

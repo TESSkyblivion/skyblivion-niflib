@@ -41,11 +41,11 @@ endif()
 ##########################
 
 # Visitor should be used in a single module, but for test we can avoid that
-if (MSVC)
-	set(CMAKE_EXE_LINKER_FLAGS "/FORCE:MULTIPLE" CACHE INTERNAL "" FORCE)
-else()
-	set(CMAKE_EXE_LINKER_FLAGS "-z muldefs" CACHE INTERNAL "" FORCE)
-endif()
+#if (MSVC)
+#	set(CMAKE_EXE_LINKER_FLAGS "/FORCE:MULTIPLE" CACHE INTERNAL "" FORCE)
+#else()
+#	set(CMAKE_EXE_LINKER_FLAGS "-z muldefs" CACHE INTERNAL "" FORCE)
+#endif()
 
 file(GLOB SRCS *.cpp)
 file(GLOB SRCS_MIKTT mikktspace/*.cpp)

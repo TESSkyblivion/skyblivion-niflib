@@ -2,6 +2,9 @@
  All rights reserved. Please see niflib.h for license. */
 
 #include "test_utils.h"
+#include "mikktspace.h"
+
+#include <functional>
 
 //#include <gtest/gtest.h>
 //
@@ -493,4 +496,299 @@ TEST(ReadWriteTest, FieldVisitorTest) {
 	NiObjectRef root = ReadNifTree(nifs[0].string().c_str(), &info);
 	TestFieldVisitor fimpl;
 	root->accept(fimpl, info);
+}
+
+Vector3 centeroid(const vector<Vector3>& in) {
+	Vector3 centeroid = Vector3(0.0, 0.0, 0.0);
+	for (Vector3 vertex : in) {
+		centeroid += vertex;
+	}
+	centeroid = Vector3(centeroid.x / in.size(), centeroid.y / in.size(), centeroid.z / in.size()).Normalized();
+	return centeroid;
+}
+
+void CalculateNormals(const vector<Vector3>& vertices, const vector<Triangle> faces,
+	vector<Vector3>& normals, Vector3& COM, bool sphericalNormals = false, bool calculateCOM = false) {
+
+	std::map<unsigned int, vector<Vector3>> normalMap;
+
+	if (normals.size()!=vertices.size())
+		normals.resize(vertices.size());
+	//test faces before start
+	set<unsigned int> faceIndexes;
+	for (Triangle face : faces) {
+		faceIndexes.insert(face.v1); faceIndexes.insert(face.v2); faceIndexes.insert(face.v3);
+	}
+
+	for (size_t i = 0; i < vertices.size(); i++)
+		if (faceIndexes.find(i) == faceIndexes.end())
+			throw runtime_error("Found unindexed vertex: "+i);
+	
+	if (calculateCOM)
+		COM = centeroid(vertices);
+
+	for (Triangle face : faces) {
+		Vector3 v1 = vertices[face.v1].Normalized();
+		Vector3 v2 = vertices[face.v2].Normalized();
+		Vector3 v3 = vertices[face.v3].Normalized();
+
+		Vector3 v12 = v2 - v1;
+		Vector3 v13 = v3 - v1;
+		Vector3 v23 = v3 - v2;
+
+		//All the possible normals
+		Vector3 n1 = v12 ^ v13;
+		Vector3 n2 = v12 ^ v23;
+		Vector3 n3 = v13 ^ v23;
+
+		Vector3 COT = centeroid(vector<Vector3>({ v1,v2,v3 }));
+
+		Vector3 COMtoCOT = Vector3(COT - COM).Normalized();
+
+		//we always want a normal that is faced out of the body
+		if (sphericalNormals) {
+			Vector3 COMv1 = Vector3(v1 - COM);
+			n1 = COMv1.Normalized();
+			Vector3 COMv2 = Vector3(v2 - COM);
+			n2 = COMv2.Normalized();
+			Vector3 COMv3 = Vector3(v3 - COM);
+			n3 = COMv3.Normalized();
+		}
+		else {
+			if (n1 * COMtoCOT < 0)
+				n1 = Vector3(-n1.x, -n1.y, -n1.z);
+			if (n2 * COMtoCOT < 0)
+				n2 = Vector3(-n2.x, -n2.y, -n2.z);
+			if (n3 * COMtoCOT < 0)
+				n3 = Vector3(-n3.x, -n3.y, -n3.z);
+		}
+
+		normalMap[face.v1].push_back(n1);
+		normalMap[face.v2].push_back(n2);
+		normalMap[face.v3].push_back(n3);
+	}
+
+	for (size_t i = 0; i < vertices.size(); i++) {
+		normals[i] = centeroid(normalMap[i]).Normalized();
+	}
+}
+
+bool CheckNormals(const vector<Vector3>& normals) {
+	for (Vector3 v : normals)
+		if (v != Vector3(0.0, 0.0, 0.0))
+			return true;
+	return false;
+}
+
+struct TriGeometryContext : SMikkTSpaceContext {
+	//input
+	const vector<Vector3>& vertices;
+	const vector<Triangle>& faces;
+	Vector3 COM;
+
+	//output
+	vector<Vector3> normals;
+
+	//TSpace
+
+	//input
+	const vector<TexCoord>& uvs;
+
+	//output
+	vector<Vector3> tangents;
+	vector<Vector3> bitangents;
+
+	TriGeometryContext(const vector<Vector3>& in_vertices, Vector3 COM, const vector<Triangle>& in_faces,
+		const vector<TexCoord>& in_uvs, vector<Vector3> in_normals) : vertices(in_vertices), faces(in_faces), uvs(in_uvs), normals(in_normals) {		
+		//if (normals.size() == 0 && !CheckNormals(normals)) {
+			normals.resize(vertices.size());
+			CalculateNormals(vertices, faces, normals, COM, true);
+		//}
+		tangents.resize(vertices.size());
+		bitangents.resize(vertices.size());
+		calculate(this);
+	}
+
+	static int get_num_faces(const SMikkTSpaceContext *x) {
+		return ((TriGeometryContext*)x)->faces.size();
+	}
+
+	static int get_num_vertices_of_face(const SMikkTSpaceContext *x, int f) {
+		return 3;
+	}
+
+	static void get_position(const SMikkTSpaceContext *x, float *dst, int f, int v) {
+		Triangle face = ((TriGeometryContext*)x)->faces[f];
+		Vector3 v_out = (v == 0 ? ((TriGeometryContext*)x)->vertices[face.v1] : v == 1 ? ((TriGeometryContext*)x)->vertices[face.v2] : ((TriGeometryContext*)x)->vertices[face.v3]);
+		memcpy(dst, &v_out, 3 * sizeof(float));
+	}
+
+	static void get_normal(const SMikkTSpaceContext *x, float *dst, int f, int v) {
+		Triangle face = ((TriGeometryContext*)x)->faces[f];
+		Vector3 n_out = (v == 0 ? ((TriGeometryContext*)x)->normals[face.v1] : v == 1 ? ((TriGeometryContext*)x)->normals[face.v2] : ((TriGeometryContext*)x)->normals[face.v3]);
+		memcpy(dst, &n_out, 3 * sizeof(float));
+	}
+
+	static void get_tex_coord(const SMikkTSpaceContext *x, float *dst, int f, int v) {
+		Triangle face = ((TriGeometryContext*)x)->faces[f];
+		TexCoord uv_out = (v == 0 ? ((TriGeometryContext*)x)->uvs[face.v1] : v == 1 ? ((TriGeometryContext*)x)->uvs[face.v2] : ((TriGeometryContext*)x)->uvs[face.v3]);
+		memcpy(dst, &uv_out, 2 * sizeof(float));
+	}
+
+
+	// bitangent = fSign * cross(vN, tangent);
+	static void set_tspace_basic(
+		const SMikkTSpaceContext *x,
+		const float *t,
+		float s,
+		int f,
+		int v
+	) {
+		Triangle face = ((TriGeometryContext*)x)->faces[f];
+		unsigned short t_index = (v == 0 ? face.v1 : v == 1 ? face.v2 : face.v3);
+		((TriGeometryContext*)x)->tangents[t_index] = Vector3(t[0], t[1], t[2]).Normalized();
+		((TriGeometryContext*)x)->bitangents[t_index] = (((TriGeometryContext*)x)->vertices[t_index] ^ ((TriGeometryContext*)x)->tangents[t_index]);
+		((TriGeometryContext*)x)->bitangents[t_index] *= s;
+		((TriGeometryContext*)x)->bitangents[t_index] = ((TriGeometryContext*)x)->bitangents[t_index].Normalized();
+	}
+
+	static void set_tspace(
+		const SMikkTSpaceContext *x,
+		const float *t,
+		const float *b,
+		float mag_s,
+		float mag_t,
+		tbool op,
+		int f,
+		int v
+	) {
+		set_tspace_basic(x, t, op != 0 ? 1.0f : -1.0f, f, v);
+	}
+
+	static void calculate(TriGeometryContext* obj) {
+		using namespace std::placeholders;
+
+		SMikkTSpaceInterface interface;
+
+		interface.m_getNumFaces = get_num_faces;
+
+		interface.m_getNumVerticesOfFace = get_num_vertices_of_face;
+		interface.m_getPosition = get_position;
+		interface.m_getNormal = get_normal;
+		interface.m_getTexCoord = get_tex_coord;
+		interface.m_setTSpaceBasic = set_tspace_basic;
+		interface.m_setTSpace = set_tspace;
+
+		obj->m_pInterface = &interface;
+		obj->m_pUserData = NULL;
+
+		genTangSpaceDefault(obj);
+	}
+
+};
+
+TEST(Calculate, Normals) {
+	//calculate sane vertex normals for geometries
+	NifInfo info;
+	vector<path> nifs;
+	findFiles(test_nifs_in_path, ".nif", nifs);
+	for (size_t i = 0; i < nifs.size(); i++) {
+		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
+		//calculate the centeroid first
+		Vector3 COM;
+		for (NiObjectRef block : blocks) {
+			if (block->IsDerivedType(NiTriShapeData::TYPE)) {
+				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
+				vector<Vector3> vertices = ref->GetVertices();
+				if (vertices.size() != 0) {
+					COM = (COM / 2) + (centeroid(vertices) / 2);
+				}
+			}
+		}
+
+		for (NiObjectRef block : blocks) {
+			if (block->IsDerivedType(NiTriShapeData::TYPE)) {
+				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
+				vector<Vector3> vertices = ref->GetVertices();
+				vector<Triangle> faces = ref->GetTriangles();
+				
+				vector<Vector3> normals = ref->GetNormals();
+				if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
+					vector<TexCoord> uvs = ref->GetUvSets()[0];
+					Vector3 COM;					
+					//Tangent Space
+					TriGeometryContext g(vertices, COM, faces, uvs, normals);
+					ref->SetNormals(g.normals);
+					ref->SetTangents(g.tangents);
+					ref->SetBitangents(g.bitangents);
+				}
+			}
+		}
+		NiObjectRef root = GetFirstRoot(blocks);
+		path out_path = test_resources_path / "nifs" / "out" / nifs[i].filename();
+		WriteNifTree(out_path.string().c_str(), root, info);
+	}
+
+}
+
+
+
+///Triangulation methods
+
+vector<Triangle> triangulate(vector<unsigned short> strip)
+{
+	vector<Triangle> tris;
+	unsigned short a, b = strip[0], c = strip[1];
+	bool flip = false;
+
+	for (int s = 2; s < strip.size(); s++) {
+		a = b;
+		b = c;
+		c = strip[s];
+
+		if (a != b && b != c && c != a) {
+			if (!flip)
+				tris.push_back(Triangle(a, b, c));
+			else
+				tris.push_back(Triangle(a, c, b));
+		}
+
+		flip = !flip;
+	}
+
+	return tris;
+}
+
+vector<Triangle> triangulate(vector<vector<unsigned short>> strips)
+{
+	vector<Triangle> tris;
+	for (const vector<unsigned short>& strip : strips)
+	{
+		vector<Triangle> these_tris = triangulate(strip);
+		tris.insert(tris.end(), these_tris.begin(), these_tris.end());
+	}
+	return tris;
+}
+
+TEST(Calculate, Strippify) {
+	//calculate sane vertex normals for geometries
+	NifInfo info;
+	vector<path> nifs;
+	findFiles(test_nifs_in_path, ".nif", nifs);
+	for (size_t i = 0; i < nifs.size(); i++) {
+		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
+		for (NiObjectRef block : blocks) {
+
+			if (block->IsDerivedType(NiTriStripsData::TYPE)) {
+				NiTriStripsDataRef stripsData = DynamicCast<NiTriStripsData>(block);
+				///Getting the points
+
+				vector<Triangle> triangles = triangulate(stripsData->GetPoints());
+
+			}
+		}
+		NiObjectRef root = GetFirstRoot(blocks);
+		path out_path = test_resources_path / "nifs" / "out" / nifs[i].filename();
+		WriteNifTree(out_path.string().c_str(), root, info);
+	}
 }

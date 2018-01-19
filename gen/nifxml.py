@@ -543,28 +543,28 @@ class CFile(file):
             return
         if action == ACTION_RTTI_GET_DECLARE:
             #divide specializations
-            typeList = {}
-            compoundList = {}
-            linkList = {}
-            refList = {}
+            #typeList = {}
+            #compoundList = {}
+            #linkList = {}
+            #refList = {}
 
-            if isinstance(block, Block) and block.inherit:
-                self.code( 'NIFLIB_API template <unsigned int field> const auto& get() {return %s::get<field>();}'%block.inherit.cname )
-            else:
-                self.code( 'NIFLIB_API template <unsigned int field> const auto& get() {throw std::runtime_error("Invalid Field Requested"); return NULL;}')
-            for y in block.members:
-                if not y.is_duplicate:
-                    if not block.template:
-                        ctype = ("%s"%(y.type_declare()))
-                        self.code('NIFLIB_API template<> const auto& get<FIELDS::%s%s>();'%(prefix, y.cname))           
+            #if isinstance(block, Block) and block.inherit:
+            #    self.code( 'NIFLIB_API template <unsigned int field> const auto& get() {return %s::get<field>();}'%block.inherit.cname )
+            #else:
+            #    self.code( 'NIFLIB_API template <unsigned int field> const auto& get() {throw std::runtime_error("Invalid Field Requested"); return NULL;}')
+            #for y in block.members:
+            #    if not y.is_duplicate:
+            #        if not block.template:
+            #            ctype = ("%s"%(y.type_declare()))
+            #            self.code('NIFLIB_API template<> const auto& get<FIELDS::%s%s>();'%(prefix, y.cname))           
             return
         if action == ACTION_RTTI_GET:
-            for y in block.members:
-                if not y.is_duplicate:
-                    if not block.template:
-                        self.code('template<> const auto& %s::get<%s::FIELDS::%s%s>() {return %s%s;}'%(block.cname, block.cname, prefix, y.cname, prefix, y.cname))
-                    else:
-                        self.code('NIFLIB_API template<> const auto& get<FIELDS::%s%s>() {return %s%s;}'%(prefix, y.cname, prefix, y.cname))
+            #for y in block.members:
+            #    if not y.is_duplicate:
+            #        if not block.template:
+            #            self.code('template<> const auto& %s::get<%s::FIELDS::%s%s>() {return %s%s;}'%(block.cname, block.cname, prefix, y.cname, prefix, y.cname))
+            #        else:
+            #            self.code('NIFLIB_API template<> const auto& get<FIELDS::%s%s>() {return %s%s;}'%(prefix, y.cname, prefix, y.cname))
             # FieldVisitor
             if not block.template:
                 self.code( 'void %s::accept(class FieldVisitor& visitor) {'%(block.cname) )

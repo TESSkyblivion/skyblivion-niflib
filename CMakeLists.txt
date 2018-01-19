@@ -63,7 +63,6 @@ set(sources
 	src/RefObject.cpp
 	src/Type.cpp
 	src/nif_members_expr.cpp
-#	include/nif_basic_types.cpp
 )
 
 set(custom_types
