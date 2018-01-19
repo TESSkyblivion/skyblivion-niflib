@@ -1,5 +1,3 @@
-
-
 /* Copyright (c) 2018, NIF File Format Library and Tools
 All rights reserved. Please see niflib.h for license. */
 
@@ -341,21 +339,25 @@ public:
 			if (propertyRef->IsSameType(NiTexturingProperty::TYPE))
 			{
 				texturing = DynamicCast<NiTexturingProperty>(propertyRef);
+				string textureName = "tes4\\";
+				textureName += texturing->GetBaseTexture().source->GetFileName();
+				string textureNormal = textureName;
+				textureNormal.erase(textureNormal.end() - 4, textureNormal.end());
+				textureNormal += "_n.dds";
 				//setup textureSet (TODO)
 				std::vector<std::string> textures{
-					texturing->GetBaseTexture().source->GetFileName(),
-					"2",
-					"3",
-					"4",
-					"5",
-					"6",
-					"7",
-					"8"
+					textureName,
+					textureNormal,
+					"",
+					"",
+					"",
+					"",
+					"",
+					""
 				};
 				textureSet->SetTextures(textures);
 			}
 		}
-
 		//Vertices
 		shapeData->SetHasVertices(stripsData->GetHasVertices());
 		shapeData->SetVertices(stripsData->GetVertices());
@@ -364,17 +366,17 @@ public:
 		shapeData->SetHasNormals(stripsData->GetHasNormals());
 		shapeData->SetNormals(stripsData->GetNormals());
 
-		//Tangents and Bitangents
-		shapeData->SetBitangents(stripsData->GetBitangents());
-		shapeData->SetTangents(stripsData->GetTangents());
+		//Tangents and Bitangents (TODO)
+		//shapeData->SetBitangents(stripsData->GetBitangents());
+		//shapeData->SetTangents(stripsData->GetTangents());
 
 		//BS Vector flags. Oblivion doesn't have this, just settings it to UV and tangents.
 		//Might need to work out Unk64, Unk128 and Unk256.
 		//shapeData->SetBsVectorFlags(static_cast<BSVectorFlags>(4097));
+		shapeData->SetBsVectorFlags(BSVectorFlags::BSVF_HAS_UV);
 
-		//UVs TODO
-		//shapeData->SetHasUv(stripsData->GetHasUv());
-		//shapeData->SetUvSets(stripsData->GetUvSets());
+		//UVs
+		shapeData->SetUvSets(stripsData->GetUvSets());
 
 		//center & radius
 		shapeData->SetCenter(stripsData->GetCenter());
@@ -464,6 +466,35 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 	ConverterVisitor fimpl(info);
 	root->accept(fimpl, info);
 	
+	//Fix useless blocks
+	NiNodeRef rootRef = DynamicCast<NiNode>(root);
+	BSFadeNodeRef fadeNode = new BSFadeNode();
+	fadeNode->SetName(rootRef->GetName());
+	fadeNode->SetExtraDataList(rootRef->GetExtraDataList());
+	fadeNode->SetFlags(524302);
+	fadeNode->SetCollisionObject(rootRef->GetCollisionObject());
+	fadeNode->SetChildren(rootRef->GetChildren());
+	root = fadeNode;
+	vector<NiAVObjectRef> children = fadeNode->GetChildren();
+	int index = 0;
+	for (NiAVObjectRef block : children) {
+		if (block->IsDerivedType(NiTriStrips::TYPE)) {
+			NiTriStripsRef stripsRef = DynamicCast<NiTriStrips>(block);
+			if (stripsRef->GetData()->IsDerivedType(NiTriShapeData::TYPE)) {
+				NiTriShapeRef shapeRef = new NiTriShape();
+				shapeRef->SetName(stripsRef->GetName());
+				shapeRef->SetExtraDataList(stripsRef->GetExtraDataList());
+				shapeRef->SetFlags(524302);
+				shapeRef->SetData(stripsRef->GetData());
+				shapeRef->SetShaderProperty(stripsRef->GetShaderProperty());
+				block = shapeRef;
+				children[index] = shapeRef;
+			}
+		}
+		index++;
+	}
+	fadeNode->SetChildren(children);
+	root = fadeNode;
 	//create the new name
 	std::string newName = nifs[0].string();
 	newName.erase(newName.end() - 4, newName.end());
