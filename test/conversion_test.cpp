@@ -332,6 +332,7 @@ public:
 				lightingProperty->SetShaderType(BSShaderType::SHADER_DEFAULT);
 				lightingProperty->SetName(material->GetName());
 				lightingProperty->SetEmissiveColor(material->GetEmissiveColor());
+				lightingProperty->SetSpecularColor(Color3(0, 0, 0));
 				lightingProperty->SetEmissiveMultiple(1);
 				lightingProperty->SetGlossiness(material->GetGlossiness());
 				lightingProperty->SetAlpha(material->GetAlpha());
@@ -339,8 +340,10 @@ public:
 			if (propertyRef->IsSameType(NiTexturingProperty::TYPE))
 			{
 				texturing = DynamicCast<NiTexturingProperty>(propertyRef);
-				string textureName = "tes4\\";
+				string textureName;
 				textureName += texturing->GetBaseTexture().source->GetFileName();
+				textureName.erase(textureName.begin(), textureName.begin() + 8);
+				textureName.insert(0, "textures\\tes4");
 				string textureNormal = textureName;
 				textureNormal.erase(textureNormal.end() - 4, textureNormal.end());
 				textureNormal += "_n.dds";
