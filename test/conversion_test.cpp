@@ -4,6 +4,17 @@ All rights reserved. Please see niflib.h for license. */
 #include "test_utils.h"
 #include "geometry.h"
 
+NiTriShapeRef convert_strip(NiTriStrips stripsRef)
+{
+	NiTriShapeRef shapeRef = new NiTriShape();
+	shapeRef->SetName(stripsRef.GetName());
+	shapeRef->SetExtraDataList(stripsRef.GetExtraDataList());
+	shapeRef->SetFlags(524302);
+	shapeRef->SetData(stripsRef.GetData());
+	shapeRef->SetShaderProperty(stripsRef.GetShaderProperty());
+	return shapeRef;
+}
+
 //#include <objDecl.cpp>
 class AnalyzerVisitor : public RecursiveFieldVisitor<AnalyzerVisitor> {
 
@@ -29,7 +40,6 @@ public:
 	template<class T>
 	inline void visit_field(T& obj) {}
 };
-
 
 class ConverterVisitor : public RecursiveFieldVisitor<ConverterVisitor> {
 public:
@@ -283,6 +293,7 @@ public:
 		//Sort out textures.
 		BSLightingShaderPropertyRef lightingProperty = new BSLightingShaderProperty();
 		BSShaderTextureSetRef textureSet = new BSShaderTextureSet();
+
 		//oblivions
 		NiMaterialPropertyRef material = new NiMaterialProperty();
 		NiTexturingPropertyRef texturing = new NiTexturingProperty();
@@ -305,27 +316,27 @@ public:
 			}
 			if (propertyRef->IsSameType(NiTexturingProperty::TYPE))
 			{
+				//setup paths
 				texturing = DynamicCast<NiTexturingProperty>(propertyRef);
 				string textureName;
 				textureName += texturing->GetBaseTexture().source->GetFileName();
-				textureName.erase(textureName.begin(), textureName.begin() + 8);
-				textureName.insert(0, "textures\\tes4");
+				textureName.insert(9, "tes4\\");
 				string textureNormal = textureName;
 				textureNormal.erase(textureNormal.end() - 4, textureNormal.end());
 				textureNormal += "_n.dds";
+
 				//setup textureSet (TODO)
-				std::vector<std::string> textures{
-					textureName,
-					textureNormal,
-					"",
-					"",
-					"",
-					"",
-					"",
-					""
-				};
+				std::vector<std::string> textures(9);
+				textures[0] = textureName;
+				textures[1] = textureNormal;
+
+				//finally set them.
 				textureSet->SetTextures(textures);
 			}
+			if (propertyRef->IsSameType(NiAlphaProperty::TYPE))
+				obj.SetAlphaProperty(DynamicCast<NiAlphaProperty>(propertyRef));
+			if (propertyRef->IsSameType(NiStencilProperty::TYPE))
+				lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() + SkyrimShaderPropertyFlags2::SLSF2_DOUBLE_SIDED));
 		}
 		//Vertices
 		shapeData->SetHasVertices(stripsData->GetHasVertices());
@@ -370,10 +381,8 @@ public:
 		obj.SetShaderProperty(DynamicCast<BSShaderProperty>(lightingProperty));
 
 		//finally set the data
-		vector<Ref<NiProperty>> nullproperties;
-		vector<Ref<NiExtraData>> nulldata;
-		obj.SetExtraDataList(nulldata);
-		obj.SetProperties(nullproperties);
+		obj.SetExtraDataList(vector<Ref<NiExtraData>> {});
+		obj.SetProperties(vector<Ref<NiProperty>> {});
 		obj.SetData(DynamicCast<NiGeometryData>(shapeData));
 	}
 	template<>
@@ -425,12 +434,13 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 
 	//get the first nif
 	NiObjectRef root = ReadNifTree(nifs[0].string().c_str(), &info);
+	vector<NiObjectRef> blocks = ReadNifList(nifs[0].string().c_str(), &info);
 
 	//set versioning
 	info.userVersion = 12;
 	info.userVersion2 = 83;
 	info.version = Niflib::VER_20_2_0_7; //or 0x14020007
-	
+
 	//convert nif
 	ConverterVisitor fimpl(info);
 	root->accept(fimpl, info);
@@ -450,6 +460,7 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 		if (block->IsDerivedType(NiTriStrips::TYPE)) {
 			NiTriStripsRef stripsRef = DynamicCast<NiTriStrips>(block);
 			if (stripsRef->GetData()->IsDerivedType(NiTriShapeData::TYPE)) {
+				//Need to use method at the top but its fine for now
 				NiTriShapeRef shapeRef = new NiTriShape();
 				shapeRef->SetName(stripsRef->GetName());
 				shapeRef->SetExtraDataList(stripsRef->GetExtraDataList());
@@ -464,6 +475,7 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 	}
 	fadeNode->SetChildren(children);
 	root = fadeNode;
+
 	//create the new name
 	std::string newName = nifs[0].string();
 	newName.erase(newName.end() - 4, newName.end());
