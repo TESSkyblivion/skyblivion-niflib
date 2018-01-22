@@ -5,6 +5,7 @@
 #include "mikktspace.h"
 #include "geometry.h"
 #include <functional>
+#include <bitset>
 
 //#include <gtest/gtest.h>
 //
@@ -38,11 +39,13 @@ TEST(ReadWriteTest, ReadWriteTest) {
 	NifInfo info;
 	NifInfo newinfo;
 	vector<path> nifs;
-	findFiles(test_nifs_in_path / "skyrim", ".nif", nifs);
+	findFiles(test_nifs_in_path / "skyrim" , ".nif", nifs);
+	ASSERT_TRUE(nifs.size() > 0);
 	for (size_t i = 0; i < nifs.size(); i++) {
 		string in_path = nifs[i].string();
 		vector<NiObjectRef> objects = ReadNifList(in_path.c_str(), &info);
-		if (info.userVersion2 == 32)
+		//Chinese Officer weapon has UV2 == 34
+		if (info.userVersion2 != 83)
 			//Some Oblivion models somehow slipped into skyrim release
 			continue;
 		NiObjectRef root = GetFirstRoot(objects);
@@ -280,6 +283,336 @@ TEST(Read, Stats) {
 	for_each(SkyrimNotInOblivion.begin(), SkyrimNotInOblivion.end(),
 		[&log_text](string a) { log_text += "\t" + a + "\n"; });
 	outFile(log_text, log_file);
+}
+
+TEST(Read, BSXFlagsStats) {
+	using namespace std;
+	NifInfo oblivion_info;
+	NifInfo skyrim_info;
+	vector<path> nifs;
+	string log_text = "";
+
+	std::set<unsigned int> oblivion_flags;
+	std::map<unsigned int, std::set<path>> oblivion_files;
+	std::map<unsigned int, std::set<string>> bsxflags_node_types;
+
+	path log_file = test_nifs_in_path / "BSXFlags_Statistics.txt";
+
+	findFiles(test_nifs_in_path / "oblivion", ".nif", nifs);
+	//KF are really nif files
+	//findFiles(test_kf_in_path / "oblivion", ".kf", nifs);
+
+	for (size_t i = 0; i < nifs.size(); i++) {
+		vector< Ref<NiObject> > objs = ReadNifList(nifs[i].string().c_str(), &oblivion_info);
+		std::set<string> node_types;
+		for (Ref<NiObject> ref : objs) {
+			node_types.insert(ref->GetInternalType().GetTypeName());
+		}
+		bool found = false;
+		for (Ref<NiObject> ref : objs) {
+			if (ref->IsSameType(BSXFlags::TYPE)) {
+				found = true;
+				BSXFlags this_value = *DynamicCast<BSXFlags>(ref);
+				int value = this_value.GetIntegerData();
+				oblivion_flags.insert(value);
+				std::map<unsigned int, std::set<path>>::iterator it = oblivion_files.find(value);
+				if (it != oblivion_files.end()) {
+					it->second.insert(nifs[i]);
+				}
+				else {
+					std::set<path> this_value_paths;
+					this_value_paths.insert(nifs[i]);
+					oblivion_files[value] = this_value_paths;
+				}
+				std::map<unsigned int, std::set<string>>::iterator itb = bsxflags_node_types.find(value);
+				if (itb != bsxflags_node_types.end()) {
+					itb->second.insert(node_types.begin(),node_types.end());
+				}
+				else {
+					bsxflags_node_types[value] = node_types;
+				}
+			}			
+		}
+		if (!found)
+		{
+			int value = 0;
+			oblivion_flags.insert(value);
+			std::map<unsigned int, std::set<path>>::iterator it = oblivion_files.find(value);
+			if (it != oblivion_files.end()) {
+				it->second.insert(nifs[i]);
+			}
+			else {
+				std::set<path> this_value_paths;
+				this_value_paths.insert(nifs[i]);
+				oblivion_files[value] = this_value_paths;
+			}
+			std::map<unsigned int, std::set<string>>::iterator itb = bsxflags_node_types.find(value);
+			if (itb != bsxflags_node_types.end()) {
+				itb->second.insert(node_types.begin(), node_types.end());
+			}
+			else {
+				bsxflags_node_types[value] = node_types;
+			}
+		}
+	}
+	for_each(oblivion_files.begin(), oblivion_files.end(),
+		[&log_text, &bsxflags_node_types](pair<unsigned int, std::set<path>> a) {
+		log_text += "BSXFlags: " + std::bitset<32>(a.first).to_string() + "\n";
+		std::set<string> this_node_types = bsxflags_node_types[a.first];
+		log_text += "Unique nodes from 0: \n";
+		set<string> diff;
+		set<string> base = bsxflags_node_types[0];
+		std::set_difference(this_node_types.begin(), this_node_types.end(), base.begin(), base.end(),
+			std::inserter(diff, diff.begin()));
+		for (string node_class : diff)
+			log_text += "\t" + node_class + "\n";
+		log_text += "Node classes: \n";
+		for (string node_class : this_node_types)
+			log_text += "\t" + node_class + "\n";
+		log_text += "Files: \n";
+		for (path p : a.second)
+			log_text += "\t" + p.string() + "\n";
+	});
+
+	outFile(log_text, log_file);
+}
+
+TEST(Read, SkyrimBSXFlagsStats) {
+	using namespace std;
+	NifInfo oblivion_info;
+	NifInfo skyrim_info;
+	vector<path> nifs;
+	string log_text = "";
+
+	std::set<unsigned int> oblivion_flags;
+	std::map<unsigned int, std::set<path>> oblivion_files;
+	std::map<unsigned int, std::set<string>> bsxflags_node_types;
+
+	path log_file = test_nifs_in_path / "BSXFlags_Skyrim_Statistics.txt";
+
+	findFiles(test_nifs_in_path / "skyrim", ".nif", nifs);
+	//KF are really nif files
+	//findFiles(test_kf_in_path / "oblivion", ".kf", nifs);
+
+	for (size_t i = 0; i < nifs.size(); i++) {
+		vector< Ref<NiObject> > objs = ReadNifList(nifs[i].string().c_str(), &oblivion_info);
+		std::set<string> node_types;
+		for (Ref<NiObject> ref : objs) {
+			node_types.insert(ref->GetInternalType().GetTypeName());
+		}
+		bool found = false;
+		for (Ref<NiObject> ref : objs) {
+			if (ref->IsSameType(BSXFlags::TYPE)) {
+				found = true;
+				BSXFlags this_value = *DynamicCast<BSXFlags>(ref);
+				int value = this_value.GetIntegerData();
+				oblivion_flags.insert(value);
+				std::map<unsigned int, std::set<path>>::iterator it = oblivion_files.find(value);
+				if (it != oblivion_files.end()) {
+					it->second.insert(nifs[i]);
+				}
+				else {
+					std::set<path> this_value_paths;
+					this_value_paths.insert(nifs[i]);
+					oblivion_files[value] = this_value_paths;
+				}
+				std::map<unsigned int, std::set<string>>::iterator itb = bsxflags_node_types.find(value);
+				if (itb != bsxflags_node_types.end()) {
+					itb->second.insert(node_types.begin(), node_types.end());
+				}
+				else {
+					bsxflags_node_types[value] = node_types;
+				}
+			}
+		}
+		if (!found)
+		{
+			int value = 0;
+			oblivion_flags.insert(value);
+			std::map<unsigned int, std::set<path>>::iterator it = oblivion_files.find(value);
+			if (it != oblivion_files.end()) {
+				it->second.insert(nifs[i]);
+			}
+			else {
+				std::set<path> this_value_paths;
+				this_value_paths.insert(nifs[i]);
+				oblivion_files[value] = this_value_paths;
+			}
+			std::map<unsigned int, std::set<string>>::iterator itb = bsxflags_node_types.find(value);
+			if (itb != bsxflags_node_types.end()) {
+				itb->second.insert(node_types.begin(), node_types.end());
+			}
+			else {
+				bsxflags_node_types[value] = node_types;
+			}
+		}
+	}
+	for_each(oblivion_files.begin(), oblivion_files.end(),
+		[&log_text, &bsxflags_node_types](pair<unsigned int, std::set<path>> a) {
+		log_text += "BSXFlags: " + std::bitset<32>(a.first).to_string() + "\n";
+		std::set<string> this_node_types = bsxflags_node_types[a.first];
+		log_text += "Unique nodes from 0: \n";
+		set<string> diff;
+		set<string> base = bsxflags_node_types[0];
+		std::set_difference(this_node_types.begin(), this_node_types.end(), base.begin(), base.end(),
+			std::inserter(diff, diff.begin()));
+		for (string node_class : diff)
+			log_text += "\t" + node_class + "\n";
+		log_text += "Node classes: \n";
+		for (string node_class : this_node_types)
+			log_text += "\t" + node_class + "\n";
+		log_text += "Files: \n";
+		for (path p : a.second)
+			log_text += "\t" + p.string() + "\n";
+	});
+
+	outFile(log_text, log_file);
+}
+
+class SingleChunkFlagVerifier : public RecursiveFieldVisitor<SingleChunkFlagVerifier> {
+
+public:
+
+	SingleChunkFlagVerifier(bhkCompressedMeshShapeData& data, const NifInfo& info) :
+		RecursiveFieldVisitor(*this, info)
+	{
+		data.accept(*this, info);
+	}
+
+	int chunks = 0;
+
+	template<class T>
+	inline void visit_object(T& obj) {}
+
+	template<class T>
+	inline void visit_compound(T& obj) {}
+
+	template<>
+	inline void visit_compound(bhkCMSDMaterial& obj) {
+		chunks++;
+	}
+
+	template<class T>
+	inline void visit_field(T& obj) {}
+
+	int getNumChunks() { return chunks; }
+};
+
+TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
+	using namespace std;
+	NifInfo oblivion_info;
+	NifInfo skyrim_info;
+	vector<path> nifs;
+	string log_text = "";
+
+	std::set<unsigned int> oblivion_flags;
+	std::map<unsigned int, std::set<path>> oblivion_files;
+	std::map<unsigned int, std::set<string>> bsxflags_node_types;
+
+	path log_file = test_nifs_in_path / "BSXFlags_Skyrim_Statistics.txt";
+
+	findFiles(test_nifs_in_path / "skyrim" / "meshes" / "actors" / "dlc02" / "spider_poison", ".nif", nifs);
+	//KF are really nif files
+	//findFiles(test_kf_in_path / "oblivion", ".kf", nifs);
+	std::set<path> error;
+
+
+	for (size_t i = 0; i < nifs.size(); i++) {
+		bool moving = false;
+		bool movingVerified = false;
+		bool bit3 = false;
+		bool singleChunk = false;
+		bool singleChunkVerified = false;
+		bool hasList = false;
+		path this_path = nifs[i];
+		//bugged hair model with BSXFlags
+		if (this_path.filename().string().find("hairshorthumanfold") != string::npos)
+			continue;
+		if (this_path.filename().string().find("hairlonghumanm") != string::npos)
+			continue;
+		//bugged skeleton
+		if (this_path.string().find("centaur") != string::npos)
+			continue;
+		//bugged model
+		if (this_path.string().find("atronachfrost") != string::npos && this_path.filename().string().find("shield") != string::npos)
+			continue;
+		//if (this_path.filename().string().find("eggsackpoisonexplosion") != string::npos)
+		//	continue;
+		vector< Ref<NiObject> > objs = ReadNifList(nifs[i].string().c_str(), &oblivion_info);
+		std::set<string> node_types;
+		int value = 0;
+		for (Ref<NiObject> ref : objs) {
+			if (ref->IsSameType(BSXFlags::TYPE)) {
+				BSXFlags this_value = *DynamicCast<BSXFlags>(ref);
+				value = this_value.GetIntegerData();
+				if (value & (1 << 3)) bit3 = true;
+				if (value & (1 << 6)) moving = true;
+				if (value & (1 << 7)) singleChunk = true;
+			}
+		}
+		if (value) {
+			int n_collisions = 0;
+			bool multiple = false;
+			for (Ref<NiObject> ref : objs) {
+				if (ref->IsDerivedType(bhkRigidBody::TYPE)) {
+					bhkRigidBodyRef this_value = DynamicCast<bhkRigidBody>(ref);
+					if (this_value->GetQualityType() != hkQualityType::MO_QUAL_INVALID 
+						&& this_value->GetQualityType() != hkQualityType::MO_QUAL_FIXED)
+						movingVerified = true;
+				}
+				if (ref->IsDerivedType(bhkBlendCollisionObject::TYPE)) {
+					movingVerified = true;
+				}
+				//if (ref->IsDerivedType(bhkSPCollisionObject::TYPE)) {
+				//	singleChunkVerified = true;
+				//}
+				//if (ref->IsDerivedType(bhkListShape::TYPE)) {
+				//	singleChunkVerified = true;
+				//}
+				//if (ref->IsSameType(bhkCompressedMeshShapeData::TYPE)) {
+				//	bhkCompressedMeshShapeDataRef this_value = DynamicCast<bhkCompressedMeshShapeData>(ref);
+				//	if(SingleChunkFlagVerifier(*this_value, oblivion_info).getNumChunks()>1)
+				//		singleChunkVerified = true;
+				//}
+				
+				if (ref->IsSameType(BSFadeNode::TYPE)) {
+					for (NiObjectRef cref : ref->GetRefs())
+						if (cref->IsDerivedType(bhkCollisionObject::TYPE))
+							singleChunkVerified = false;
+				}
+
+				if (ref->IsSameType(NiNode::TYPE)) {
+					for (NiObjectRef cref : ref->GetRefs())
+						if (cref->IsDerivedType(bhkCollisionObject::TYPE))
+						{
+							n_collisions++;
+							if (n_collisions == 1)
+								singleChunkVerified = true;
+							else
+								singleChunkVerified = false;
+						}
+				}
+
+				
+			}
+			if (n_collisions <= 1) {
+				for (Ref<NiObject> ref : objs) {
+					if ((ref->IsDerivedType(bhkConvexTransformShape::TYPE) || ref->IsDerivedType(bhkConvexShape::TYPE))) {
+						singleChunkVerified = true;
+					}
+					if (ref->IsDerivedType(BSInvMarker::TYPE)) {
+						singleChunkVerified = true;
+					}
+				}
+			}
+
+
+			ASSERT_TRUE(moving == movingVerified) << this_path.string() << " : " << std::bitset<32>(value) << " : " << (value & (1 << 6));
+			ASSERT_TRUE(singleChunk == singleChunkVerified) << this_path.string() << " : " << std::bitset<32>(value) << " : " << (value & (1 << 7));
+
+		}
+	}
+
 }
 
 TEST(Read, KF) {
@@ -546,26 +879,26 @@ void CalculateNormals(const vector<Vector3>& vertices, const vector<Triangle> fa
 		Vector3 COMtoCOT = Vector3(COT - COM).Normalized();
 
 		//we always want a normal that is faced out of the body
-		if (sphericalNormals) {
-			Vector3 COMv1 = Vector3(v1 - COM);
-			n1 = COMv1.Normalized();
-			Vector3 COMv2 = Vector3(v2 - COM);
-			n2 = COMv2.Normalized();
-			Vector3 COMv3 = Vector3(v3 - COM);
-			n3 = COMv3.Normalized();
-		}
-		else {
-			if (n1 * COMtoCOT < 0)
-				n1 = Vector3(-n1.x, -n1.y, -n1.z);
-			if (n2 * COMtoCOT < 0)
-				n2 = Vector3(-n2.x, -n2.y, -n2.z);
-			if (n3 * COMtoCOT < 0)
-				n3 = Vector3(-n3.x, -n3.y, -n3.z);
-		}
+		//if (sphericalNormals) {
+		//	Vector3 COMv1 = Vector3(v1 - COM);
+		//	n1 = COMv1.Normalized();
+		//	Vector3 COMv2 = Vector3(v2 - COM);
+		//	n2 = COMv2.Normalized();
+		//	Vector3 COMv3 = Vector3(v3 - COM);
+		//	n3 = COMv3.Normalized();
+		//}
+		//else {
+		//	if (n1 * COMtoCOT < 0)
+		//		n1 = Vector3(-n1.x, -n1.y, -n1.z);
+		//	if (n2 * COMtoCOT < 0)
+		//		n2 = Vector3(-n2.x, -n2.y, -n2.z);
+		//	if (n3 * COMtoCOT < 0)
+		//		n3 = Vector3(-n3.x, -n3.y, -n3.z);
+		//}
 
-		normalMap[face.v1].push_back(n1);
-		normalMap[face.v2].push_back(n2);
-		normalMap[face.v3].push_back(n3);
+		normalMap[face.v1].push_back(n1.Normalized());
+		normalMap[face.v2].push_back(n1.Normalized());
+		normalMap[face.v3].push_back(n1.Normalized());
 	}
 
 	for (size_t i = 0; i < vertices.size(); i++) {
@@ -602,7 +935,7 @@ struct TriGeometryContext : SMikkTSpaceContext {
 		const vector<TexCoord>& in_uvs, vector<Vector3> in_normals) : vertices(in_vertices), faces(in_faces), uvs(in_uvs), normals(in_normals) {		
 		//if (normals.size() == 0 && !CheckNormals(normals)) {
 			normals.resize(vertices.size());
-			CalculateNormals(vertices, faces, normals, COM, true);
+			CalculateNormals(vertices, faces, normals, COM, false);
 		//}
 		tangents.resize(vertices.size());
 		bitangents.resize(vertices.size());
@@ -714,8 +1047,7 @@ TEST(Calculate, Normals) {
 				
 				vector<Vector3> normals = ref->GetNormals();
 				if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
-					vector<TexCoord> uvs = ref->GetUvSets()[0];
-					Vector3 COM;					
+					vector<TexCoord> uvs = ref->GetUvSets()[0];				
 					//Tangent Space
 					TriGeometryContext g(vertices, COM, faces, uvs, normals);
 					ref->SetNormals(g.normals);

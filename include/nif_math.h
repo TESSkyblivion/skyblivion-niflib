@@ -694,9 +694,15 @@ struct Matrix33 : public Native {
 
 	NIFLIB_API bool operator==(const Matrix33 & m) const {
 		return (
-		m.rows[0][0] == rows[0][0] && m.rows[0][1] == rows[0][1] && m.rows[0][2] == rows[0][2] &&
-		m.rows[1][0] == rows[1][0] && m.rows[1][1] == rows[1][1] && m.rows[1][2] == rows[1][2] &&
-		m.rows[2][0] == rows[2][0] && m.rows[2][1] == rows[2][1] && m.rows[2][2] == rows[2][2]
+		   (m.rows[0][0] == rows[0][0] || (m.rows[0][0] != m.rows[0][0] && rows[0][0] != rows[0][0]))
+		&& (m.rows[0][1] == rows[0][1] || (m.rows[0][1] != m.rows[0][1] && rows[0][1] != rows[0][1]))
+		&& (m.rows[0][2] == rows[0][2] || (m.rows[0][2] != m.rows[0][2] && rows[0][2] != rows[0][2]))
+		&& (m.rows[1][0] == rows[1][0] || (m.rows[1][0] != m.rows[1][0] && rows[1][0] != rows[1][0]))
+		&& (m.rows[1][1] == rows[1][1] || (m.rows[1][1] != m.rows[1][1] && rows[1][1] != rows[1][1]))
+		&& (m.rows[1][2] == rows[1][2] || (m.rows[1][2] != m.rows[1][2] && rows[1][2] != rows[1][2]))
+		&& (m.rows[2][0] == rows[2][0] || (m.rows[2][0] != m.rows[2][0] && rows[2][0] != rows[2][0]))
+		&& (m.rows[2][1] == rows[2][1] || (m.rows[2][1] != m.rows[2][1] && rows[2][1] != rows[2][1]))
+		&& (m.rows[2][2] == rows[2][2] || (m.rows[2][2] != m.rows[2][2] && rows[2][2] != rows[2][2]))
 		);
 	}
 
@@ -1226,11 +1232,16 @@ struct Color4 : public Native {
 	}
 
 	NIFLIB_API bool operator==( const Color4 & n ) const {
-		return ( r == n.r && g == n.g && b == n.b && a == n.a );
+		return (
+			(r == n.r || std::isnan(r) && std::isnan(n.r)) &&
+			(g == n.g || std::isnan(g) && std::isnan(n.g)) &&
+			(b == n.b || std::isnan(b) && std::isnan(n.b)) &&
+			(a == n.a || std::isnan(a) && std::isnan(n.a))
+			);
 	}
 
 	NIFLIB_API bool operator!=( const Color4 & n ) const {
-		return ( r != n.r || g != n.g || b != n.b || a != n.a );
+		return !(*this == n);
 	}
 };
 

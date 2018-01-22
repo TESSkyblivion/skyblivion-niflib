@@ -581,6 +581,17 @@ class MapVisitor {
 			}
 		}
 
+		template <> inline void visit(BSPSysRecycleBoundModifier& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				registerObject(obj);
+				if (obj.NiPSysModifier::GetTarget()!=NULL)
+					obj.NiPSysModifier::GetTarget()->accept(*visitor, info);
+				if (obj.GetTarget() != NULL)
+					obj.GetTarget()->accept(*visitor, info);
+				visitChildren(obj, info);
+			}
+		}
+
 		template <> inline void visit(NiParticleSystem& obj, const NifInfo& info) {
 			if (isNotAlreadyVisited(obj)) {
 				registerObject(obj);
@@ -600,6 +611,12 @@ class MapVisitor {
 						registerObject(*ref);
 						//dlc2
 						if (ref->IsDerivedType(NiPSysColliderManager::TYPE))
+							ref->accept(*visitor, info);
+						//dlc1
+						if (ref->IsDerivedType(BSPSysRecycleBoundModifier::TYPE))
+							ref->accept(*visitor, info);
+						//dragon crash
+						if (ref->IsDerivedType(BSPSysHavokUpdateModifier::TYPE))
 							ref->accept(*visitor, info);
 					}
 				}
@@ -623,6 +640,41 @@ class MapVisitor {
 						registerObject(*ref);
 						//dlc2
 						if (ref->IsDerivedType(NiPSysColliderManager::TYPE))
+							ref->accept(*visitor, info);
+						//dlc1
+						if (ref->IsDerivedType(BSPSysRecycleBoundModifier::TYPE))
+							ref->accept(*visitor, info);
+						//dragon crash
+						if (ref->IsDerivedType(BSPSysHavokUpdateModifier::TYPE))
+							ref->accept(*visitor, info);
+					}
+				}
+				visitChildren(obj, info);
+			}
+		}
+
+		template <> inline void visit(NiMeshParticleSystem& obj, const NifInfo& info) {
+			if (isNotAlreadyVisited(obj)) {
+				registerObject(obj);
+				if (obj.GetController() != NULL)
+					obj.GetController()->accept(*visitor, info);
+				if (obj.NiGeometry::GetData() != NULL)
+					obj.NiGeometry::GetData()->accept(*visitor, info);
+				if (obj.GetShaderProperty() != NULL)
+					obj.GetShaderProperty()->accept(*visitor, info);
+				if (obj.GetAlphaProperty() != NULL)
+					obj.GetAlphaProperty()->accept(*visitor, info);
+				for (NiPSysModifierRef ref : obj.GetModifiers()) {
+					if (ref != NULL) {
+						registerObject(*ref);
+						//dlc2
+						if (ref->IsDerivedType(NiPSysColliderManager::TYPE))
+							ref->accept(*visitor, info);
+						//dlc1
+						if (ref->IsDerivedType(BSPSysRecycleBoundModifier::TYPE))
+							ref->accept(*visitor, info);
+						//dragon crash
+						if (ref->IsDerivedType(BSPSysHavokUpdateModifier::TYPE))
 							ref->accept(*visitor, info);
 					}
 				}
@@ -716,6 +768,16 @@ class StringFieldVisitor :
 	vector<unsigned int> valid_field_indices;
 	const NifInfo& nif_info;
 
+	set<NiObjectRef> alreadyVisited;
+
+	bool isNotAlreadyVisited(NiObject& node) {
+		if (alreadyVisited.find(Ref<NiObject>(&node)) == alreadyVisited.end()) {
+			alreadyVisited.insert(Ref<NiObject>(&node));
+			return true;
+		}
+		return false;
+	}
+
 public:
 
 	StringFieldVisitor(Header& an_header, const NifInfo& info) : header(an_header), nif_info(info),
@@ -734,7 +796,8 @@ public:
 		parent = StaticCast<NiObject>(&obj);
 		valid_field_indices = obj.GetValidFieldsIndices(info);
 
-		obj.accept(*this);
+		if(isNotAlreadyVisited(obj))
+			obj.accept(*this);
 		
 		//restore frame
 		valid_field_indices = old_valid_indices;
@@ -856,6 +919,7 @@ public:
 		for (NiNode* ptr : obj.GetBones()) {
 			unsigned int idx = 0xffffffff;
 			FromIndexString(ptr->GetName(), &header, idx);
+			ptr->accept(*this, info);
 		}
 
 		obj.accept(*this);

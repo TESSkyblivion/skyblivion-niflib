@@ -497,7 +497,10 @@ class CFile(file):
                             #    else:
                             #        self.code('\t&& std::equal(begin(%s%s), end(%s%s), begin(other.%s%s), ptr_equals<%s>)'%(prefix, y.cname, prefix, y.cname, prefix, y.cname, y.ctemplate))
                         else:
-                            self.code('\t&& %s%s == other.%s%s'%(prefix, y.cname, prefix, y.cname))
+                            if (y.ctype is 'float'):
+                                self.code('\t&& ((%s%s == other.%s%s) || (%s%s!=%s%s && other.%s%s!=other.%s%s))'%(prefix, y.cname, prefix, y.cname, prefix, y.cname, prefix, y.cname, prefix, y.cname, prefix, y.cname))
+                            else:
+                                self.code('\t&& %s%s == other.%s%s'%(prefix, y.cname, prefix, y.cname))
                     else:
                         self.code('\t&& %s%s == other.%s%s'%(prefix, y.cname, prefix, y.cname))
             return
