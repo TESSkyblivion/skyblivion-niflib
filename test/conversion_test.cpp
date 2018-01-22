@@ -9,10 +9,33 @@ NiTriShapeRef convert_strip(NiTriStrips stripsRef)
 	NiTriShapeRef shapeRef = new NiTriShape();
 	shapeRef->SetName(stripsRef.GetName());
 	shapeRef->SetExtraDataList(stripsRef.GetExtraDataList());
+	shapeRef->SetTranslation(stripsRef.GetTranslation());
+	shapeRef->SetRotation(stripsRef.GetRotation());
+	shapeRef->SetScale(stripsRef.GetScale());
 	shapeRef->SetFlags(524302);
 	shapeRef->SetData(stripsRef.GetData());
 	shapeRef->SetShaderProperty(stripsRef.GetShaderProperty());
 	return shapeRef;
+}
+//check for nested NiNodes
+NiNode visitNiNodes(NiNode node)
+{
+	vector<NiAVObjectRef> children = node.GetChildren();
+	int index = 0;
+	for (NiAVObjectRef block : children) {
+		if (block->IsDerivedType(NiTriStrips::TYPE)) {
+			NiTriStripsRef stripsRef = DynamicCast<NiTriStrips>(block);
+			if (stripsRef->GetData()->IsDerivedType(NiTriShapeData::TYPE)) {
+				children[index] = convert_strip(*stripsRef);
+			}
+		}
+		if (block->IsDerivedType(NiNode::TYPE)) {
+			visitNiNodes(*DynamicCast<NiNode>(block));
+		}
+		index++;
+	}
+	node.SetChildren(children);
+	return node;
 }
 
 //#include <objDecl.cpp>
@@ -273,7 +296,6 @@ public:
 	NiTriShape / NiTriShapeData /
 	NiTriShape / NiTriShapeData / NiAdditionalGeometryData /
 	*/
-
 	template<>
 	inline void visit_object(NiTriShape& obj) {
 	
@@ -282,10 +304,9 @@ public:
 	//NB: Deprecated after Skyrim, triangulate
 	template<>
 	inline void visit_object(NiTriStrips& obj) {
+		
 		//get the NiTriStripsData
-		NiGeometryDataRef ref = obj.GetData();
-
-		NiTriStripsDataRef stripsData = DynamicCast<NiTriStripsData>(ref);
+		NiTriStripsDataRef stripsData = DynamicCast<NiTriStripsData>(obj.GetData());
 
 		//Copy over existing NiTriStripData to NiTriShapeData
 		NiTriShapeDataRef shapeData = new  NiTriShapeData();
@@ -298,46 +319,6 @@ public:
 		NiMaterialPropertyRef material = new NiMaterialProperty();
 		NiTexturingPropertyRef texturing = new NiTexturingProperty();
 
-		//get properties
-		vector<Ref<NiProperty>> properties = obj.GetProperties();
-		for (NiPropertyRef propertyRef : properties)
-		{
-			if (propertyRef->IsSameType(NiMaterialProperty::TYPE))
-			{
-				material = DynamicCast<NiMaterialProperty>(propertyRef);
-				//setup lighting
-				lightingProperty->SetShaderType(BSShaderType::SHADER_DEFAULT);
-				lightingProperty->SetName(material->GetName());
-				lightingProperty->SetEmissiveColor(material->GetEmissiveColor());
-				lightingProperty->SetSpecularColor(Color3(0, 0, 0));
-				lightingProperty->SetEmissiveMultiple(1);
-				lightingProperty->SetGlossiness(material->GetGlossiness());
-				lightingProperty->SetAlpha(material->GetAlpha());
-			}
-			if (propertyRef->IsSameType(NiTexturingProperty::TYPE))
-			{
-				//setup paths
-				texturing = DynamicCast<NiTexturingProperty>(propertyRef);
-				string textureName;
-				textureName += texturing->GetBaseTexture().source->GetFileName();
-				textureName.insert(9, "tes4\\");
-				string textureNormal = textureName;
-				textureNormal.erase(textureNormal.end() - 4, textureNormal.end());
-				textureNormal += "_n.dds";
-
-				//setup textureSet (TODO)
-				std::vector<std::string> textures(9);
-				textures[0] = textureName;
-				textures[1] = textureNormal;
-
-				//finally set them.
-				textureSet->SetTextures(textures);
-			}
-			if (propertyRef->IsSameType(NiAlphaProperty::TYPE))
-				obj.SetAlphaProperty(DynamicCast<NiAlphaProperty>(propertyRef));
-			if (propertyRef->IsSameType(NiStencilProperty::TYPE))
-				lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() + SkyrimShaderPropertyFlags2::SLSF2_DOUBLE_SIDED));
-		}
 		//Vertices
 		shapeData->SetHasVertices(stripsData->GetHasVertices());
 		shapeData->SetVertices(stripsData->GetVertices());
@@ -377,6 +358,50 @@ public:
 		shapeData->SetTriangles(triangles);
 
 		//Add Texture properties
+
+		//get properties and sort out textures
+		vector<Ref<NiProperty>> properties = obj.GetProperties();
+		for (NiPropertyRef propertyRef : properties)
+		{
+			if (propertyRef->IsSameType(NiMaterialProperty::TYPE))
+			{
+				material = DynamicCast<NiMaterialProperty>(propertyRef);
+				//setup lighting
+				lightingProperty->SetShaderType(BSShaderType::SHADER_DEFAULT);
+				lightingProperty->SetName(material->GetName());
+				lightingProperty->SetEmissiveColor(material->GetEmissiveColor());
+				lightingProperty->SetSpecularColor(Color3(0, 0, 0));
+				lightingProperty->SetEmissiveMultiple(1);
+				lightingProperty->SetGlossiness(material->GetGlossiness());
+				lightingProperty->SetAlpha(material->GetAlpha());
+			}
+			if (propertyRef->IsSameType(NiTexturingProperty::TYPE))
+			{
+				//setup paths
+				texturing = DynamicCast<NiTexturingProperty>(propertyRef);
+				string textureName;
+				textureName += texturing->GetBaseTexture().source->GetFileName();
+				textureName.insert(9, "tes4\\");
+				string textureNormal = textureName;
+				textureNormal.erase(textureNormal.end() - 4, textureNormal.end());
+				textureNormal += "_n.dds";
+
+				//setup textureSet (TODO)
+				std::vector<std::string> textures(9);
+				textures[0] = textureName;
+				textures[1] = textureNormal;
+
+				//finally set them.
+				textureSet->SetTextures(textures);
+			}
+			if (propertyRef->IsSameType(NiAlphaProperty::TYPE))
+				obj.SetAlphaProperty(DynamicCast<NiAlphaProperty>(propertyRef));
+			if (propertyRef->IsSameType(NiStencilProperty::TYPE))
+				lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() + SkyrimShaderPropertyFlags2::SLSF2_DOUBLE_SIDED));
+		}
+		if(!obj.GetData()->GetHasVertexColors())
+			lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() - SkyrimShaderPropertyFlags2::SLSF2_VERTEX_COLORS));
+
 		lightingProperty->SetTextureSet(textureSet);
 		obj.SetShaderProperty(DynamicCast<BSShaderProperty>(lightingProperty));
 
@@ -385,6 +410,7 @@ public:
 		obj.SetProperties(vector<Ref<NiProperty>> {});
 		obj.SetData(DynamicCast<NiGeometryData>(shapeData));
 	}
+
 	template<>
 	inline void visit_object(NiTriShapeData& obj) {
 	}
@@ -415,13 +441,15 @@ public:
 	//Static collision
 	template<>
 	inline void visit_object(bhkCollisionObject& obj) {
-		//obj.SetFlags(static_cast<bhkCOFlags>(129));
+		obj.SetFlags(static_cast<bhkCOFlags>(129));
 	}
+
 	//Phantom collision to be handled by logic instead of the actual solvers
 	template<>
 	inline void visit_object(bhkSPCollisionObject& obj) {}
 
 };
+
 TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 
 	//get nifs
@@ -432,57 +460,54 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 	//check if we found nifs
 	if (nifs.empty()) return;
 
-	//get the first nif
-	NiObjectRef root = ReadNifTree(nifs[0].string().c_str(), &info);
-	vector<NiObjectRef> blocks = ReadNifList(nifs[0].string().c_str(), &info);
+	for (size_t i = 0; i < nifs.size(); i++) {
+		NiObjectRef root = ReadNifTree(nifs[i].string().c_str(), &info);
+		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
 
-	//set versioning
-	info.userVersion = 12;
-	info.userVersion2 = 83;
-	info.version = Niflib::VER_20_2_0_7; //or 0x14020007
+		//set versioning
+		info.userVersion = 12;
+		info.userVersion2 = 83;
+		info.version = Niflib::VER_20_2_0_7; //or 0x14020007
 
-	//convert nif
-	ConverterVisitor fimpl(info);
-	root->accept(fimpl, info);
-	
-	//Fix useless blocks
-	NiNodeRef rootRef = DynamicCast<NiNode>(root);
-	BSFadeNodeRef fadeNode = new BSFadeNode();
-	fadeNode->SetName(rootRef->GetName());
-	fadeNode->SetExtraDataList(rootRef->GetExtraDataList());
-	fadeNode->SetFlags(524302);
-	fadeNode->SetCollisionObject(rootRef->GetCollisionObject());
-	fadeNode->SetChildren(rootRef->GetChildren());
-	root = fadeNode;
-	vector<NiAVObjectRef> children = fadeNode->GetChildren();
-	int index = 0;
-	for (NiAVObjectRef block : children) {
-		if (block->IsDerivedType(NiTriStrips::TYPE)) {
-			NiTriStripsRef stripsRef = DynamicCast<NiTriStrips>(block);
-			if (stripsRef->GetData()->IsDerivedType(NiTriShapeData::TYPE)) {
-				//Need to use method at the top but its fine for now
-				NiTriShapeRef shapeRef = new NiTriShape();
-				shapeRef->SetName(stripsRef->GetName());
-				shapeRef->SetExtraDataList(stripsRef->GetExtraDataList());
-				shapeRef->SetFlags(524302);
-				shapeRef->SetData(stripsRef->GetData());
-				shapeRef->SetShaderProperty(stripsRef->GetShaderProperty());
-				block = shapeRef;
-				children[index] = shapeRef;
+		//convert nif
+		ConverterVisitor fimpl(info);
+		root->accept(fimpl, info);
+
+		//Fix useless blocks
+		NiNodeRef rootRef = DynamicCast<NiNode>(root);
+		BSFadeNodeRef fadeNode = new BSFadeNode();
+		fadeNode->SetName(rootRef->GetName());
+		fadeNode->SetExtraDataList(rootRef->GetExtraDataList());
+		fadeNode->SetFlags(524302);
+		fadeNode->SetCollisionObject(rootRef->GetCollisionObject());
+		fadeNode->SetChildren(rootRef->GetChildren());
+		root = fadeNode;
+
+		//Search for NiTriStrips
+		vector<NiAVObjectRef> children = fadeNode->GetChildren();
+		int index = 0;
+		for (NiAVObjectRef block : children) {
+			if (block->IsSameType(NiNode::TYPE)) {
+				NiNodeRef nodeRef = new NiNode((visitNiNodes(*DynamicCast<NiNode>(block))));
+				children[index] = nodeRef;
 			}
+			if (block->IsSameType(NiTriStrips::TYPE)) {
+				NiTriStripsRef stripsRef = DynamicCast<NiTriStrips>(block);
+				if (stripsRef->GetData()->IsDerivedType(NiTriShapeData::TYPE)) {
+					children[index] = convert_strip(*stripsRef);
+				}
+			}
+			index++;
 		}
-		index++;
+		fadeNode->SetChildren(children);
+		root = fadeNode;
+
+		//create the new path
+		path out_path = test_resources_path / "nifs" / "out" / nifs[i].filename();
+
+		//write new nif
+		WriteNifTree(out_path.string().c_str(), root, info);
 	}
-	fadeNode->SetChildren(children);
-	root = fadeNode;
-
-	//create the new name
-	std::string newName = nifs[0].string();
-	newName.erase(newName.end() - 4, newName.end());
-	newName += "_converted.nif";
-
-	//write new nif
-	WriteNifTree(newName.c_str(), root, info);
 }
 //Original's Ormin Conversion
 //https://github.com/Ormin/skyblivion-NIFConverter
