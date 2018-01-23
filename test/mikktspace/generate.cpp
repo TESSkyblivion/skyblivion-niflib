@@ -231,3 +231,33 @@ TEST(MIKKTSPACE, cubeTest) {
 
 //    return 0;
 }
+
+#include <igl/gaussian_curvature.h>
+#include <igl/massmatrix.h>
+#include <igl/invert_diag.h>
+#include <igl/readOFF.h>
+#include <igl/jet.h>
+
+static const path test_libigl_tutorial_path = "..\\..\\..\\lib\\libigl\\tutorial\\shared\\";
+
+TEST(LIBIGL, gaussianCurvature) 
+{
+	using namespace Eigen;
+	using namespace std;
+	MatrixXf V;
+	MatrixXi F;
+	path mesh = test_libigl_tutorial_path / "bumpy.off";
+	ASSERT_TRUE(exists(mesh));
+	igl::readOFF(mesh.string(), V, F);
+
+	VectorXf K;
+	// Compute integral of Gaussian curvature
+	igl::gaussian_curvature(V, F, K);
+	// Compute mass matrix
+	SparseMatrix<float> M, Minv;
+	igl::massmatrix(V, F, igl::MASSMATRIX_TYPE_DEFAULT, M);
+	igl::invert_diag(M, Minv);
+	// Divide by area to get integral average
+	K = (Minv*K).eval();
+
+}

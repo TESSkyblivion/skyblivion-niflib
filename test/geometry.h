@@ -1,12 +1,15 @@
 #include "test_utils.h"
 #include "mikktspace.h"
 
+#include <igl/per_vertex_normals.h>
+
 vector<Triangle> triangulate(vector<unsigned short> strip);
 vector<Triangle> triangulate(vector<vector<unsigned short>> strips);
 Vector3 centeroid(const vector<Vector3>& in);
 void CalculateNormals(const vector<Vector3>& vertices, const vector<Triangle> faces,
 	vector<Vector3>& normals, Vector3& COM, bool sphericalNormals = false, bool calculateCOM = false);
 bool CheckNormals(const vector<Vector3>& normals);
+
 struct TriGeometryContext : SMikkTSpaceContext
 {
 	//input

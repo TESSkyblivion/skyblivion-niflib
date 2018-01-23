@@ -386,7 +386,7 @@ class CFile(file):
     def get_dependent_arg_class(self, block):
         return get_dependent_arg_class_inn(block)
      
-    def stream(self, streamed_blocks, block, action, localprefix = "", prefix = "", arg_prefix = "", arg_member = None, is_subblock = False):
+    def stream(self, block, action, localprefix = "", prefix = "", arg_prefix = "", arg_member = None, is_subblock = False):
         """
         Generates the function code for various functions in Niflib and outputs it to the file.
         @param block: The class or struct to generate the function for.
@@ -947,14 +947,12 @@ class CFile(file):
                         self.code('compounds.push_back((Compound*)&%s);'%(z))
                 else:
                     subblock = compound_types[y.type]
-                    if not subblock in streamed_blocks:
-                        streamed_blocks.append(subblock)
-                        if not y.arr1.lhs:
-                            self.stream(streamed_blocks, subblock, action, "%s%s_"%(localprefix, y.cname), "%s."%z, y_arg_prefix,  y_arg, True)
-                        elif not y.arr2.lhs:
-                            self.stream(streamed_blocks, subblock, action, "%s%s_"%(localprefix, y.cname), "%s."%z, y_arg_prefix, y_arg, True)
-                        else:
-                            self.stream(streamed_blocks, subblock, action, "%s%s_"%(localprefix, y.cname), "%s."%z, y_arg_prefix, y_arg, True)
+                    if not y.arr1.lhs:
+                        self.stream(subblock, action, "%s%s_"%(localprefix, y.cname), "%s."%z, y_arg_prefix,  y_arg, True)
+                    elif not y.arr2.lhs:
+                        self.stream(subblock, action, "%s%s_"%(localprefix, y.cname), "%s."%z, y_arg_prefix, y_arg, True)
+                    else:
+                        self.stream(subblock, action, "%s%s_"%(localprefix, y.cname), "%s."%z, y_arg_prefix, y_arg, True)
 
             # close array loops
             if y.arr1.lhs:
@@ -2002,18 +2000,15 @@ class Compound(Basic):
             #***********************
             #** NIFLIB HACK BEGIN **
             #***********************
-           # if self.name == "BoundingVolume" and x.name == "Union":
+            if self.name == "BoundingVolume" and x.name == "Union":
                 # ignore this one because niflib cannot handle
                 # recursively defined structures... so we remove
                 # this one to avoid the problem
                 # as a result a minority of nifs won't load
-                # continue 
+                continue 
             #*********************
             #** NIFLIB HACK END **
             #*********************
-            if x in self.members:
-                continue
- 
             self.members.append(x)
             
             # detect templates
@@ -2192,8 +2187,8 @@ class Compound(Basic):
                 file_name = '#include <obj\%s.h>\n'%(block_types[name].cname)
                 result.append(file_name)
         return ''.join(result)
-    
-    def code_include_cpp_set(self, analyzed_types, usedirs=False, gen_dir=None, obj_dir=None):
+        
+    def code_include_cpp_set(self, usedirs=False, gen_dir=None, obj_dir=None):
         if self.niflibtype: return ""
         
         if not usedirs:
@@ -2215,10 +2210,9 @@ class Compound(Basic):
                 file_name = '#include "%s%s.h"\n'%(obj_dir, y.ctemplate)
                 if file_name not in used_blocks:
                     used_blocks.append( file_name )
-            if y.type in compound_names and not self in analyzed_types:
-                analyzed_types.append(self)
+            if y.type in compound_names:
                 subblock = compound_types[y.type]
-                used_blocks.extend(subblock.code_include_cpp_set(analyzed_types, True, gen_dir, obj_dir))
+                used_blocks.extend(subblock.code_include_cpp_set(True, gen_dir, obj_dir))
             for terminal in y.cond.get_terminals():
                 if terminal in block_types:
                     used_blocks.append('#include "%s%s.h"\n'%(obj_dir, terminal))
@@ -2228,8 +2222,7 @@ class Compound(Basic):
         return result    
         
     def code_include_cpp(self, usedirs=False, gen_dir=None, obj_dir=None):
-        analyzed_types = []
-        return ''.join(self.code_include_cpp_set(analyzed_types, True, gen_dir, obj_dir))
+        return ''.join(self.code_include_cpp_set(True, gen_dir, obj_dir))
 
     # find member by name
     def find_member(self, name, inherit=False):

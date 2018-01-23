@@ -1,3 +1,9 @@
 [submodule "gen/nifxml"]
 	path = gen/nifxml
 	url = https://github.com/TESSkyblivion/nifxml
+[submodule "lib/libigl"]
+	path = lib/libigl
+	url = https://github.com/libigl/libigl
+[submodule "lib/eigen"]
+	path = lib/eigen
+	url = https://github.com/eigenteam/eigen-git-mirror
