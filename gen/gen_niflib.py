@@ -233,6 +233,8 @@ mkpath(os.path.join(ROOT_DIR, "src/gen"))
 for n in compound_names:
     x = compound_types[n]
     
+    streamed_blocks = []
+    
     # skip natively implemented types
 #    if x.niflibtype: continue
     if x.name in NATIVETYPES.keys(): continue
@@ -319,11 +321,11 @@ for n in compound_names:
             h.code( 'NIFLIB_HIDDEN virtual list<Compound * > GetCompounds() const;' )
         else:
             h.code( 'NIFLIB_HIDDEN virtual list<Compound * > GetCompounds() const {' )
-            h.stream(x, ACTION_GETCOMPOUNDS)
+            h.stream(streamed_blocks, x, ACTION_GETCOMPOUNDS)
             h.code("}")
             h.code()
         h.code()
-        h.stream(x, ACTION_RTTI_FIELDS)
+        h.stream(streamed_blocks, x, ACTION_RTTI_FIELDS)
         h.code()
         if not x.template:
             if cmp != None:
@@ -335,22 +337,22 @@ for n in compound_names:
             h.code()
             h.code( 'NIFLIB_API virtual void accept(class FieldVisitor& visitor);' )
             h.code()
-            h.stream(x, ACTION_RTTI_GET_DECLARE)
+            h.stream(streamed_blocks, x, ACTION_RTTI_GET_DECLARE)
         else:
             if cmp != None:
                 h.code( 'NIFLIB_API std::vector<unsigned int> GetValidFieldsIndices( const NifInfo & info, const %s & ) const {'%cmp.cname )
             else:
                 h.code( 'NIFLIB_API std::vector<unsigned int> GetValidFieldsIndices( const NifInfo & info ) const {' )
-            h.stream(x, ACTION_RTTI_GETVALID)
+            h.stream(streamed_blocks, x, ACTION_RTTI_GETVALID)
             h.code("}")
             h.code()
             h.code( 'NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo & in) {' )
             h.code( 'visitor.visit(*this, in);')
             h.code( '}')
             h.code()
-            h.stream(x, ACTION_RTTI_GET_DECLARE)
+            h.stream(streamed_blocks, x, ACTION_RTTI_GET_DECLARE)
             h.code()
-            h.stream(x, ACTION_RTTI_GET)
+            h.stream(streamed_blocks, x, ACTION_RTTI_GET)
             h.code()
 
         
@@ -424,7 +426,7 @@ for n in compound_names:
         cpp.code('//Equal Operator')
         cpp.code( 'bool %s::operator==( const %s & other ) const {'%(x.cname, x.cname) )
         cpp.code( 'return ( true ')
-        cpp.stream(x, ACTION_EQUALS)
+        cpp.stream(streamed_blocks, x, ACTION_EQUALS)
         #for m in x.members:
         #    if not m.is_duplicate:
         #        cpp.code('\t && %s == other.%s'%(m.cname, m.cname) )
@@ -443,7 +445,7 @@ for n in compound_names:
             cpp.code( '//Declare NifInfo structure' )
             cpp.code( 'NifInfo info;' )
             cpp.code()
-            cpp.stream(x, ACTION_READ)
+            cpp.stream(streamed_blocks, x, ACTION_READ)
             cpp.code()
             cpp.code( '//Copy info.version to local version var.' )
             cpp.code( 'version = info.version;' )
@@ -461,24 +463,24 @@ for n in compound_names:
             cpp.code( '}' )
             cpp.code()
             cpp.code( 'void ' + x.cname + '::Write( ostream& out, const NifInfo & info ) const {' )
-            cpp.stream(x, ACTION_WRITE)
+            cpp.stream(streamed_blocks, x, ACTION_WRITE)
             cpp.code( '}' )
             cpp.code()
             cpp.code( 'string ' + x.cname + '::asString( bool verbose ) const {' )
-            cpp.stream(x, ACTION_OUT)
+            cpp.stream(streamed_blocks, x, ACTION_OUT)
             cpp.code( '}' )       
         elif n == "Footer":
             cpp.code()
             cpp.code( 'void ' + x.cname + '::Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info ) {' )
-            cpp.stream(x, ACTION_READ)
+            cpp.stream(streamed_blocks, x, ACTION_READ)
             cpp.code( '}' )
             cpp.code()
             cpp.code( 'void ' + x.cname + '::Write( ostream& out, const map<NiObjectRef,unsigned int> & link_map, list<NiObject *> & missing_link_stack, const NifInfo & info ) const {' )
-            cpp.stream(x, ACTION_WRITE)
+            cpp.stream(streamed_blocks, x, ACTION_WRITE)
             cpp.code( '}' )
             cpp.code()
             cpp.code( 'string ' + x.cname + '::asString( bool verbose ) const {' )
-            cpp.stream(x, ACTION_OUT)
+            cpp.stream(streamed_blocks, x, ACTION_OUT)
             cpp.code( '}' )
         else:
             cpp.code()
@@ -493,14 +495,14 @@ for n in compound_names:
             else:
                 cpp.code( 'std::vector<unsigned int> %s::GetValidFieldsIndices( const NifInfo & info ) const {'%(x.cname) )
             #cpp.code( 'std::vector<unsigned int> %s::GetValidFieldsIndices( const NifInfo & info ) const {'%(x.cname) )
-            cpp.stream(x, ACTION_RTTI_GETVALID)
+            cpp.stream(streamed_blocks, x, ACTION_RTTI_GETVALID)
             cpp.code( 'return valid_fields;' )
             cpp.code( '}' )
             cpp.code("std::list<Compound * > %s::GetCompounds() const {"%x.cname)
-            cpp.stream(x, ACTION_GETCOMPOUNDS)
+            cpp.stream(streamed_blocks, x, ACTION_GETCOMPOUNDS)
             cpp.code("}")
             cpp.code()
-            cpp.stream(x, ACTION_RTTI_GET)
+            cpp.stream(streamed_blocks, x, ACTION_RTTI_GET)
         
         cpp.code()
         cpp.code( '//--BEGIN MISC CUSTOM CODE--//' )
@@ -673,13 +675,13 @@ if GENALLFILES:
     #        x = compound_types[n]
     #        if not x.template:
     #            out.code()
-    #            out.stream(x, ACTION_RTTI_GET)
+    #            out.stream(streamed_blocks, x, ACTION_RTTI_GET)
     #            out.code()
     #for n in block_names:
     #    x = block_types[n]
         #if not n == 'NiObject':
     #    out.code()
-    #    out.stream(x, ACTION_RTTI_GET)
+    #    out.stream(streamed_blocks, x, ACTION_RTTI_GET)
     #    out.code()
     #out.code( '}' )   
     #out.close()
@@ -819,6 +821,8 @@ sourceList.write('set(niobjects\n')
 # NiObject Files
 #
 for n in block_names:
+
+    streamed_blocks = []
     x = block_types[n]
     x_define_name = define_name(x.cname)
 
@@ -876,7 +880,7 @@ for n in block_names:
     out.code( 'friend class Visitor;')
     out.code( 'public:' )
     out.code()
-    out.stream(x, ACTION_RTTI_FIELDS)
+    out.stream(streamed_blocks, x, ACTION_RTTI_FIELDS)
     out.code()
     out.code( '/*! Constructor */' )
     out.code( 'NIFLIB_API ' + x.cname + '();' )
@@ -937,7 +941,7 @@ for n in block_names:
     out.code()
     #out.code( 'NIFLIB_API template<typename Type> Type get(const unsigned int member) {throw std::runtime_error("Wrong Type"); return Type();}')
     #out.code()
-    out.stream(x, ACTION_RTTI_GET_DECLARE)
+    out.stream(streamed_blocks, x, ACTION_RTTI_GET_DECLARE)
 
     #
     # Show example naive implementation if requested
@@ -1103,7 +1107,7 @@ for n in block_names:
         
     out.code( '//--END CUSTOM CODE--//' )
     out.code()
-    out.stream(x, ACTION_READ)
+    out.stream(streamed_blocks, x, ACTION_READ)
     out.code()
     out.code( '//--BEGIN POST-READ CUSTOM CODE--//' )
 
@@ -1124,7 +1128,7 @@ for n in block_names:
         
     out.code( '//--END CUSTOM CODE--//' )
     out.code()
-    out.stream(x, ACTION_WRITE)
+    out.stream(streamed_blocks, x, ACTION_WRITE)
     out.code()
     out.code( '//--BEGIN POST-WRITE CUSTOM CODE--//' )
 
@@ -1139,7 +1143,7 @@ for n in block_names:
         out.code( 'std::vector<unsigned int> %s::GetValidFieldsIndices( const NifInfo & info, const %s & parent ) const {'%(x.cname, cmp.cname) )
     else:
         out.code( 'std::vector<unsigned int> %s::GetValidFieldsIndices( const NifInfo & info ) const {'%(x.cname) )
-    out.stream(x, ACTION_RTTI_GETVALID)
+    out.stream(streamed_blocks, x, ACTION_RTTI_GETVALID)
     out.code( 'return valid_fields;' )
     out.code( '}' )
     out.code()    
@@ -1152,7 +1156,7 @@ for n in block_names:
         
     out.code( '//--END CUSTOM CODE--//' )
     out.code()
-    out.stream(x, ACTION_OUT)
+    out.stream(streamed_blocks, x, ACTION_OUT)
     out.code()
     out.code( '//--BEGIN POST-STRING CUSTOM CODE--//' )
 
@@ -1174,7 +1178,7 @@ for n in block_names:
         
     out.code( '//--END CUSTOM CODE--//' )
     out.code()
-    out.stream(x, ACTION_FIXLINKS)
+    out.stream(streamed_blocks, x, ACTION_FIXLINKS)
     out.code()
     out.code( '//--BEGIN POST-FIXLINKS CUSTOM CODE--//' )
     #Preserve Custom code from before
@@ -1186,33 +1190,33 @@ for n in block_names:
     out.code()
 
     out.code("std::list<NiObjectRef> %s::GetRefs() const {"%x.cname)
-    out.stream(x, ACTION_GETREFS)
+    out.stream(streamed_blocks, x, ACTION_GETREFS)
     out.code("}")
     out.code()
     
 
     out.code("std::list<NiObject *> %s::GetPtrs() const {"%x.cname)
-    out.stream(x, ACTION_GETPTRS)
+    out.stream(streamed_blocks, x, ACTION_GETPTRS)
     out.code("}")
     out.code()
     
     out.code("std::list<Compound * > %s::GetCompounds() const {"%x.cname)
-    out.stream(x, ACTION_GETCOMPOUNDS)
+    out.stream(streamed_blocks, x, ACTION_GETCOMPOUNDS)
     out.code("}")
     out.code()
     
     out.code()
-    out.stream(x, ACTION_RTTI_GET)
+    out.stream(streamed_blocks, x, ACTION_RTTI_GET)
     out.code()
     
     #out.code("void %s::CreateStringTable(Header* in) const {"%x.cname)
-    #out.stream(x, ACTION_STRINGTABLE)
+    #out.stream(streamed_blocks, x, ACTION_STRINGTABLE)
     #out.code("}")
     #out.code()
     
     out.code("bool %s::equals(const %s & other) const {"%(x.cname, x.cname))
     out.code("return ( true ")
-    out.stream(x, ACTION_EQUALS)
+    out.stream(streamed_blocks, x, ACTION_EQUALS)
     out.code(");")
     out.code("}")
     out.code()
@@ -1225,7 +1229,7 @@ for n in block_names:
 
     if not x.name == 'NiObject':
         out.code("void %s::accept(Visitor& visitor, const NifInfo & info) {"%x.cname)
-        out.stream(x, ACTION_ACCEPT)
+        out.stream(streamed_blocks, x, ACTION_ACCEPT)
         out.code("}")
         out.code()
 
