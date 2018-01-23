@@ -88,6 +88,16 @@ public:
 	//	NiBillboardNode
 	//	NiCamera
 	//	NiControllerManager
+	template<>
+	inline void visit_object(NiControllerManager& obj) {
+		//Need to remove NiStringPalettes, not used in Skyrim.
+		vector<Ref<NiControllerSequence>> sequences = obj.GetControllerSequences();
+		for (NiControllerSequenceRef sequence : sequences) {
+			sequence->SetStringPalette(NULL);
+		}
+		obj.SetTarget(0);
+		obj.SetControllerSequences(sequences);
+	}
 	//	NiDirectionalLight
 	//	NiFogProperty
 	//	NiKeyframeController
@@ -323,18 +333,9 @@ public:
 		shapeData->SetHasVertices(stripsData->GetHasVertices());
 		shapeData->SetVertices(stripsData->GetVertices());
 
-		//Normals
-		shapeData->SetHasNormals(stripsData->GetHasNormals());
-		shapeData->SetNormals(stripsData->GetNormals());
-		
-		//Tangents and Bitangents (TODO)
-		//shapeData->SetBitangents(stripsData->GetBitangents());
-		//shapeData->SetTangents(stripsData->GetTangents());
-
 		//BS Vector flags. Oblivion doesn't have this, just settings it to UV and tangents.
 		//Might need to work out Unk64, Unk128 and Unk256.
-		//shapeData->SetBsVectorFlags(static_cast<BSVectorFlags>(4097));
-		shapeData->SetBsVectorFlags(BSVectorFlags::BSVF_HAS_UV);
+		shapeData->SetBsVectorFlags(static_cast<BSVectorFlags>(4097));
 
 		//UVs
 		shapeData->SetUvSets(stripsData->GetUvSets());
@@ -357,8 +358,25 @@ public:
 		shapeData->SetHasTriangles(1);
 		shapeData->SetTriangles(triangles);
 
-		//Add Texture properties
 
+		//Tangents, Bitangents and Normals
+		vector<Vector3> vertices = shapeData->GetVertices();
+		Vector3 COM;
+		if (vertices.size() != 0)
+			COM = (COM / 2) + (centeroid(vertices) / 2);
+		vector<Triangle> faces = shapeData->GetTriangles();
+		vector<Vector3> normals = shapeData->GetNormals();
+		if (vertices.size() != 0 && faces.size() != 0 && shapeData->GetUvSets().size() != 0) {
+			vector<TexCoord> uvs = shapeData->GetUvSets()[0];
+			//Tangent Space
+			TriGeometryContext g(vertices, COM, faces, uvs, normals);
+			shapeData->SetHasNormals(1);
+			shapeData->SetNormals(g.normals);
+			shapeData->SetTangents(g.tangents);
+			shapeData->SetBitangents(g.bitangents);
+		}
+
+		//Add Texture properties
 		//get properties and sort out textures
 		vector<Ref<NiProperty>> properties = obj.GetProperties();
 		for (NiPropertyRef propertyRef : properties)
@@ -395,7 +413,7 @@ public:
 				textureSet->SetTextures(textures);
 			}
 			if (propertyRef->IsSameType(NiAlphaProperty::TYPE))
-				obj.SetAlphaProperty(DynamicCast<NiAlphaProperty>(propertyRef));
+				obj.SetAlphaProperty(DynamicCast<NiAlphaProperty>(propertyRef)); //Still not working, needs work
 			if (propertyRef->IsSameType(NiStencilProperty::TYPE))
 				lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() + SkyrimShaderPropertyFlags2::SLSF2_DOUBLE_SIDED));
 		}
@@ -479,14 +497,19 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 		fadeNode->SetName(rootRef->GetName());
 		fadeNode->SetExtraDataList(rootRef->GetExtraDataList());
 		fadeNode->SetFlags(524302);
+		fadeNode->SetController(rootRef->GetController());
 		fadeNode->SetCollisionObject(rootRef->GetCollisionObject());
 		fadeNode->SetChildren(rootRef->GetChildren());
 		root = fadeNode;
 
-		//Search for NiTriStrips
+		//Search for NiTriStrips (nested still giving issues)
 		vector<NiAVObjectRef> children = fadeNode->GetChildren();
 		int index = 0;
 		for (NiAVObjectRef block : children) {
+			if (block == NULL) {
+				children.erase(children.begin() + index);
+				continue;
+			}
 			if (block->IsSameType(NiNode::TYPE)) {
 				NiNodeRef nodeRef = new NiNode((visitNiNodes(*DynamicCast<NiNode>(block))));
 				children[index] = nodeRef;
