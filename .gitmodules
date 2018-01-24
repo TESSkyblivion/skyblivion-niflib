@@ -9,7 +9,7 @@
 	url = https://github.com/eigenteam/eigen-git-mirror
 [submodule "lib/bounding-mesh"]
 	path = lib/bounding-mesh
-	url = https://github.com/gaschler/bounding-mesh
+	url = https://github.com/TESSkyblivion/bounding-mesh
 [submodule "lib/quickhull"]
 	path = lib/quickhull
 	url = https://github.com/akuukka/quickhull
