@@ -49,13 +49,17 @@ endif()
 
 file(GLOB SRCS *.cpp)
 file(GLOB SRCS_MIKTT mikktspace/*.cpp)
+file(GLOB SRCS_BOUNDM ${PROJECT_SOURCE_DIR}/lib/bounding-mesh/src/boundingmesh/*.cpp )
+file(GLOB SRCS_QUICKHULL ${PROJECT_SOURCE_DIR}//lib/quickhull/*.cpp )
 
 include_directories(${PROJECT_SOURCE_DIR}/include )
 include_directories(${PROJECT_SOURCE_DIR}/lib/mikktspace )
 include_directories(${PROJECT_SOURCE_DIR}/lib/eigen )
 include_directories(${PROJECT_SOURCE_DIR}/lib/libigl/include )
+include_directories(${PROJECT_SOURCE_DIR}/lib/bounding-mesh/src/boundingmesh )
+include_directories(${PROJECT_SOURCE_DIR}/lib/quickhull )
 
-add_executable(test_niflib ${SRCS} ${SRCS_MIKTT})
+add_executable(test_niflib ${SRCS} ${SRCS_MIKTT} ${SRCS_BOUNDM} ${SRCS_QUICKHULL})
 target_link_libraries(test_niflib
 	mikktspace
 	niflib

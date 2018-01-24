@@ -6,6 +6,7 @@
 #include "geometry.h"
 #include <functional>
 #include <bitset>
+#include <boundingmesh.h>
 
 //#include <gtest/gtest.h>
 //
@@ -838,35 +839,74 @@ TEST(Calculate, Normals) {
 	findFiles(test_nifs_in_path, ".nif", nifs);
 	for (size_t i = 0; i < nifs.size(); i++) {
 		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
-		//calculate the centeroid first
-		Vector3 COM;
+		//calculate bounding mesh
 		for (NiObjectRef block : blocks) {
 			if (block->IsDerivedType(NiTriShapeData::TYPE)) {
 				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
-				vector<Vector3> vertices = ref->GetVertices();
-				if (vertices.size() != 0) {
-					COM = (COM / 2) + (centeroid(vertices) / 2);
+				std::shared_ptr<boundingmesh::Mesh> mesh = make_shared<boundingmesh::Mesh>();
+				for (Triangle t : ref->GetTriangles()) {
+					boundingmesh::Index indices[3];
+					Vector3 v1 = ref->GetVertices()[t.v1];
+					Vector3 v2 = ref->GetVertices()[t.v2];
+					Vector3 v3 = ref->GetVertices()[t.v3];
+
+					boundingmesh::Vector3 mv1(v1.x, v1.y, v1.z);
+					boundingmesh::Vector3 mv2(v2.x, v2.y, v2.z);
+					boundingmesh::Vector3 mv3(v3.x, v3.y, v3.z);
+					
+					indices[0] = mesh->addVertex(mv1);
+					indices[1] = mesh->addVertex(mv2);
+					indices[2] = mesh->addVertex(mv3);
+
+					mesh->addTriangle(indices[0], indices[1], indices[2]);
+				}
+
+				boundingmesh::Real bounding_box_diagonal = mesh->getBoundingBoxDiagonal();
+				boundingmesh::Real alpha = 1;
+				int voxels = 50000;
+				boundingmesh::Real target_error = 0.02;
+				mesh->closeHoles();
+
+				boundingmesh::SegmenterDownsampling segmenter;
+				segmenter.setMaxPasses(10);
+				segmenter.setAlpha(alpha);
+				segmenter.setDelta(alpha / 2);
+
+				std::cout << "Voxelizing mesh..." << std::endl;
+				segmenter.setMesh(mesh, voxels);
+				std::cout << "Calculating bounding convex decomposition..." << std::endl;
+				segmenter.compute();
+				std::vector < std::shared_ptr<boundingmesh::Mesh> > decomposition = segmenter.getSegmentation();
+
+				std::cout << "Simplifying bounding convex decomposition with the bounding mesh algorithm..." << std::endl;
+				std::vector < std::shared_ptr<boundingmesh::Mesh> > decomposition_decimated;
+				for (int i = 0; i < decomposition.size(); ++i)
+				{
+					boundingmesh::Decimator decimator;
+					decimator.setMesh(*decomposition[i]);
+					decimator.setMaximumError(std::pow(target_error * bounding_box_diagonal, 2));
+					decomposition_decimated.push_back(decimator.compute());
 				}
 			}
 		}
 
-		for (NiObjectRef block : blocks) {
-			if (block->IsDerivedType(NiTriShapeData::TYPE)) {
-				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
-				vector<Vector3> vertices = ref->GetVertices();
-				vector<Triangle> faces = ref->GetTriangles();
-				
-				vector<Vector3> normals = ref->GetNormals();
-				if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
-					vector<TexCoord> uvs = ref->GetUvSets()[0];				
-					//Tangent Space
-					TriGeometryContext g(vertices, COM, faces, uvs, normals);
-					ref->SetNormals(g.normals);
-					ref->SetTangents(g.tangents);
-					ref->SetBitangents(g.bitangents);
-				}
-			}
-		}
+		//for (NiObjectRef block : blocks) {
+		//	if (block->IsDerivedType(NiTriShapeData::TYPE)) {
+		//		NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
+		//		vector<Vector3> vertices = ref->GetVertices();
+		//		vector<Triangle> faces = ref->GetTriangles();
+		//		
+		//		vector<Vector3> normals = ref->GetNormals();
+		//		if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
+		//			vector<TexCoord> uvs = ref->GetUvSets()[0];				
+		//			//Tangent Space
+		//			TriGeometryContext g(vertices, COM, faces, uvs, normals);
+		//			ref->SetNormals(g.normals);
+		//			ref->SetTangents(g.tangents);
+		//			ref->SetBitangents(g.bitangents);
+		//		}
+		//	}
+		//}
 		NiObjectRef root = GetFirstRoot(blocks);
 		path out_path = test_resources_path / "nifs" / "out" / nifs[i].filename();
 		WriteNifTree(out_path.string().c_str(), root, info);
