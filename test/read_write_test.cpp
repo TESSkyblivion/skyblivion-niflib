@@ -836,19 +836,24 @@ TEST(Calculate, Normals) {
 	//calculate sane vertex normals for geometries
 	NifInfo info;
 	vector<path> nifs;
-	findFiles(test_nifs_in_path, ".nif", nifs);
+	path in_path = test_resources_path / "nifs" / "in" / "maniatree03.nif";
+	//findFiles(test_nifs_in_path, ".nif", nifs);
+	nifs.push_back(in_path);
 	for (size_t i = 0; i < nifs.size(); i++) {
 		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
+		NiObjectRef root = GetFirstRoot(blocks);
+		NiNodeRef nroot = DynamicCast<NiNode>(root);
 		//calculate bounding mesh
 		for (NiObjectRef block : blocks) {
-			if (block->IsDerivedType(NiTriShapeData::TYPE)) {
-				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
+			if (block->IsDerivedType(NiTriShape::TYPE)) {
+				NiTriShapeRef a_shape = DynamicCast<NiTriShape>(block);
+				NiTriShapeDataRef refn = DynamicCast<NiTriShapeData>(a_shape->GetData());
 				std::shared_ptr<boundingmesh::Mesh> mesh = make_shared<boundingmesh::Mesh>();
-				for (Triangle t : ref->GetTriangles()) {
+				for (Triangle t : refn->GetTriangles()) {
 					boundingmesh::Index indices[3];
-					Vector3 v1 = ref->GetVertices()[t.v1];
-					Vector3 v2 = ref->GetVertices()[t.v2];
-					Vector3 v3 = ref->GetVertices()[t.v3];
+					Vector3 v1 = refn->GetVertices()[t.v1];
+					Vector3 v2 = refn->GetVertices()[t.v2];
+					Vector3 v3 = refn->GetVertices()[t.v3];
 
 					boundingmesh::Vector3 mv1(v1.x, v1.y, v1.z);
 					boundingmesh::Vector3 mv2(v2.x, v2.y, v2.z);
@@ -863,12 +868,12 @@ TEST(Calculate, Normals) {
 
 				boundingmesh::Real bounding_box_diagonal = mesh->getBoundingBoxDiagonal();
 				boundingmesh::Real alpha = 1;
-				int voxels = 50000;
-				boundingmesh::Real target_error = 0.02;
+				int voxels = 5;
+				boundingmesh::Real target_error = 0.2;
 				mesh->closeHoles();
 
 				boundingmesh::SegmenterDownsampling segmenter;
-				segmenter.setMaxPasses(10);
+				segmenter.setMaxPasses(1);
 				segmenter.setAlpha(alpha);
 				segmenter.setDelta(alpha / 2);
 
@@ -878,15 +883,44 @@ TEST(Calculate, Normals) {
 				segmenter.compute();
 				std::vector < std::shared_ptr<boundingmesh::Mesh> > decomposition = segmenter.getSegmentation();
 
-				std::cout << "Simplifying bounding convex decomposition with the bounding mesh algorithm..." << std::endl;
-				std::vector < std::shared_ptr<boundingmesh::Mesh> > decomposition_decimated;
-				for (int i = 0; i < decomposition.size(); ++i)
-				{
-					boundingmesh::Decimator decimator;
-					decimator.setMesh(*decomposition[i]);
-					decimator.setMaximumError(std::pow(target_error * bounding_box_diagonal, 2));
-					decomposition_decimated.push_back(decimator.compute());
+				for (std::shared_ptr<boundingmesh::Mesh> cmesh : decomposition) {
+					NiTriShapeDataRef ref = new NiTriShapeData();
+					vector<Vector3> cvertices;
+					for (int i = 0; i < cmesh->nVertices(); i++) {
+						boundingmesh::Vector3 cv = cmesh->vertex(i).position();
+						cvertices.push_back(Vector3(cv.x(), cv.y(), cv.z()));
+					}
+					ref->SetVertices(cvertices);
+					vector<Triangle> faces;
+					for (int i = 0; i < cmesh->nTriangles(); i++) {
+						boundingmesh::Triangle t = cmesh->triangle(i);
+						faces.push_back(Triangle(t.vertex(0), t.vertex(1), t.vertex(2)));
+					}
+					ref->SetNumTriangles(faces.size());
+					ref->SetTriangles(faces);
+					ref->SetHasTriangles(true);
+					NiTriShapeRef shape = new NiTriShape();
+					shape->SetData(StaticCast<NiGeometryData>(ref));
+					BSLightingShaderPropertyRef lightingProperty = new BSLightingShaderProperty();
+					BSShaderTextureSetRef textureSet = new BSShaderTextureSet();
+					lightingProperty->SetTextureSet(textureSet);
+					shape->SetShaderProperty(StaticCast<BSShaderProperty>(lightingProperty));
+					IndexString s;
+					s = a_shape->GetName() + "_BB";
+					shape->SetName(s);
+					vector<NiAVObjectRef> children = nroot->GetChildren();
+					children.push_back(StaticCast<NiAVObject>(shape));
+					nroot->SetChildren(children);
 				}
+				//std::cout << "Simplifying bounding convex decomposition with the bounding mesh algorithm..." << std::endl;
+				//std::vector < std::shared_ptr<boundingmesh::Mesh> > decomposition_decimated;
+				//for (int i = 0; i < decomposition.size(); ++i)
+				//{
+				//	boundingmesh::Decimator decimator;
+				//	decimator.setMesh(*decomposition[i]);
+				//	decimator.setMaximumError(std::pow(target_error * bounding_box_diagonal, 2));
+				//	decomposition_decimated.push_back(decimator.compute());
+				//}
 			}
 		}
 
@@ -907,7 +941,7 @@ TEST(Calculate, Normals) {
 		//		}
 		//	}
 		//}
-		NiObjectRef root = GetFirstRoot(blocks);
+		//NiObjectRef root = GetFirstRoot(blocks);
 		path out_path = test_resources_path / "nifs" / "out" / nifs[i].filename();
 		WriteNifTree(out_path.string().c_str(), root, info);
 	}
