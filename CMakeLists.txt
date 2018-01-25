@@ -20,6 +20,13 @@ if (MSVC)
 	endif()
 endif()
 
+add_subdirectory(lib/mikktspace)
+
+#include_directories(${PROJECT_SOURCE_DIR}/lib/mikktspace )
+#include_directories(${PROJECT_SOURCE_DIR}/lib/eigen )
+#include_directories(${PROJECT_SOURCE_DIR}/lib/libigl/include )
+#include_directories(${PROJECT_SOURCE_DIR}/lib/bounding-mesh/src/boundingmesh )
+
 add_subdirectory(test)
 add_custom_target(
 	check_niflib
@@ -33,7 +40,7 @@ add_custom_target(
 	${PROJECT_SOURCE_DIR}/gen/nifxml/nif.xml  
 )
 
-add_subdirectory(lib/mikktspace)
+include_directories(${PROJECT_SOURCE_DIR}/include )
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 
@@ -45,8 +52,6 @@ if (MSVC)
 	message(STATUS "Adding MSVC parallel build")
 	add_definitions(/MP)
 endif()
-
-include_directories(${PROJECT_SOURCE_DIR}/include )
 
 set(sources
 	src/BSComplexShape.cpp
