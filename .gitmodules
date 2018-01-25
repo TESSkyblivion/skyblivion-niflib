@@ -13,3 +13,6 @@
 [submodule "lib/quickhull"]
 	path = lib/quickhull
 	url = https://github.com/akuukka/quickhull
+[submodule "lib/v-hacd"]
+	path = lib/v-hacd
+	url = https://github.com/TESSkyblivion/v-hacd

@@ -8,6 +8,8 @@
 #include <bitset>
 #include <boundingmesh.h>
 
+#include <VHACD.h>
+
 //#include <gtest/gtest.h>
 //
 //#include <filesystem>
@@ -836,44 +838,64 @@ TEST(Calculate, Normals) {
 	//calculate sane vertex normals for geometries
 	NifInfo info;
 	vector<path> nifs;
-	path in_path = test_resources_path / "nifs" / "in" / "maniatree03.nif";
+	path in_path = test_resources_path / "nifs" / "in" / "nationalarchives_tri.nif";
 	//findFiles(test_nifs_in_path, ".nif", nifs);
 	nifs.push_back(in_path);
 	for (size_t i = 0; i < nifs.size(); i++) {
 		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
 		NiObjectRef root = GetFirstRoot(blocks);
 		NiNodeRef nroot = DynamicCast<NiNode>(root);
+		vector<NiTriShapeRef> bbs;
 		//calculate bounding mesh
 		for (NiObjectRef block : blocks) {
 			if (block->IsDerivedType(NiTriShape::TYPE)) {
 				NiTriShapeRef a_shape = DynamicCast<NiTriShape>(block);
 				NiTriShapeDataRef refn = DynamicCast<NiTriShapeData>(a_shape->GetData());
-				std::shared_ptr<boundingmesh::Mesh> mesh = make_shared<boundingmesh::Mesh>();
-				for (Triangle t : refn->GetTriangles()) {
-					boundingmesh::Index indices[3];
-					Vector3 v1 = refn->GetVertices()[t.v1];
-					Vector3 v2 = refn->GetVertices()[t.v2];
-					Vector3 v3 = refn->GetVertices()[t.v3];
 
-					boundingmesh::Vector3 mv1(v1.x, v1.y, v1.z);
-					boundingmesh::Vector3 mv2(v2.x, v2.y, v2.z);
-					boundingmesh::Vector3 mv3(v3.x, v3.y, v3.z);
-					
-					indices[0] = mesh->addVertex(mv1);
-					indices[1] = mesh->addVertex(mv2);
-					indices[2] = mesh->addVertex(mv3);
+				VHACD::IVHACD* interfaceVHACD = VHACD::CreateVHACD();
 
-					mesh->addTriangle(indices[0], indices[1], indices[2]);
+				vector<float> points;
+				vector<int> triangles;
+
+				//std::shared_ptr<boundingmesh::Mesh> mesh = make_shared<boundingmesh::Mesh>();
+				for (Vector3 v : refn->GetVertices()) {
+					points.push_back(v.x);
+					points.push_back(v.y);
+					points.push_back(v.z);
 				}
+				for (Triangle t : refn->GetTriangles()) {
+					triangles.push_back(t.v1);
+					triangles.push_back(t.v2);
+					triangles.push_back(t.v3);
+				}
+				VHACD::IVHACD::Parameters params;
+				bool res = interfaceVHACD->Compute(&points[0], (unsigned int)points.size() / 3,
+					(const uint32_t *)&triangles[0], (unsigned int)triangles.size() / 3, params);
 
-				boundingmesh::Real bounding_box_diagonal = mesh->getBoundingBoxDiagonal();
+				//for (Triangle t : refn->GetTriangles()) {
+				//	boundingmesh::Index indices[3];
+				//	Vector3 v1 = refn->GetVertices()[t.v1];
+				//	Vector3 v2 = refn->GetVertices()[t.v2];
+				//	Vector3 v3 = refn->GetVertices()[t.v3];
+
+				//	boundingmesh::Vector3 mv1(v1.x, v1.y, v1.z);
+				//	boundingmesh::Vector3 mv2(v2.x, v2.y, v2.z);
+				//	boundingmesh::Vector3 mv3(v3.x, v3.y, v3.z);
+				//	
+				//	indices[0] = mesh->addVertex(mv1);
+				//	indices[1] = mesh->addVertex(mv2);
+				//	indices[2] = mesh->addVertex(mv3);
+
+				//	mesh->addTriangle(indices[0], indices[1], indices[2]);
+				//}
+
+				/*boundingmesh::Real bounding_box_diagonal = mesh->getBoundingBoxDiagonal();
 				boundingmesh::Real alpha = 1;
-				int voxels = 5;
-				boundingmesh::Real target_error = 0.2;
+				int voxels = 50000;
 				mesh->closeHoles();
 
 				boundingmesh::SegmenterDownsampling segmenter;
-				segmenter.setMaxPasses(1);
+				segmenter.setMaxPasses(10);
 				segmenter.setAlpha(alpha);
 				segmenter.setDelta(alpha / 2);
 
@@ -882,34 +904,63 @@ TEST(Calculate, Normals) {
 				std::cout << "Calculating bounding convex decomposition..." << std::endl;
 				segmenter.compute();
 				std::vector < std::shared_ptr<boundingmesh::Mesh> > decomposition = segmenter.getSegmentation();
+*/
 
-				for (std::shared_ptr<boundingmesh::Mesh> cmesh : decomposition) {
-					NiTriShapeDataRef ref = new NiTriShapeData();
-					vector<Vector3> cvertices;
-					for (int i = 0; i < cmesh->nVertices(); i++) {
-						boundingmesh::Vector3 cv = cmesh->vertex(i).position();
-						cvertices.push_back(Vector3(cv.x(), cv.y(), cv.z()));
+
+				if (res) {
+					unsigned int nConvexHulls = interfaceVHACD->GetNConvexHulls();
+					VHACD::IVHACD::ConvexHull ch;
+					NiTriShapeDataRef bb_ref = new NiTriShapeData();
+					vector<Vector3> bb_vertices;
+					vector<Triangle> bb_faces;
+					size_t bb_v_size = bb_vertices.size();
+					for (unsigned int p = 0; p < nConvexHulls; ++p) {
+						bb_v_size = bb_vertices.size();
+						interfaceVHACD->GetConvexHull(p, ch);
+						NiTriShapeDataRef ref = new NiTriShapeData();
+						vector<Vector3> cvertices;
+						for (int i = 0; i < ch.m_nPoints; i++) {
+							cvertices.push_back(Vector3(ch.m_points[3*i], ch.m_points[3 * i+1], ch.m_points[3 * i + 2]));
+							bb_vertices.push_back(Vector3(ch.m_points[3 * i], ch.m_points[3 * i + 1], ch.m_points[3 * i + 2]));
+						}
+						ref->SetVertices(cvertices);
+						vector<Triangle> faces;
+						for (int i = 0; i < ch.m_nTriangles; i++) {
+							faces.push_back(Triangle(ch.m_triangles[3*i], ch.m_triangles[3 * i + 1], ch.m_triangles[3 * i + 2]));
+							bb_faces.push_back(Triangle(bb_v_size + ch.m_triangles[3 * i], bb_v_size + ch.m_triangles[3 * i + 1], bb_v_size + ch.m_triangles[3 * i + 2]));
+						}
+						ref->SetNumTriangles(faces.size());
+						ref->SetTriangles(faces);
+						ref->SetHasTriangles(true);
+						NiTriShapeRef shape = new NiTriShape();
+						shape->SetData(StaticCast<NiGeometryData>(ref));
+						BSLightingShaderPropertyRef lightingProperty = new BSLightingShaderProperty();
+						BSShaderTextureSetRef textureSet = new BSShaderTextureSet();
+						lightingProperty->SetTextureSet(textureSet);
+						shape->SetShaderProperty(StaticCast<BSShaderProperty>(lightingProperty));
+						IndexString s;
+						s = a_shape->GetName() + "_BB_segment_"+to_string(p);
+						shape->SetName(s);
+						vector<NiAVObjectRef> children = nroot->GetChildren();
+						children.push_back(StaticCast<NiAVObject>(shape));
+						nroot->SetChildren(children);
 					}
-					ref->SetVertices(cvertices);
-					vector<Triangle> faces;
-					for (int i = 0; i < cmesh->nTriangles(); i++) {
-						boundingmesh::Triangle t = cmesh->triangle(i);
-						faces.push_back(Triangle(t.vertex(0), t.vertex(1), t.vertex(2)));
-					}
-					ref->SetNumTriangles(faces.size());
-					ref->SetTriangles(faces);
-					ref->SetHasTriangles(true);
-					NiTriShapeRef shape = new NiTriShape();
-					shape->SetData(StaticCast<NiGeometryData>(ref));
+					bb_ref->SetVertices(bb_vertices);
+					bb_ref->SetNumTriangles(bb_faces.size());
+					bb_ref->SetTriangles(bb_faces);
+					bb_ref->SetHasTriangles(true);
+					NiTriShapeRef bb_shape = new NiTriShape();
+					bb_shape->SetData(StaticCast<NiGeometryData>(bb_ref));
 					BSLightingShaderPropertyRef lightingProperty = new BSLightingShaderProperty();
 					BSShaderTextureSetRef textureSet = new BSShaderTextureSet();
 					lightingProperty->SetTextureSet(textureSet);
-					shape->SetShaderProperty(StaticCast<BSShaderProperty>(lightingProperty));
+					bb_shape->SetShaderProperty(StaticCast<BSShaderProperty>(lightingProperty));
 					IndexString s;
 					s = a_shape->GetName() + "_BB";
-					shape->SetName(s);
+					bb_shape->SetName(s);
 					vector<NiAVObjectRef> children = nroot->GetChildren();
-					children.push_back(StaticCast<NiAVObject>(shape));
+					children.push_back(StaticCast<NiAVObject>(bb_shape));
+					bbs.push_back(bb_shape);
 					nroot->SetChildren(children);
 				}
 				//std::cout << "Simplifying bounding convex decomposition with the bounding mesh algorithm..." << std::endl;
@@ -924,23 +975,28 @@ TEST(Calculate, Normals) {
 			}
 		}
 
-		//for (NiObjectRef block : blocks) {
-		//	if (block->IsDerivedType(NiTriShapeData::TYPE)) {
-		//		NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
-		//		vector<Vector3> vertices = ref->GetVertices();
-		//		vector<Triangle> faces = ref->GetTriangles();
-		//		
-		//		vector<Vector3> normals = ref->GetNormals();
-		//		if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
-		//			vector<TexCoord> uvs = ref->GetUvSets()[0];				
-		//			//Tangent Space
-		//			TriGeometryContext g(vertices, COM, faces, uvs, normals);
-		//			ref->SetNormals(g.normals);
-		//			ref->SetTangents(g.tangents);
-		//			ref->SetBitangents(g.bitangents);
-		//		}
-		//	}
-		//}
+		for (NiTriShapeRef block : bbs) {
+
+			//if (block->IsDerivedType(NiTriShapeData::TYPE)) {
+				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block->GetData());
+				vector<Vector3> vertices = ref->GetVertices();
+				vector<Triangle> faces = ref->GetTriangles();
+				vector<Vector3> normals;
+				Vector3 COM;
+				CalculateNormals(vertices, faces, normals, COM, false, false);
+				ref->SetHasNormals(true);
+				ref->SetNormals(normals);
+//				vector<Vector3> normals = ref->GetNormals();
+				//if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
+				//	vector<TexCoord> uvs = ref->GetUvSets()[0];				
+				//	//Tangent Space
+				//	TriGeometryContext g(vertices, COM, faces, uvs, normals);
+				//	;
+				//	ref->SetTangents(g.tangents);
+				//	ref->SetBitangents(g.bitangents);
+				//}
+			//}
+		}
 		//NiObjectRef root = GetFirstRoot(blocks);
 		path out_path = test_resources_path / "nifs" / "out" / nifs[i].filename();
 		WriteNifTree(out_path.string().c_str(), root, info);

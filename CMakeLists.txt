@@ -20,7 +20,10 @@ if (MSVC)
 	endif()
 endif()
 
+include_directories(${PROJECT_SOURCE_DIR}/lib/v-hacd/src/VHACD_Lib/public )
+
 add_subdirectory(lib/mikktspace)
+add_subdirectory(lib/v-hacd/src)
 
 #include_directories(${PROJECT_SOURCE_DIR}/lib/mikktspace )
 #include_directories(${PROJECT_SOURCE_DIR}/lib/eigen )
