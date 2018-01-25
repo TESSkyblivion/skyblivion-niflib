@@ -4,6 +4,7 @@ All rights reserved. Please see niflib.h for license. */
 #include "test_utils.h"
 #include "geometry.h"
 
+//strip to shape
 NiTriShapeRef convert_strip(NiTriStrips stripsRef)
 {
 	NiTriShapeRef shapeRef = new NiTriShape();
@@ -17,6 +18,7 @@ NiTriShapeRef convert_strip(NiTriStrips stripsRef)
 	shapeRef->SetShaderProperty(stripsRef.GetShaderProperty());
 	return shapeRef;
 }
+
 //check for nested NiNodes
 NiNode visitNiNodes(NiNode node)
 {
@@ -36,6 +38,27 @@ NiNode visitNiNodes(NiNode node)
 	}
 	node.SetChildren(children);
 	return node;
+}
+
+//Sloppy, but it works until CBash is ready (if it ever is :P)
+IndexString isWeaponType(const string fileName)
+{
+	if (strstr(fileName.c_str(), "battleaxe.nif") || strstr(fileName.c_str(), "claymore.nif") || strstr(fileName.c_str(), "warhammer.nif"))
+		return IndexString("WeaponBack");
+	else if (strstr(fileName.c_str(), "arrow.nif"))
+		return IndexString("QUIVER");
+	else if (strstr(fileName.c_str(), "bow.nif"))
+		return IndexString("WeaponBow");
+	else if (strstr(fileName.c_str(), "longsword.nif") || strstr(fileName.c_str(), "shortsword.nif"))
+		return IndexString("WeaponSword");
+	else if (strstr(fileName.c_str(), "dagger.nif"))
+		return IndexString("WeaponDagger");
+	else if (strstr(fileName.c_str(), "mace.nif"))
+		return IndexString("WeaponMace");
+	else if (strstr(fileName.c_str(), "waraxe.nif"))
+		return IndexString("WeaponAxe");
+	else
+		return IndexString("null");
 }
 
 //#include <objDecl.cpp>
@@ -523,6 +546,26 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 			index++;
 		}
 		fadeNode->SetChildren(children);
+
+		//hates just 'NULL'
+		if (isWeaponType(nifs[i].string().c_str()) != "null") {
+			IndexString string = isWeaponType(nifs[i].string().c_str());
+			vector<Ref<NiExtraData>> extraDataList = fadeNode->GetExtraDataList();
+			int index = 0;
+			for (NiExtraDataRef data : extraDataList)
+			{
+				if (data->GetInternalType().IsSameType(NiStringExtraData::TYPE))
+				{
+					NiStringExtraDataRef extraData = DynamicCast<NiStringExtraData>(data);
+					if (extraData->GetName() == "Prn") //dont want the wrong one.
+					{
+						extraData->SetStringData(string);
+						extraDataList[index] = DynamicCast<NiExtraData>(extraData);
+					}
+				}
+			}
+			fadeNode->SetExtraDataList(extraDataList);
+		}
 		root = fadeNode;
 
 		//create the new path
