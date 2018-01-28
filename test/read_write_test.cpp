@@ -8,6 +8,8 @@
 #include <bitset>
 #include <boundingmesh.h>
 
+#include <VHACD.h>
+
 //#include <gtest/gtest.h>
 //
 //#include <filesystem>
@@ -472,31 +474,105 @@ TEST(Read, SkyrimBSXFlagsStats) {
 
 class SingleChunkFlagVerifier : public RecursiveFieldVisitor<SingleChunkFlagVerifier> {
 
-public:
+	int n_collisions = 0;
+	int n_phantoms = 0;
+	int n_constraints = 0;
+	bool hasBranches = false;
+	bool branchesResult = true;
+	set<pair<bhkEntity*, bhkEntity*>>& entitiesPair;
+	const NifInfo& this_info;
+	set<NiObject*>& alreadyVisitedNodes;
 
-	SingleChunkFlagVerifier(bhkCompressedMeshShapeData& data, const NifInfo& info) :
-		RecursiveFieldVisitor(*this, info)
+public:
+	bool singleChunkVerified = false;
+
+	SingleChunkFlagVerifier(NiObject& data, const NifInfo& info) :
+		RecursiveFieldVisitor(*this, info), this_info(info), alreadyVisitedNodes(set<NiObject*>()), entitiesPair(set<pair<bhkEntity*, bhkEntity*>>())
 	{
 		data.accept(*this, info);
+
+		bool singlechain = false;
+		if (n_collisions - n_constraints == 1) {
+			singlechain = true;
+			singleChunkVerified = true;
+		}
+		if (n_phantoms > 0 && (singlechain || n_collisions == 0)) {
+			singleChunkVerified = true;
+		}
+
+		if (hasBranches) {
+			if (n_collisions == 0 && n_phantoms == 0)
+				singleChunkVerified = singleChunkVerified || branchesResult;
+			else
+				singleChunkVerified = singleChunkVerified && branchesResult;
+		}
 	}
 
-	int chunks = 0;
+	SingleChunkFlagVerifier(NiObject& data, const NifInfo& info, set<NiObject*>& alreadyVisitedNodes, set<pair<bhkEntity*, bhkEntity*>>& entitiesPair) :
+		RecursiveFieldVisitor(*this, info), this_info(info), alreadyVisitedNodes(alreadyVisitedNodes), entitiesPair(entitiesPair)
+	{
+		data.accept(*this, info);
+
+		bool singlechain = false;
+		if (n_collisions - n_constraints == 1) {
+			singlechain = true;
+			singleChunkVerified = true;
+		}
+		if (n_phantoms > 0 && (singlechain || n_collisions == 0)) {
+			singleChunkVerified = true;
+		}
+		if (hasBranches) {
+			if (n_collisions == 0 && n_phantoms == 0)
+				singleChunkVerified = singleChunkVerified || branchesResult;
+			else
+				singleChunkVerified = singleChunkVerified && branchesResult;
+		}
+		
+		if (n_phantoms == 0 && n_collisions == 0)
+			singleChunkVerified = true;
+	}
 
 	template<class T>
-	inline void visit_object(T& obj) {}
+	inline void visit_object(T& obj) {
+		NiObject* ptr = (NiObject*)&obj;
+		if (alreadyVisitedNodes.insert(ptr).second) {
+			NiObjectRef ref = DynamicCast<NiObject>(ptr);
+			if (ref->IsSameType(NiSwitchNode::TYPE)) {
+				branchesResult = false;
+				hasBranches = true;
+				bool singleResult = true;
+				NiSwitchNodeRef ref = DynamicCast<NiSwitchNode>(ptr);
+				for (NiAVObjectRef child : ref->GetChildren()) {
+					bool result = SingleChunkFlagVerifier(*child, this_info, alreadyVisitedNodes, entitiesPair).singleChunkVerified;
+					singleResult = singleResult && result;
+				}
+				branchesResult = branchesResult || singleResult;
+			}
+
+			if (ref->IsDerivedType(bhkSPCollisionObject::TYPE)) {
+				n_phantoms++;
+			}
+			if (ref->IsDerivedType(bhkCollisionObject::TYPE)) {
+				n_collisions++;
+			}
+
+			if (ref->IsDerivedType(bhkConstraint::TYPE)) {
+				bhkConstraintRef cref = DynamicCast<bhkConstraint>(ref);
+				std::pair<bhkEntity*, bhkEntity*> p;
+				p.first = *cref->GetEntities().begin();
+				p.second = *(++cref->GetEntities().begin());
+				if (entitiesPair.insert(p).second)
+					n_constraints++;
+			}
+		}
+	}
 
 	template<class T>
 	inline void visit_compound(T& obj) {}
 
-	template<>
-	inline void visit_compound(bhkCMSDMaterial& obj) {
-		chunks++;
-	}
-
 	template<class T>
 	inline void visit_field(T& obj) {}
 
-	int getNumChunks() { return chunks; }
 };
 
 TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
@@ -512,9 +588,13 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 
 	path log_file = test_nifs_in_path / "BSXFlags_Skyrim_Statistics.txt";
 
-	findFiles(test_nifs_in_path / "skyrim" / "meshes" / "actors" / "dlc02" / "spider_poison", ".nif", nifs);
-	//KF are really nif files
-	//findFiles(test_kf_in_path / "oblivion", ".kf", nifs);
+	findFiles(test_nifs_in_path / "skyrim" / "meshes", ".nif", nifs);
+	//path in_path = test_nifs_in_path / "skyrim" / "meshes" / "dlc01" / "landscape" / "trees" / "winteraspen01.nif";
+	//findFiles(test_nifs_in_path, ".nif", nifs);
+	//nifs.push_back(in_path);
+
+	ASSERT_TRUE(nifs.size() > 0);
+
 	std::set<path> error;
 
 
@@ -531,15 +611,41 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 			continue;
 		if (this_path.filename().string().find("hairlonghumanm") != string::npos)
 			continue;
+		//strange oblivion like bitset
+		if (this_path.filename().string().find("markarthhousetemp01") != string::npos)
+			continue;
+		if (this_path.filename().string().find("markarthtemphouse") != string::npos)
+			continue;
+		if (this_path.filename().string().find("countercornerout01") != string::npos)
+			continue;
+		if (this_path.string().find("clutter") != string::npos && this_path.filename().string().find("table02") != string::npos)
+			continue;
+		//strange oblivion like bitset shader tests
+		if (this_path.filename().string().find("testcaveepiccorner") != string::npos)
+			continue;
+		if (this_path.filename().string().find("testcaveepicinsidecorner") != string::npos)
+			continue;
+		if (this_path.filename().string().find("testcaveepicmid03") != string::npos)
+			continue;
+		if (this_path.filename().string().find("testcaveepicwall") != string::npos)
+			continue;
+		//strange dlc2 model
+		if (this_path.filename().string().find("apoforbiddenbookact01") != string::npos)
+			continue;
+		//strange weapon model, same collision as the imperial but with different BSXFlags
+		if (this_path.filename().string().find("imperialswordgo") != string::npos)
+			continue;
 		//bugged skeleton
 		if (this_path.string().find("centaur") != string::npos)
 			continue;
 		//bugged model
 		if (this_path.string().find("atronachfrost") != string::npos && this_path.filename().string().find("shield") != string::npos)
 			continue;
-		//if (this_path.filename().string().find("eggsackpoisonexplosion") != string::npos)
-		//	continue;
+
 		vector< Ref<NiObject> > objs = ReadNifList(nifs[i].string().c_str(), &oblivion_info);
+		if (oblivion_info.userVersion2 != 83)
+			//Some Oblivion models somehow slipped into skyrim release
+			continue;
 		std::set<string> node_types;
 		int value = 0;
 		for (Ref<NiObject> ref : objs) {
@@ -553,6 +659,9 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 		}
 		if (value) {
 			int n_collisions = 0;
+			int n_phantoms = 0;
+			int n_constraints = 0;
+			set<pair<bhkEntity*, bhkEntity*>> entitiesPair;
 			bool multiple = false;
 			for (Ref<NiObject> ref : objs) {
 				if (ref->IsDerivedType(bhkRigidBody::TYPE)) {
@@ -564,49 +673,32 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 				if (ref->IsDerivedType(bhkBlendCollisionObject::TYPE)) {
 					movingVerified = true;
 				}
-				//if (ref->IsDerivedType(bhkSPCollisionObject::TYPE)) {
-				//	singleChunkVerified = true;
-				//}
-				//if (ref->IsDerivedType(bhkListShape::TYPE)) {
-				//	singleChunkVerified = true;
-				//}
-				//if (ref->IsSameType(bhkCompressedMeshShapeData::TYPE)) {
-				//	bhkCompressedMeshShapeDataRef this_value = DynamicCast<bhkCompressedMeshShapeData>(ref);
-				//	if(SingleChunkFlagVerifier(*this_value, oblivion_info).getNumChunks()>1)
-				//		singleChunkVerified = true;
-				//}
-				
-				if (ref->IsSameType(BSFadeNode::TYPE)) {
-					for (NiObjectRef cref : ref->GetRefs())
-						if (cref->IsDerivedType(bhkCollisionObject::TYPE))
-							singleChunkVerified = false;
+				/*if (ref->IsDerivedType(bhkSPCollisionObject::TYPE)) {
+					n_phantoms++;
+				}
+				if (ref->IsDerivedType(bhkCollisionObject::TYPE)) {
+					n_collisions++;
 				}
 
-				if (ref->IsSameType(NiNode::TYPE)) {
-					for (NiObjectRef cref : ref->GetRefs())
-						if (cref->IsDerivedType(bhkCollisionObject::TYPE))
-						{
-							n_collisions++;
-							if (n_collisions == 1)
-								singleChunkVerified = true;
-							else
-								singleChunkVerified = false;
-						}
-				}
-
-				
+				if (ref->IsDerivedType(bhkConstraint::TYPE)) {
+					bhkConstraintRef cref = DynamicCast<bhkConstraint>(ref);
+					std::pair<bhkEntity*, bhkEntity*> p;
+					p.first = *cref->GetEntities().begin();
+					p.second = *(++cref->GetEntities().begin());
+					if (entitiesPair.insert(p).second)
+						n_constraints++;
+				}*/
 			}
-			if (n_collisions <= 1) {
-				for (Ref<NiObject> ref : objs) {
-					if ((ref->IsDerivedType(bhkConvexTransformShape::TYPE) || ref->IsDerivedType(bhkConvexShape::TYPE))) {
-						singleChunkVerified = true;
-					}
-					if (ref->IsDerivedType(BSInvMarker::TYPE)) {
-						singleChunkVerified = true;
-					}
-				}
-			}
-
+			//bool singlechain = false;
+			//if (n_collisions - n_constraints == 1) {
+			//	singlechain = true;
+			//	singleChunkVerified = true;
+			//}
+			//if (n_phantoms > 0 && (singlechain || n_collisions == 0)) {
+			//	singleChunkVerified = true;
+			//}
+			NiObjectRef root = GetFirstRoot(objs);
+			singleChunkVerified = SingleChunkFlagVerifier(*root, oblivion_info).singleChunkVerified;
 
 			ASSERT_TRUE(moving == movingVerified) << this_path.string() << " : " << std::bitset<32>(value) << " : " << (value & (1 << 6));
 			ASSERT_TRUE(singleChunk == singleChunkVerified) << this_path.string() << " : " << std::bitset<32>(value) << " : " << (value & (1 << 7));
@@ -836,44 +928,64 @@ TEST(Calculate, Normals) {
 	//calculate sane vertex normals for geometries
 	NifInfo info;
 	vector<path> nifs;
-	path in_path = test_resources_path / "nifs" / "in" / "maniatree03.nif";
+	path in_path = test_resources_path / "nifs" / "in" / "nationalarchives_tri.nif";
 	//findFiles(test_nifs_in_path, ".nif", nifs);
 	nifs.push_back(in_path);
 	for (size_t i = 0; i < nifs.size(); i++) {
 		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
 		NiObjectRef root = GetFirstRoot(blocks);
 		NiNodeRef nroot = DynamicCast<NiNode>(root);
+		vector<NiTriShapeRef> bbs;
 		//calculate bounding mesh
 		for (NiObjectRef block : blocks) {
 			if (block->IsDerivedType(NiTriShape::TYPE)) {
 				NiTriShapeRef a_shape = DynamicCast<NiTriShape>(block);
 				NiTriShapeDataRef refn = DynamicCast<NiTriShapeData>(a_shape->GetData());
-				std::shared_ptr<boundingmesh::Mesh> mesh = make_shared<boundingmesh::Mesh>();
-				for (Triangle t : refn->GetTriangles()) {
-					boundingmesh::Index indices[3];
-					Vector3 v1 = refn->GetVertices()[t.v1];
-					Vector3 v2 = refn->GetVertices()[t.v2];
-					Vector3 v3 = refn->GetVertices()[t.v3];
 
-					boundingmesh::Vector3 mv1(v1.x, v1.y, v1.z);
-					boundingmesh::Vector3 mv2(v2.x, v2.y, v2.z);
-					boundingmesh::Vector3 mv3(v3.x, v3.y, v3.z);
-					
-					indices[0] = mesh->addVertex(mv1);
-					indices[1] = mesh->addVertex(mv2);
-					indices[2] = mesh->addVertex(mv3);
+				VHACD::IVHACD* interfaceVHACD = VHACD::CreateVHACD();
 
-					mesh->addTriangle(indices[0], indices[1], indices[2]);
+				vector<float> points;
+				vector<int> triangles;
+
+				//std::shared_ptr<boundingmesh::Mesh> mesh = make_shared<boundingmesh::Mesh>();
+				for (Vector3 v : refn->GetVertices()) {
+					points.push_back(v.x);
+					points.push_back(v.y);
+					points.push_back(v.z);
 				}
+				for (Triangle t : refn->GetTriangles()) {
+					triangles.push_back(t.v1);
+					triangles.push_back(t.v2);
+					triangles.push_back(t.v3);
+				}
+				VHACD::IVHACD::Parameters params;
+				bool res = interfaceVHACD->Compute(&points[0], (unsigned int)points.size() / 3,
+					(const uint32_t *)&triangles[0], (unsigned int)triangles.size() / 3, params);
 
-				boundingmesh::Real bounding_box_diagonal = mesh->getBoundingBoxDiagonal();
+				//for (Triangle t : refn->GetTriangles()) {
+				//	boundingmesh::Index indices[3];
+				//	Vector3 v1 = refn->GetVertices()[t.v1];
+				//	Vector3 v2 = refn->GetVertices()[t.v2];
+				//	Vector3 v3 = refn->GetVertices()[t.v3];
+
+				//	boundingmesh::Vector3 mv1(v1.x, v1.y, v1.z);
+				//	boundingmesh::Vector3 mv2(v2.x, v2.y, v2.z);
+				//	boundingmesh::Vector3 mv3(v3.x, v3.y, v3.z);
+				//	
+				//	indices[0] = mesh->addVertex(mv1);
+				//	indices[1] = mesh->addVertex(mv2);
+				//	indices[2] = mesh->addVertex(mv3);
+
+				//	mesh->addTriangle(indices[0], indices[1], indices[2]);
+				//}
+
+				/*boundingmesh::Real bounding_box_diagonal = mesh->getBoundingBoxDiagonal();
 				boundingmesh::Real alpha = 1;
-				int voxels = 5;
-				boundingmesh::Real target_error = 0.2;
+				int voxels = 50000;
 				mesh->closeHoles();
 
 				boundingmesh::SegmenterDownsampling segmenter;
-				segmenter.setMaxPasses(1);
+				segmenter.setMaxPasses(10);
 				segmenter.setAlpha(alpha);
 				segmenter.setDelta(alpha / 2);
 
@@ -882,34 +994,63 @@ TEST(Calculate, Normals) {
 				std::cout << "Calculating bounding convex decomposition..." << std::endl;
 				segmenter.compute();
 				std::vector < std::shared_ptr<boundingmesh::Mesh> > decomposition = segmenter.getSegmentation();
+*/
 
-				for (std::shared_ptr<boundingmesh::Mesh> cmesh : decomposition) {
-					NiTriShapeDataRef ref = new NiTriShapeData();
-					vector<Vector3> cvertices;
-					for (int i = 0; i < cmesh->nVertices(); i++) {
-						boundingmesh::Vector3 cv = cmesh->vertex(i).position();
-						cvertices.push_back(Vector3(cv.x(), cv.y(), cv.z()));
+
+				if (res) {
+					unsigned int nConvexHulls = interfaceVHACD->GetNConvexHulls();
+					VHACD::IVHACD::ConvexHull ch;
+					NiTriShapeDataRef bb_ref = new NiTriShapeData();
+					vector<Vector3> bb_vertices;
+					vector<Triangle> bb_faces;
+					size_t bb_v_size = bb_vertices.size();
+					for (unsigned int p = 0; p < nConvexHulls; ++p) {
+						bb_v_size = bb_vertices.size();
+						interfaceVHACD->GetConvexHull(p, ch);
+						NiTriShapeDataRef ref = new NiTriShapeData();
+						vector<Vector3> cvertices;
+						for (int i = 0; i < ch.m_nPoints; i++) {
+							cvertices.push_back(Vector3(ch.m_points[3*i], ch.m_points[3 * i+1], ch.m_points[3 * i + 2]));
+							bb_vertices.push_back(Vector3(ch.m_points[3 * i], ch.m_points[3 * i + 1], ch.m_points[3 * i + 2]));
+						}
+						ref->SetVertices(cvertices);
+						vector<Triangle> faces;
+						for (int i = 0; i < ch.m_nTriangles; i++) {
+							faces.push_back(Triangle(ch.m_triangles[3*i], ch.m_triangles[3 * i + 1], ch.m_triangles[3 * i + 2]));
+							bb_faces.push_back(Triangle(bb_v_size + ch.m_triangles[3 * i], bb_v_size + ch.m_triangles[3 * i + 1], bb_v_size + ch.m_triangles[3 * i + 2]));
+						}
+						ref->SetNumTriangles(faces.size());
+						ref->SetTriangles(faces);
+						ref->SetHasTriangles(true);
+						NiTriShapeRef shape = new NiTriShape();
+						shape->SetData(StaticCast<NiGeometryData>(ref));
+						BSLightingShaderPropertyRef lightingProperty = new BSLightingShaderProperty();
+						BSShaderTextureSetRef textureSet = new BSShaderTextureSet();
+						lightingProperty->SetTextureSet(textureSet);
+						shape->SetShaderProperty(StaticCast<BSShaderProperty>(lightingProperty));
+						IndexString s;
+						s = a_shape->GetName() + "_BB_segment_"+to_string(p);
+						shape->SetName(s);
+						vector<NiAVObjectRef> children = nroot->GetChildren();
+						children.push_back(StaticCast<NiAVObject>(shape));
+						nroot->SetChildren(children);
 					}
-					ref->SetVertices(cvertices);
-					vector<Triangle> faces;
-					for (int i = 0; i < cmesh->nTriangles(); i++) {
-						boundingmesh::Triangle t = cmesh->triangle(i);
-						faces.push_back(Triangle(t.vertex(0), t.vertex(1), t.vertex(2)));
-					}
-					ref->SetNumTriangles(faces.size());
-					ref->SetTriangles(faces);
-					ref->SetHasTriangles(true);
-					NiTriShapeRef shape = new NiTriShape();
-					shape->SetData(StaticCast<NiGeometryData>(ref));
+					bb_ref->SetVertices(bb_vertices);
+					bb_ref->SetNumTriangles(bb_faces.size());
+					bb_ref->SetTriangles(bb_faces);
+					bb_ref->SetHasTriangles(true);
+					NiTriShapeRef bb_shape = new NiTriShape();
+					bb_shape->SetData(StaticCast<NiGeometryData>(bb_ref));
 					BSLightingShaderPropertyRef lightingProperty = new BSLightingShaderProperty();
 					BSShaderTextureSetRef textureSet = new BSShaderTextureSet();
 					lightingProperty->SetTextureSet(textureSet);
-					shape->SetShaderProperty(StaticCast<BSShaderProperty>(lightingProperty));
+					bb_shape->SetShaderProperty(StaticCast<BSShaderProperty>(lightingProperty));
 					IndexString s;
 					s = a_shape->GetName() + "_BB";
-					shape->SetName(s);
+					bb_shape->SetName(s);
 					vector<NiAVObjectRef> children = nroot->GetChildren();
-					children.push_back(StaticCast<NiAVObject>(shape));
+					children.push_back(StaticCast<NiAVObject>(bb_shape));
+					bbs.push_back(bb_shape);
 					nroot->SetChildren(children);
 				}
 				//std::cout << "Simplifying bounding convex decomposition with the bounding mesh algorithm..." << std::endl;
@@ -924,23 +1065,28 @@ TEST(Calculate, Normals) {
 			}
 		}
 
-		//for (NiObjectRef block : blocks) {
-		//	if (block->IsDerivedType(NiTriShapeData::TYPE)) {
-		//		NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block);
-		//		vector<Vector3> vertices = ref->GetVertices();
-		//		vector<Triangle> faces = ref->GetTriangles();
-		//		
-		//		vector<Vector3> normals = ref->GetNormals();
-		//		if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
-		//			vector<TexCoord> uvs = ref->GetUvSets()[0];				
-		//			//Tangent Space
-		//			TriGeometryContext g(vertices, COM, faces, uvs, normals);
-		//			ref->SetNormals(g.normals);
-		//			ref->SetTangents(g.tangents);
-		//			ref->SetBitangents(g.bitangents);
-		//		}
-		//	}
-		//}
+		for (NiTriShapeRef block : bbs) {
+
+			//if (block->IsDerivedType(NiTriShapeData::TYPE)) {
+				NiTriShapeDataRef ref = DynamicCast<NiTriShapeData>(block->GetData());
+				vector<Vector3> vertices = ref->GetVertices();
+				vector<Triangle> faces = ref->GetTriangles();
+				vector<Vector3> normals;
+				Vector3 COM;
+				CalculateNormals(vertices, faces, normals, COM, false, false);
+				ref->SetHasNormals(true);
+				ref->SetNormals(normals);
+//				vector<Vector3> normals = ref->GetNormals();
+				//if (vertices.size() != 0 && faces.size() != 0 && ref->GetUvSets().size()!=0) {
+				//	vector<TexCoord> uvs = ref->GetUvSets()[0];				
+				//	//Tangent Space
+				//	TriGeometryContext g(vertices, COM, faces, uvs, normals);
+				//	;
+				//	ref->SetTangents(g.tangents);
+				//	ref->SetBitangents(g.bitangents);
+				//}
+			//}
+		}
 		//NiObjectRef root = GetFirstRoot(blocks);
 		path out_path = test_resources_path / "nifs" / "out" / nifs[i].filename();
 		WriteNifTree(out_path.string().c_str(), root, info);

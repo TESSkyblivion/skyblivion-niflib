@@ -58,11 +58,13 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/eigen )
 include_directories(${PROJECT_SOURCE_DIR}/lib/libigl/include )
 include_directories(${PROJECT_SOURCE_DIR}/lib/bounding-mesh/src/boundingmesh )
 include_directories(${PROJECT_SOURCE_DIR}/lib/quickhull )
+include_directories(${PROJECT_SOURCE_DIR}/lib/v-hacd/src/VHACD_Lib/public )
 
 add_executable(test_niflib ${SRCS} ${SRCS_MIKTT} ${SRCS_BOUNDM} ${SRCS_QUICKHULL})
 target_link_libraries(test_niflib
 	mikktspace
 	niflib
 	gtest_main
+	vhacd
 )
 

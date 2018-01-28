@@ -63,7 +63,7 @@ void CalculateNormals(const vector<Vector3>& vertices, const vector<Triangle> fa
 
 	Eigen::MatrixXf N_vertices;
 
-	igl::per_vertex_normals(V, F, igl::PER_VERTEX_NORMALS_WEIGHTING_TYPE_AREA, N_vertices);
+	igl::per_vertex_normals(V, F, igl::PER_VERTEX_NORMALS_WEIGHTING_TYPE_UNIFORM, N_vertices);
 
 	normals.resize(vertices.size());
 	for (int i = 0; i < vertices.size(); i++) {
