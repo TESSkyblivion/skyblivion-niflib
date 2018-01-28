@@ -474,31 +474,105 @@ TEST(Read, SkyrimBSXFlagsStats) {
 
 class SingleChunkFlagVerifier : public RecursiveFieldVisitor<SingleChunkFlagVerifier> {
 
-public:
+	int n_collisions = 0;
+	int n_phantoms = 0;
+	int n_constraints = 0;
+	bool hasBranches = false;
+	bool branchesResult = true;
+	set<pair<bhkEntity*, bhkEntity*>>& entitiesPair;
+	const NifInfo& this_info;
+	set<NiObject*>& alreadyVisitedNodes;
 
-	SingleChunkFlagVerifier(bhkCompressedMeshShapeData& data, const NifInfo& info) :
-		RecursiveFieldVisitor(*this, info)
+public:
+	bool singleChunkVerified = false;
+
+	SingleChunkFlagVerifier(NiObject& data, const NifInfo& info) :
+		RecursiveFieldVisitor(*this, info), this_info(info), alreadyVisitedNodes(set<NiObject*>()), entitiesPair(set<pair<bhkEntity*, bhkEntity*>>())
 	{
 		data.accept(*this, info);
+
+		bool singlechain = false;
+		if (n_collisions - n_constraints == 1) {
+			singlechain = true;
+			singleChunkVerified = true;
+		}
+		if (n_phantoms > 0 && (singlechain || n_collisions == 0)) {
+			singleChunkVerified = true;
+		}
+
+		if (hasBranches) {
+			if (n_collisions == 0 && n_phantoms == 0)
+				singleChunkVerified = singleChunkVerified || branchesResult;
+			else
+				singleChunkVerified = singleChunkVerified && branchesResult;
+		}
 	}
 
-	int chunks = 0;
+	SingleChunkFlagVerifier(NiObject& data, const NifInfo& info, set<NiObject*>& alreadyVisitedNodes, set<pair<bhkEntity*, bhkEntity*>>& entitiesPair) :
+		RecursiveFieldVisitor(*this, info), this_info(info), alreadyVisitedNodes(alreadyVisitedNodes), entitiesPair(entitiesPair)
+	{
+		data.accept(*this, info);
+
+		bool singlechain = false;
+		if (n_collisions - n_constraints == 1) {
+			singlechain = true;
+			singleChunkVerified = true;
+		}
+		if (n_phantoms > 0 && (singlechain || n_collisions == 0)) {
+			singleChunkVerified = true;
+		}
+		if (hasBranches) {
+			if (n_collisions == 0 && n_phantoms == 0)
+				singleChunkVerified = singleChunkVerified || branchesResult;
+			else
+				singleChunkVerified = singleChunkVerified && branchesResult;
+		}
+		
+		if (n_phantoms == 0 && n_collisions == 0)
+			singleChunkVerified = true;
+	}
 
 	template<class T>
-	inline void visit_object(T& obj) {}
+	inline void visit_object(T& obj) {
+		NiObject* ptr = (NiObject*)&obj;
+		if (alreadyVisitedNodes.insert(ptr).second) {
+			NiObjectRef ref = DynamicCast<NiObject>(ptr);
+			if (ref->IsSameType(NiSwitchNode::TYPE)) {
+				branchesResult = false;
+				hasBranches = true;
+				bool singleResult = true;
+				NiSwitchNodeRef ref = DynamicCast<NiSwitchNode>(ptr);
+				for (NiAVObjectRef child : ref->GetChildren()) {
+					bool result = SingleChunkFlagVerifier(*child, this_info, alreadyVisitedNodes, entitiesPair).singleChunkVerified;
+					singleResult = singleResult && result;
+				}
+				branchesResult = branchesResult || singleResult;
+			}
+
+			if (ref->IsDerivedType(bhkSPCollisionObject::TYPE)) {
+				n_phantoms++;
+			}
+			if (ref->IsDerivedType(bhkCollisionObject::TYPE)) {
+				n_collisions++;
+			}
+
+			if (ref->IsDerivedType(bhkConstraint::TYPE)) {
+				bhkConstraintRef cref = DynamicCast<bhkConstraint>(ref);
+				std::pair<bhkEntity*, bhkEntity*> p;
+				p.first = *cref->GetEntities().begin();
+				p.second = *(++cref->GetEntities().begin());
+				if (entitiesPair.insert(p).second)
+					n_constraints++;
+			}
+		}
+	}
 
 	template<class T>
 	inline void visit_compound(T& obj) {}
 
-	template<>
-	inline void visit_compound(bhkCMSDMaterial& obj) {
-		chunks++;
-	}
-
 	template<class T>
 	inline void visit_field(T& obj) {}
 
-	int getNumChunks() { return chunks; }
 };
 
 TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
@@ -514,9 +588,13 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 
 	path log_file = test_nifs_in_path / "BSXFlags_Skyrim_Statistics.txt";
 
-	findFiles(test_nifs_in_path / "skyrim" / "meshes" / "actors" / "dlc02" / "spider_poison", ".nif", nifs);
-	//KF are really nif files
-	//findFiles(test_kf_in_path / "oblivion", ".kf", nifs);
+	findFiles(test_nifs_in_path / "skyrim" / "meshes", ".nif", nifs);
+	//path in_path = test_nifs_in_path / "skyrim" / "meshes" / "dlc01" / "landscape" / "trees" / "winteraspen01.nif";
+	//findFiles(test_nifs_in_path, ".nif", nifs);
+	//nifs.push_back(in_path);
+
+	ASSERT_TRUE(nifs.size() > 0);
+
 	std::set<path> error;
 
 
@@ -533,15 +611,41 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 			continue;
 		if (this_path.filename().string().find("hairlonghumanm") != string::npos)
 			continue;
+		//strange oblivion like bitset
+		if (this_path.filename().string().find("markarthhousetemp01") != string::npos)
+			continue;
+		if (this_path.filename().string().find("markarthtemphouse") != string::npos)
+			continue;
+		if (this_path.filename().string().find("countercornerout01") != string::npos)
+			continue;
+		if (this_path.string().find("clutter") != string::npos && this_path.filename().string().find("table02") != string::npos)
+			continue;
+		//strange oblivion like bitset shader tests
+		if (this_path.filename().string().find("testcaveepiccorner") != string::npos)
+			continue;
+		if (this_path.filename().string().find("testcaveepicinsidecorner") != string::npos)
+			continue;
+		if (this_path.filename().string().find("testcaveepicmid03") != string::npos)
+			continue;
+		if (this_path.filename().string().find("testcaveepicwall") != string::npos)
+			continue;
+		//strange dlc2 model
+		if (this_path.filename().string().find("apoforbiddenbookact01") != string::npos)
+			continue;
+		//strange weapon model, same collision as the imperial but with different BSXFlags
+		if (this_path.filename().string().find("imperialswordgo") != string::npos)
+			continue;
 		//bugged skeleton
 		if (this_path.string().find("centaur") != string::npos)
 			continue;
 		//bugged model
 		if (this_path.string().find("atronachfrost") != string::npos && this_path.filename().string().find("shield") != string::npos)
 			continue;
-		//if (this_path.filename().string().find("eggsackpoisonexplosion") != string::npos)
-		//	continue;
+
 		vector< Ref<NiObject> > objs = ReadNifList(nifs[i].string().c_str(), &oblivion_info);
+		if (oblivion_info.userVersion2 != 83)
+			//Some Oblivion models somehow slipped into skyrim release
+			continue;
 		std::set<string> node_types;
 		int value = 0;
 		for (Ref<NiObject> ref : objs) {
@@ -555,6 +659,9 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 		}
 		if (value) {
 			int n_collisions = 0;
+			int n_phantoms = 0;
+			int n_constraints = 0;
+			set<pair<bhkEntity*, bhkEntity*>> entitiesPair;
 			bool multiple = false;
 			for (Ref<NiObject> ref : objs) {
 				if (ref->IsDerivedType(bhkRigidBody::TYPE)) {
@@ -566,49 +673,32 @@ TEST(Read, SkyrimBSXFlagsMO_QUAL_MOVING) {
 				if (ref->IsDerivedType(bhkBlendCollisionObject::TYPE)) {
 					movingVerified = true;
 				}
-				//if (ref->IsDerivedType(bhkSPCollisionObject::TYPE)) {
-				//	singleChunkVerified = true;
-				//}
-				//if (ref->IsDerivedType(bhkListShape::TYPE)) {
-				//	singleChunkVerified = true;
-				//}
-				//if (ref->IsSameType(bhkCompressedMeshShapeData::TYPE)) {
-				//	bhkCompressedMeshShapeDataRef this_value = DynamicCast<bhkCompressedMeshShapeData>(ref);
-				//	if(SingleChunkFlagVerifier(*this_value, oblivion_info).getNumChunks()>1)
-				//		singleChunkVerified = true;
-				//}
-				
-				if (ref->IsSameType(BSFadeNode::TYPE)) {
-					for (NiObjectRef cref : ref->GetRefs())
-						if (cref->IsDerivedType(bhkCollisionObject::TYPE))
-							singleChunkVerified = false;
+				/*if (ref->IsDerivedType(bhkSPCollisionObject::TYPE)) {
+					n_phantoms++;
+				}
+				if (ref->IsDerivedType(bhkCollisionObject::TYPE)) {
+					n_collisions++;
 				}
 
-				if (ref->IsSameType(NiNode::TYPE)) {
-					for (NiObjectRef cref : ref->GetRefs())
-						if (cref->IsDerivedType(bhkCollisionObject::TYPE))
-						{
-							n_collisions++;
-							if (n_collisions == 1)
-								singleChunkVerified = true;
-							else
-								singleChunkVerified = false;
-						}
-				}
-
-				
+				if (ref->IsDerivedType(bhkConstraint::TYPE)) {
+					bhkConstraintRef cref = DynamicCast<bhkConstraint>(ref);
+					std::pair<bhkEntity*, bhkEntity*> p;
+					p.first = *cref->GetEntities().begin();
+					p.second = *(++cref->GetEntities().begin());
+					if (entitiesPair.insert(p).second)
+						n_constraints++;
+				}*/
 			}
-			if (n_collisions <= 1) {
-				for (Ref<NiObject> ref : objs) {
-					if ((ref->IsDerivedType(bhkConvexTransformShape::TYPE) || ref->IsDerivedType(bhkConvexShape::TYPE))) {
-						singleChunkVerified = true;
-					}
-					if (ref->IsDerivedType(BSInvMarker::TYPE)) {
-						singleChunkVerified = true;
-					}
-				}
-			}
-
+			//bool singlechain = false;
+			//if (n_collisions - n_constraints == 1) {
+			//	singlechain = true;
+			//	singleChunkVerified = true;
+			//}
+			//if (n_phantoms > 0 && (singlechain || n_collisions == 0)) {
+			//	singleChunkVerified = true;
+			//}
+			NiObjectRef root = GetFirstRoot(objs);
+			singleChunkVerified = SingleChunkFlagVerifier(*root, oblivion_info).singleChunkVerified;
 
 			ASSERT_TRUE(moving == movingVerified) << this_path.string() << " : " << std::bitset<32>(value) << " : " << (value & (1 << 6));
 			ASSERT_TRUE(singleChunk == singleChunkVerified) << this_path.string() << " : " << std::bitset<32>(value) << " : " << (value & (1 << 7));
