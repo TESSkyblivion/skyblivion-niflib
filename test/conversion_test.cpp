@@ -32,7 +32,8 @@ NiNode visitNiNodes(NiNode node)
 			}
 		}
 		if (block->IsDerivedType(NiNode::TYPE)) {
-			visitNiNodes(*DynamicCast<NiNode>(block));
+			NiNodeRef nodeRef = new NiNode((visitNiNodes(*DynamicCast<NiNode>(block))));
+			children[index] = nodeRef;
 		}
 		index++;
 	}
@@ -111,16 +112,6 @@ public:
 	//	NiBillboardNode
 	//	NiCamera
 	//	NiControllerManager
-	template<>
-	inline void visit_object(NiControllerManager& obj) {
-		//Need to remove NiStringPalettes, not used in Skyrim.
-		vector<Ref<NiControllerSequence>> sequences = obj.GetControllerSequences();
-		for (NiControllerSequenceRef sequence : sequences) {
-			sequence->SetStringPalette(NULL);
-		}
-		obj.SetTarget(0);
-		obj.SetControllerSequences(sequences);
-	}
 	//	NiDirectionalLight
 	//	NiFogProperty
 	//	NiKeyframeController
@@ -546,6 +537,36 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 			index++;
 		}
 		fadeNode->SetChildren(children);
+
+		NiControllerManagerRef controllerRef = DynamicCast<NiControllerManager>(fadeNode->GetController());
+		controllerRef->SetTarget(fadeNode);
+
+		vector<Ref<NiControllerSequence>> sequences = controllerRef->GetControllerSequences();
+		index = 0;
+		for (NiControllerSequenceRef sequence : sequences) {
+			vector<ControlledBlock> blocks = sequence->GetControlledBlocks();
+			for (ControlledBlock block : blocks) {
+				block.nodeName = block.stringPalette->GetPalette().palette;
+				block.controllerType = "NiTransformController"; //will need changing.
+				blocks[index] = block;
+
+				NiTransformInterpolatorRef transform = DynamicCast<NiTransformInterpolator>(block.interpolator);
+				NiTransformDataRef transformData = DynamicCast<NiTransformData>(transform->GetData());
+			}
+			sequence->SetControlledBlocks(blocks);
+
+			vector<Key<IndexString>> textKeys = sequence->GetTextKeys()->GetTextKeys();
+			for (int i = 0; i != textKeys.size(); i++) {
+				if (strstr(textKeys[i].data.c_str(), "Sound:"))
+					textKeys[i].data.insert(7, "TES4");
+			}
+
+			sequence->GetTextKeys()->SetTextKeys(textKeys);
+
+			index++;
+		}
+		controllerRef->SetControllerSequences(sequences);
+		fadeNode->SetController(DynamicCast<NiTimeController>(controllerRef));
 
 		//hates just 'NULL'
 		if (isWeaponType(nifs[i].string().c_str()) != "null") {
