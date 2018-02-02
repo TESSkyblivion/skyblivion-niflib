@@ -328,7 +328,10 @@ public:
 	//NB: Deprecated after Skyrim, triangulate
 	template<>
 	inline void visit_object(NiTriStrips& obj) {
-		
+		//bools
+		bool hasAlpha = false;
+		bool hasStencil = false;
+
 		//get the NiTriStripsData
 		NiTriStripsDataRef stripsData = DynamicCast<NiTriStripsData>(obj.GetData());
 
@@ -427,15 +430,22 @@ public:
 				textureSet->SetTextures(textures);
 			}
 			if (propertyRef->IsSameType(NiAlphaProperty::TYPE))
-				obj.SetAlphaProperty(DynamicCast<NiAlphaProperty>(propertyRef)); //Still not working, needs work
+				hasAlpha = true;
 			if (propertyRef->IsSameType(NiStencilProperty::TYPE))
 				lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() + SkyrimShaderPropertyFlags2::SLSF2_DOUBLE_SIDED));
 		}
-		if(!obj.GetData()->GetHasVertexColors())
+		if (!obj.GetData()->GetHasVertexColors())
 			lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() - SkyrimShaderPropertyFlags2::SLSF2_VERTEX_COLORS));
 
 		lightingProperty->SetTextureSet(textureSet);
 		obj.SetShaderProperty(DynamicCast<BSShaderProperty>(lightingProperty));
+
+		NiAlphaPropertyRef alphaProp = new NiAlphaProperty();
+		alphaProp->SetThreshold(127);
+		alphaProp->SetFlags(4608);
+
+		if (hasAlpha)
+			obj.SetAlphaProperty(alphaProp);
 
 		//finally set the data
 		obj.SetExtraDataList(vector<Ref<NiExtraData>> {});
@@ -538,35 +548,37 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 		}
 		fadeNode->SetChildren(children);
 
-		NiControllerManagerRef controllerRef = DynamicCast<NiControllerManager>(fadeNode->GetController());
-		controllerRef->SetTarget(fadeNode);
+		if (fadeNode->GetController() != NULL) {
+			NiControllerManagerRef controllerRef = DynamicCast<NiControllerManager>(fadeNode->GetController());
+			controllerRef->SetTarget(fadeNode);
 
-		vector<Ref<NiControllerSequence>> sequences = controllerRef->GetControllerSequences();
-		index = 0;
-		for (NiControllerSequenceRef sequence : sequences) {
-			vector<ControlledBlock> blocks = sequence->GetControlledBlocks();
-			for (ControlledBlock block : blocks) {
-				block.nodeName = block.stringPalette->GetPalette().palette;
-				block.controllerType = "NiTransformController"; //will need changing.
-				blocks[index] = block;
+			vector<Ref<NiControllerSequence>> sequences = controllerRef->GetControllerSequences();
+			index = 0;
+			for (NiControllerSequenceRef sequence : sequences) {
+				vector<ControlledBlock> blocks = sequence->GetControlledBlocks();
+				for (ControlledBlock block : blocks) {
+					block.nodeName = block.stringPalette->GetPalette().palette;
+					block.controllerType = "NiTransformController"; //will need changing.
+					blocks[index] = block;
 
-				NiTransformInterpolatorRef transform = DynamicCast<NiTransformInterpolator>(block.interpolator);
-				NiTransformDataRef transformData = DynamicCast<NiTransformData>(transform->GetData());
+					NiTransformInterpolatorRef transform = DynamicCast<NiTransformInterpolator>(block.interpolator);
+					NiTransformDataRef transformData = DynamicCast<NiTransformData>(transform->GetData());
+				}
+				sequence->SetControlledBlocks(blocks);
+
+				vector<Key<IndexString>> textKeys = sequence->GetTextKeys()->GetTextKeys();
+				for (int i = 0; i != textKeys.size(); i++) {
+					if (strstr(textKeys[i].data.c_str(), "Sound:"))
+						textKeys[i].data.insert(7, "TES4");
+				}
+
+				sequence->GetTextKeys()->SetTextKeys(textKeys);
+
+				index++;
 			}
-			sequence->SetControlledBlocks(blocks);
-
-			vector<Key<IndexString>> textKeys = sequence->GetTextKeys()->GetTextKeys();
-			for (int i = 0; i != textKeys.size(); i++) {
-				if (strstr(textKeys[i].data.c_str(), "Sound:"))
-					textKeys[i].data.insert(7, "TES4");
-			}
-
-			sequence->GetTextKeys()->SetTextKeys(textKeys);
-
-			index++;
+			controllerRef->SetControllerSequences(sequences);
+			fadeNode->SetController(DynamicCast<NiTimeController>(controllerRef));
 		}
-		controllerRef->SetControllerSequences(sequences);
-		fadeNode->SetController(DynamicCast<NiTimeController>(controllerRef));
 
 		//hates just 'NULL'
 		if (isWeaponType(nifs[i].string().c_str()) != "null") {
