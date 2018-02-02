@@ -4,6 +4,7 @@ All rights reserved. Please see niflib.h for license. */
 #include "test_utils.h"
 #include "geometry.h"
 
+//strip to shape
 NiTriShapeRef convert_strip(NiTriStrips stripsRef)
 {
 	NiTriShapeRef shapeRef = new NiTriShape();
@@ -17,6 +18,7 @@ NiTriShapeRef convert_strip(NiTriStrips stripsRef)
 	shapeRef->SetShaderProperty(stripsRef.GetShaderProperty());
 	return shapeRef;
 }
+
 //check for nested NiNodes
 NiNode visitNiNodes(NiNode node)
 {
@@ -30,12 +32,34 @@ NiNode visitNiNodes(NiNode node)
 			}
 		}
 		if (block->IsDerivedType(NiNode::TYPE)) {
-			visitNiNodes(*DynamicCast<NiNode>(block));
+			NiNodeRef nodeRef = new NiNode((visitNiNodes(*DynamicCast<NiNode>(block))));
+			children[index] = nodeRef;
 		}
 		index++;
 	}
 	node.SetChildren(children);
 	return node;
+}
+
+//Sloppy, but it works until CBash is ready (if it ever is :P)
+IndexString isWeaponType(const string fileName)
+{
+	if (strstr(fileName.c_str(), "battleaxe.nif") || strstr(fileName.c_str(), "claymore.nif") || strstr(fileName.c_str(), "warhammer.nif"))
+		return IndexString("WeaponBack");
+	else if (strstr(fileName.c_str(), "arrow.nif"))
+		return IndexString("QUIVER");
+	else if (strstr(fileName.c_str(), "bow.nif"))
+		return IndexString("WeaponBow");
+	else if (strstr(fileName.c_str(), "longsword.nif") || strstr(fileName.c_str(), "shortsword.nif"))
+		return IndexString("WeaponSword");
+	else if (strstr(fileName.c_str(), "dagger.nif"))
+		return IndexString("WeaponDagger");
+	else if (strstr(fileName.c_str(), "mace.nif"))
+		return IndexString("WeaponMace");
+	else if (strstr(fileName.c_str(), "waraxe.nif"))
+		return IndexString("WeaponAxe");
+	else
+		return IndexString("null");
 }
 
 //#include <objDecl.cpp>
@@ -88,16 +112,6 @@ public:
 	//	NiBillboardNode
 	//	NiCamera
 	//	NiControllerManager
-	template<>
-	inline void visit_object(NiControllerManager& obj) {
-		//Need to remove NiStringPalettes, not used in Skyrim.
-		vector<Ref<NiControllerSequence>> sequences = obj.GetControllerSequences();
-		for (NiControllerSequenceRef sequence : sequences) {
-			sequence->SetStringPalette(NULL);
-		}
-		obj.SetTarget(0);
-		obj.SetControllerSequences(sequences);
-	}
 	//	NiDirectionalLight
 	//	NiFogProperty
 	//	NiKeyframeController
@@ -314,7 +328,10 @@ public:
 	//NB: Deprecated after Skyrim, triangulate
 	template<>
 	inline void visit_object(NiTriStrips& obj) {
-		
+		//bools
+		bool hasAlpha = false;
+		bool hasStencil = false;
+
 		//get the NiTriStripsData
 		NiTriStripsDataRef stripsData = DynamicCast<NiTriStripsData>(obj.GetData());
 
@@ -413,15 +430,22 @@ public:
 				textureSet->SetTextures(textures);
 			}
 			if (propertyRef->IsSameType(NiAlphaProperty::TYPE))
-				obj.SetAlphaProperty(DynamicCast<NiAlphaProperty>(propertyRef)); //Still not working, needs work
+				hasAlpha = true;
 			if (propertyRef->IsSameType(NiStencilProperty::TYPE))
 				lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() + SkyrimShaderPropertyFlags2::SLSF2_DOUBLE_SIDED));
 		}
-		if(!obj.GetData()->GetHasVertexColors())
+		if (!obj.GetData()->GetHasVertexColors())
 			lightingProperty->SetShaderFlags2_sk(static_cast<SkyrimShaderPropertyFlags2>(lightingProperty->GetShaderFlags2_sk() - SkyrimShaderPropertyFlags2::SLSF2_VERTEX_COLORS));
 
 		lightingProperty->SetTextureSet(textureSet);
 		obj.SetShaderProperty(DynamicCast<BSShaderProperty>(lightingProperty));
+
+		NiAlphaPropertyRef alphaProp = new NiAlphaProperty();
+		alphaProp->SetThreshold(127);
+		alphaProp->SetFlags(4608);
+
+		if (hasAlpha)
+			obj.SetAlphaProperty(alphaProp);
 
 		//finally set the data
 		obj.SetExtraDataList(vector<Ref<NiExtraData>> {});
@@ -523,6 +547,58 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 			index++;
 		}
 		fadeNode->SetChildren(children);
+
+		if (fadeNode->GetController() != NULL) {
+			NiControllerManagerRef controllerRef = DynamicCast<NiControllerManager>(fadeNode->GetController());
+			controllerRef->SetTarget(fadeNode);
+
+			vector<Ref<NiControllerSequence>> sequences = controllerRef->GetControllerSequences();
+			index = 0;
+			for (NiControllerSequenceRef sequence : sequences) {
+				vector<ControlledBlock> blocks = sequence->GetControlledBlocks();
+				for (ControlledBlock block : blocks) {
+					block.nodeName = block.stringPalette->GetPalette().palette;
+					block.controllerType = "NiTransformController"; //will need changing.
+					blocks[index] = block;
+
+					NiTransformInterpolatorRef transform = DynamicCast<NiTransformInterpolator>(block.interpolator);
+					NiTransformDataRef transformData = DynamicCast<NiTransformData>(transform->GetData());
+				}
+				sequence->SetControlledBlocks(blocks);
+
+				vector<Key<IndexString>> textKeys = sequence->GetTextKeys()->GetTextKeys();
+				for (int i = 0; i != textKeys.size(); i++) {
+					if (strstr(textKeys[i].data.c_str(), "Sound:"))
+						textKeys[i].data.insert(7, "TES4");
+				}
+
+				sequence->GetTextKeys()->SetTextKeys(textKeys);
+
+				index++;
+			}
+			controllerRef->SetControllerSequences(sequences);
+			fadeNode->SetController(DynamicCast<NiTimeController>(controllerRef));
+		}
+
+		//hates just 'NULL'
+		if (isWeaponType(nifs[i].string().c_str()) != "null") {
+			IndexString string = isWeaponType(nifs[i].string().c_str());
+			vector<Ref<NiExtraData>> extraDataList = fadeNode->GetExtraDataList();
+			int index = 0;
+			for (NiExtraDataRef data : extraDataList)
+			{
+				if (data->GetInternalType().IsSameType(NiStringExtraData::TYPE))
+				{
+					NiStringExtraDataRef extraData = DynamicCast<NiStringExtraData>(data);
+					if (extraData->GetName() == "Prn") //dont want the wrong one.
+					{
+						extraData->SetStringData(string);
+						extraDataList[index] = DynamicCast<NiExtraData>(extraData);
+					}
+				}
+			}
+			fadeNode->SetExtraDataList(extraDataList);
+		}
 		root = fadeNode;
 
 		//create the new path
