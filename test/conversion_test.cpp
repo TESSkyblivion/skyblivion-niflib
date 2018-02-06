@@ -550,21 +550,26 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 
 		if (fadeNode->GetController() != NULL) {
 			NiControllerManagerRef controllerRef = DynamicCast<NiControllerManager>(fadeNode->GetController());
-			controllerRef->SetTarget(fadeNode);
+			controllerRef->SetTarget(DynamicCast<NiAVObject>(root));
 
 			vector<Ref<NiControllerSequence>> sequences = controllerRef->GetControllerSequences();
-			index = 0;
 			for (NiControllerSequenceRef sequence : sequences) {
 				vector<ControlledBlock> blocks = sequence->GetControlledBlocks();
+				vector<ControlledBlock> newBlocks;
 				for (ControlledBlock block : blocks) {
+					//check if the controlled block is used.
+					NiTransformInterpolatorRef Inter = DynamicCast<NiTransformInterpolator>(block.interpolator);
+					NiKeyframeDataRef Data = Inter->GetData();
+					if (Data == NULL)
+						continue;
+
+					//if it has, lets make changes :)
 					block.nodeName = block.stringPalette->GetPalette().palette;
 					block.controllerType = "NiTransformController"; //will need changing.
-					blocks[index] = block;
-
-					NiTransformInterpolatorRef transform = DynamicCast<NiTransformInterpolator>(block.interpolator);
-					NiTransformDataRef transformData = DynamicCast<NiTransformData>(transform->GetData());
+					newBlocks.push_back(block);
 				}
-				sequence->SetControlledBlocks(blocks);
+				sequence->SetControlledBlocks(newBlocks);
+				sequence->SetStringPalette(NULL); //why won't these go away :/
 
 				vector<Key<IndexString>> textKeys = sequence->GetTextKeys()->GetTextKeys();
 				for (int i = 0; i != textKeys.size(); i++) {
@@ -577,6 +582,20 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 				index++;
 			}
 			controllerRef->SetControllerSequences(sequences);
+
+			NiDefaultAVObjectPaletteRef pallete = controllerRef->GetObjectPalette();
+			pallete->SetScene(DynamicCast<NiAVObject>(root));
+			vector<AVObject> objs = pallete->GetObjs();
+			for (int i = 0; i != blocks.size(); i++) {
+				string newString = blocks[i]->asString();
+				for (int j = 0; j != objs.size(); j++) {
+					if (strstr(newString.c_str(), objs[j].name.c_str())) {
+						objs[j].avObject = DynamicCast<NiAVObject>(blocks[i]);
+					}
+				}
+			}
+			pallete->SetObjs(objs);
+			controllerRef->SetObjectPalette(pallete);
 			fadeNode->SetController(DynamicCast<NiTimeController>(controllerRef));
 		}
 
