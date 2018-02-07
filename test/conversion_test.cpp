@@ -503,8 +503,9 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 	if (nifs.empty()) return;
 
 	for (size_t i = 0; i < nifs.size(); i++) {
-		NiObjectRef root = ReadNifTree(nifs[i].string().c_str(), &info);
+		//NiObjectRef root = ReadNifTree(nifs[i].string().c_str(), &info);
 		vector<NiObjectRef> blocks = ReadNifList(nifs[i].string().c_str(), &info);
+		NiObjectRef root = GetFirstRoot(blocks);
 
 		//set versioning
 		info.userVersion = 12;
@@ -586,11 +587,13 @@ TEST(ConversionTest, OblivionToSkyrimSingleNIF) {
 			NiDefaultAVObjectPaletteRef pallete = controllerRef->GetObjectPalette();
 			pallete->SetScene(DynamicCast<NiAVObject>(root));
 			vector<AVObject> objs = pallete->GetObjs();
-			for (int i = 0; i != blocks.size(); i++) {
-				string newString = blocks[i]->asString();
-				for (int j = 0; j != objs.size(); j++) {
-					if (strstr(newString.c_str(), objs[j].name.c_str())) {
-						objs[j].avObject = DynamicCast<NiAVObject>(blocks[i]);
+			//for (int i = 0; i != blocks.size(); i++) {
+			for (NiObjectRef bref : blocks) {
+				if (bref->IsDerivedType(NiAVObject::TYPE)) {
+					NiAVObjectRef avref = DynamicCast<NiAVObject>(bref);
+					for (AVObject& avc : objs) {
+						if (avc.name == avref->GetName())
+							avc.avObject = &*avref;
 					}
 				}
 			}
