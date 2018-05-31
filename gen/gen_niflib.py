@@ -342,6 +342,7 @@ for n in compound_names:
             else:
                 h.code( 'NIFLIB_API std::vector<unsigned int> GetValidFieldsIndices( const NifInfo & info ) const {' )
             h.stream(x, ACTION_RTTI_GETVALID)
+            h.code( 'return valid_fields;' )
             h.code("}")
             h.code()
             h.code( 'NIFLIB_API virtual void accept(class CompoundVisitor& visitor, const NifInfo & in) {' )
@@ -873,7 +874,7 @@ for n in block_names:
         out.code( 'class ' + x.cname + ' : public ' + x.inherit.cname + ' {' )
     else:
         out.code( 'class ' + x.cname + ' : public RefObject {' )
-    out.code( 'friend class Visitor;')
+    out.code( 'template<typename Delegate> friend class Accessor;')
     out.code( 'public:' )
     out.code()
     out.stream(x, ACTION_RTTI_FIELDS)

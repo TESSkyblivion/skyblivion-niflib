@@ -103,8 +103,10 @@ namespace Niflib {
 			parent = StaticCast<NiObject>(&obj);
 			valid_field_indices = obj.GetValidFieldsIndices(info);
 
+			start(*parent, info);
 			delegate.visit_object(obj);
 			obj.accept(*this);
+			end(*parent, info);
 
 			//restore frame
 			valid_field_indices = old_valid_indices;
@@ -220,8 +222,8 @@ namespace Niflib {
 		}
 
 		
-		inline void start(NiObject& in, const NifInfo& info) {}
-		inline void end(NiObject& in, const NifInfo& info) {}
+		virtual inline void start(NiObject& in, const NifInfo& info) {}
+		virtual inline void end(NiObject& in, const NifInfo& info) {}
 	};
 
 }
