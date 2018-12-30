@@ -885,7 +885,8 @@ public:
 			block.accept(*this, info);
 
 		//Go to extra data before visiting this
-		obj.GetTextKeys()->accept(*this, info);
+		if (obj.GetTextKeys()!=NULL)
+			obj.GetTextKeys()->accept(*this, info);
 
 		obj.accept(*this);
 
