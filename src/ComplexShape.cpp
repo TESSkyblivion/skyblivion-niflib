@@ -52,7 +52,7 @@ All rights reserved.  Please see niflib.h for license. */
 
 using namespace Niflib;
 
-//Wrape these in the Niflib namespace so they don't polute the Class View
+//Wrap these in the Niflib namespace so they don't pollute the Class View
 namespace Niflib
 {
 	struct VertNorm
