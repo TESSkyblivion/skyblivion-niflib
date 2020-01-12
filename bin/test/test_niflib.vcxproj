@@ -1,0 +1,378 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{77E08088-3B7E-35A4-BACD-1B1D940785BE}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>test_niflib</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">test_niflib.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">test_niflib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">test_niflib.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">test_niflib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">test_niflib.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">test_niflib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">test_niflib.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">test_niflib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\mikktspace\Debug\mikktspace.lib;..\Debug\niflib.lib;..\lib\Debug\gtest_maind.lib;..\lib\v-hacd\src\VHACD_Lib\Debug\vhacd.lib;..\lib\Debug\gtestd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/Debug/test_niflib.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/Debug/test_niflib.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\mikktspace\Release\mikktspace.lib;..\Release\niflib.lib;..\lib\Release\gtest_main.lib;..\lib\v-hacd\src\VHACD_Lib\Release\vhacd.lib;..\lib\Release\gtest.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/Release/test_niflib.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/Release/test_niflib.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\mikktspace\MinSizeRel\mikktspace.lib;..\MinSizeRel\niflib.lib;..\lib\MinSizeRel\gtest_main.lib;..\lib\v-hacd\src\VHACD_Lib\MinSizeRel\vhacd.lib;..\lib\MinSizeRel\gtest.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/MinSizeRel/test_niflib.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/MinSizeRel/test_niflib.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <LanguageStandard>Default</LanguageStandard>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;NIFLIB_STATIC_LINK;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\public;E:\SkyBlivion\niflib\skyblivion-niflib\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\mikktspace;E:\SkyBlivion\niflib\skyblivion-niflib\lib\eigen;E:\SkyBlivion\niflib\skyblivion-niflib\lib\libigl\include;E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh;E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull;E:\SkyBlivion\niflib\skyblivion-niflib\lib\v-hacd\src\VHACD_Lib\inc;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest\include;E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-src\googletest;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\lib\mikktspace\RelWithDebInfo\mikktspace.lib;..\RelWithDebInfo\niflib.lib;..\lib\RelWithDebInfo\gtest_main.lib;..\lib\v-hacd\src\VHACD_Lib\RelWithDebInfo\vhacd.lib;..\lib\RelWithDebInfo\gtest.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/RelWithDebInfo/test_niflib.lib</ImportLibrary>
+      <ProgramDataBaseFile>E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/RelWithDebInfo/test_niflib.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule E:/SkyBlivion/niflib/skyblivion-niflib/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/SkyBlivion/niflib/skyblivion-niflib -BE:/SkyBlivion/niflib/skyblivion-niflib/bin --check-stamp-file E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;E:\SkyBlivion\niflib\skyblivion-niflib\test\CMakeLists.txt.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule E:/SkyBlivion/niflib/skyblivion-niflib/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/SkyBlivion/niflib/skyblivion-niflib -BE:/SkyBlivion/niflib/skyblivion-niflib/bin --check-stamp-file E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;E:\SkyBlivion\niflib\skyblivion-niflib\test\CMakeLists.txt.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule E:/SkyBlivion/niflib/skyblivion-niflib/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/SkyBlivion/niflib/skyblivion-niflib -BE:/SkyBlivion/niflib/skyblivion-niflib/bin --check-stamp-file E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;E:\SkyBlivion\niflib\skyblivion-niflib\test\CMakeLists.txt.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule E:/SkyBlivion/niflib/skyblivion-niflib/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SE:/SkyBlivion/niflib/skyblivion-niflib -BE:/SkyBlivion/niflib/skyblivion-niflib/bin --check-stamp-file E:/SkyBlivion/niflib/skyblivion-niflib/bin/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.c.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;E:\SkyBlivion\niflib\skyblivion-niflib\test\CMakeLists.txt.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\SkyBlivion\niflib\skyblivion-niflib\bin\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\conversion_test.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\geometry.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\normal_test.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\read_write_test.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\sample_test.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\test_utils.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\test\mikktspace\generate.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\ContractionUtils.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\Decimator.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\FileUtils.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\Mesh.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\MetricGenerator.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\Primitives.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\SegmenterDownsampling.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\SegmenterSimple.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\Split.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\VoxelSet.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\bounding-mesh\src\boundingmesh\VoxelSubset.cpp" />
+    <ClCompile Include="E:\SkyBlivion\niflib\skyblivion-niflib\lib\quickhull\QuickHull.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="E:\SkyBlivion\niflib\skyblivion-niflib\bin\ZERO_CHECK.vcxproj">
+      <Project>{D714C4F0-AFDF-3251-90E8-ECBB73C37136}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-build\googletest\gtest.vcxproj">
+      <Project>{2485E5C4-01F2-3988-8D37-FF2C741B7951}</Project>
+      <Name>gtest</Name>
+    </ProjectReference>
+    <ProjectReference Include="E:\SkyBlivion\niflib\skyblivion-niflib\bin\googletest-build\googletest\gtest_main.vcxproj">
+      <Project>{75F5507F-27E0-3F5D-9529-3DCABF33C29F}</Project>
+      <Name>gtest_main</Name>
+    </ProjectReference>
+    <ProjectReference Include="E:\SkyBlivion\niflib\skyblivion-niflib\bin\lib\mikktspace\mikktspace.vcxproj">
+      <Project>{317C8F68-5897-3B0A-AC05-1EB322807829}</Project>
+      <Name>mikktspace</Name>
+    </ProjectReference>
+    <ProjectReference Include="E:\SkyBlivion\niflib\skyblivion-niflib\bin\niflib.vcxproj">
+      <Project>{DCE3CEA0-14ED-3578-8A4F-FCB94AB42A54}</Project>
+      <Name>niflib</Name>
+    </ProjectReference>
+    <ProjectReference Include="E:\SkyBlivion\niflib\skyblivion-niflib\bin\lib\v-hacd\src\VHACD_Lib\vhacd.vcxproj">
+      <Project>{241DE0E4-57DA-3F0C-ACCC-FD0E0B1AABF3}</Project>
+      <Name>vhacd</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
