@@ -10,6 +10,8 @@
 
 #include <VHACD.h>
 
+#include <filesystem>
+
 //#include <gtest/gtest.h>
 //
 //#include <filesystem>
