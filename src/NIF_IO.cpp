@@ -764,14 +764,13 @@ ostream & operator<<(ostream & out, const Niflib::BSVertexDesc& data) {
 //TODO
 void NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BSVertexDesc desc)
 {
-	uint16_t vertexFlags = desc.vertexAttributes;
 	//MSVC COMPLAINS
-	if ((vertexFlags & 16) && (vertexFlags & 16384) == 0 && info.userVersion2 == 130) {
+	if ((desc.VA_Vertex) && (desc.VA_Full_Precision) == 0 && info.userVersion2 == 130) {
 		NifStream(data.vertex.x, in, info);
 		NifStream(data.vertex.y, in, info);
 		NifStream(data.vertex.z, in, info);
 
-		if (vertexFlags & 256) {
+		if (desc.VA_Tangents) {
 			NifStream(data.bitangentX, in, info);
 		}
 		else {
@@ -779,38 +778,38 @@ void NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BS
 		}
 	}
 
-	if (vertexFlags & 16 && (vertexFlags & 16384 || info.userVersion2 == 100)) {
+	if (desc.VA_Vertex && (desc.VA_Full_Precision || info.userVersion2 == 100)) {
 		NifStream(data.vertex2, in, info);
 		NifStream(data.bitangentX2, in, info);
 	}
 
-	if (vertexFlags & 32) {
+	if (desc.VA_UVs) {
 		NifStream(data.uv.u, in, info);
 		NifStream(data.uv.v, in, info);
 	}
 
-	if (vertexFlags & 128) {
+	if (desc.VA_Normals) {
 		NifStream(data.normal.x, in, info);
 		NifStream(data.normal.y, in, info);
 		NifStream(data.normal.z, in, info);
 		NifStream(data.bitangentY, in, info);
 	}
 
-	if (vertexFlags & 128 && vertexFlags & 256) {
+	if (desc.VA_Normals && desc.VA_Tangents) {
 		NifStream(data.tangent.x, in, info);
 		NifStream(data.tangent.y, in, info);
 		NifStream(data.tangent.z, in, info);
 		NifStream(data.bitangentZ, in, info);
 	}
 
-	if (vertexFlags & 512) {
+	if (desc.VA_Vertex_Colors) {
 		NifStream(data.vertexColors.r, in, info);
 		NifStream(data.vertexColors.g, in, info);
 		NifStream(data.vertexColors.b, in, info);
 		NifStream(data.vertexColors.a, in, info);
 	}
 
-	if (vertexFlags & 1024) {
+	if (desc.VA_Skinned) {
 		for (unsigned int i = 0; i < 4; i++) {
 			NifStream(data.boneWeights[i], in, info);
 		}
@@ -819,7 +818,7 @@ void NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BS
 		}
 	}
 
-	if (vertexFlags & 4096) {
+	if (desc.VA_Eye_Data) {
 		NifStream(data.unknownInt2, in, info);
 	}
 }
@@ -827,14 +826,13 @@ void NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BS
 //TODO
 void NifStream(BSVertexData const & data, ostream & out, const NifInfo & info, const BSVertexDesc desc)
 {
-	uint16_t vertexFlags = desc.vertexAttributes;
-	if ((vertexFlags & 16) && (vertexFlags & 16384) == 0 && info.userVersion2 == 130) {
+	if ((desc.VA_Vertex) && (desc.VA_Full_Precision) == 0 && info.userVersion2 == 130) {
 
 		NifStream(data.vertex.x, out, info);
 		NifStream(data.vertex.y, out, info);
 		NifStream(data.vertex.z, out, info);
 
-		if (vertexFlags & 256) {
+		if (desc.VA_Tangents) {
 			NifStream(data.bitangentX, out, info);
 		}
 		else {
@@ -842,38 +840,38 @@ void NifStream(BSVertexData const & data, ostream & out, const NifInfo & info, c
 		}
 	}
 
-	if (vertexFlags & 16 && (vertexFlags & 16384 || info.userVersion2 == 100)) {
+	if (desc.VA_Vertex && (desc.VA_Full_Precision || info.userVersion2 == 100)) {
 		NifStream(data.vertex2, out, info);
 		NifStream(data.bitangentX2, out, info);
 	}
 
-	if (vertexFlags & 32) {
+	if (desc.VA_UVs) {
 		NifStream(data.uv.u, out, info);
 		NifStream(data.uv.v, out, info);
 	}
 
-	if (vertexFlags & 128) {
+	if (desc.VA_Normals) {
 		NifStream(data.normal.x, out, info);
 		NifStream(data.normal.y, out, info);
 		NifStream(data.normal.z, out, info);
 		NifStream(data.bitangentY, out, info);
 	}
 
-	if (vertexFlags & 128 && vertexFlags & 256) {
+	if (desc.VA_Normals && desc.VA_Tangents) {
 		NifStream(data.tangent.x, out, info);
 		NifStream(data.tangent.y, out, info);
 		NifStream(data.tangent.z, out, info);
 		NifStream(data.bitangentZ, out, info);
 	}
 
-	if (vertexFlags & 512) {
+	if (desc.VA_Vertex_Colors) {
 		NifStream(data.vertexColors.r, out, info);
 		NifStream(data.vertexColors.g, out, info);
 		NifStream(data.vertexColors.b, out, info);
 		NifStream(data.vertexColors.a, out, info);
 	}
 
-	if (vertexFlags & 1024) {
+	if (desc.VA_Skinned) {
 		for (unsigned int i = 0; i < 4; i++) {
 			NifStream(data.boneWeights[i], out, info);
 		}
@@ -882,7 +880,7 @@ void NifStream(BSVertexData const & data, ostream & out, const NifInfo & info, c
 		}
 	}
 
-	if (vertexFlags & 4096) {
+	if (desc.VA_Eye_Data) {
 		NifStream(data.unknownInt2, out, info);
 	}
 }

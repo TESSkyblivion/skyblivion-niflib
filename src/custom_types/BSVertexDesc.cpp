@@ -47,9 +47,9 @@ uint64_t BSVertexDesc::GetAttributeOffset(VertexAttribute attr) {
 
 // Set offset to a specific vertex attribute in the description
 void BSVertexDesc::SetAttributeOffset(VertexAttribute attr, uint64_t offset) {
-	if (attr != VA_POSITION) {
-		desc = ((uint64_t)offset << (4 * (uint8_t)attr + 2)) | desc & ~(15 << (4 * (uint8_t)attr + 4));
-	}
+	//if (attr != VA_POSITION) {
+	//	desc = ((uint64_t)offset << (4 * (uint8_t)attr + 2)) | desc & ~(15 << (4 * (uint8_t)attr + 4));
+	//}
 }
 
 void BSVertexDesc::ClearAttributeOffsets() {

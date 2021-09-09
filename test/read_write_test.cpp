@@ -1116,3 +1116,10 @@ TEST(Calculate, Strippify) {
 		WriteNifTree(out_path.string().c_str(), root, info);
 	}
 }
+
+TEST(Read, BSTriShape) {
+	NifInfo info;
+	vector<NiObjectRef> blocks = ReadNifList("D:\\git\\skyblivion-niflib\\test\\meshes\\architecture\\docks\\dockcolstr01.nif", &info);
+	NiObjectRef root = GetFirstRoot(blocks);
+	WriteNifTree("D:\\git\\skyblivion-niflib\\test\\meshes\\architecture\\docks\\dockcolstr01_out.nif", root, info);
+}
