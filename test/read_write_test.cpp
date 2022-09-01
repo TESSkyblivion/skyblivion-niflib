@@ -1123,3 +1123,30 @@ TEST(Read, BSTriShape) {
 	NiObjectRef root = GetFirstRoot(blocks);
 	WriteNifTree("D:\\git\\skyblivion-niflib\\test\\meshes\\architecture\\docks\\dockcolstr01_out.nif", root, info);
 }
+
+TEST(SetVC, BSTriShape) {
+	NifInfo info;
+	vector<NiObjectRef> blocks = ReadNifList("D:\\git\\resources\\in\\test\\laddertall.nif", &info);
+	NiObjectRef root = GetFirstRoot(blocks);
+	for (auto& block : blocks)
+	{
+		if (block->IsSameType(BSTriShape::TYPE))
+		{
+			auto bs_shape = DynamicCast<BSTriShape>(block);
+			bool hasVC = bs_shape->GetVertexDesc().HasFlag(VA_Vertex_Colors);
+			if (!bs_shape->GetVertexDesc().HasFlag(VA_Vertex_Colors))
+			{
+				auto desc = bs_shape->GetVertexDesc();
+				desc.SetFlag(VA_Vertex_Colors);
+				auto data = bs_shape->GetVertexData();
+				for (auto& entry : data)
+				{
+					entry.SetVertexColor(Niflib::Color4(1., 1., 1.));
+				}
+				bs_shape->SetVertexData(data);
+				bs_shape->SetVertexDesc(desc);
+			}
+		}
+	}
+	WriteNifTree("D:\\git\\resources\\in\\test\\laddertall2.nif", root, info);
+}

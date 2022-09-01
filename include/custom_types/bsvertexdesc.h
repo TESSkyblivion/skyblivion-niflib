@@ -36,6 +36,20 @@ namespace Niflib {
 		VA_Full_Precision = 1024,
 	};
 
+	enum VertexAttributePosition : unsigned char
+	{
+		VA_POSITION = 0x0,
+		VA_TEXCOORD0 = 0x1,
+		VA_TEXCOORD1 = 0x2,
+		VA_NORMAL = 0x3,
+		VA_BINORMAL = 0x4,
+		VA_COLOR = 0x5,
+		VA_SKINNING = 0x6,
+		VA_LANDDATA = 0x7,
+		VA_EYEDATA = 0x8,
+		VA_COUNT = 9
+	};
+
 	const uint64_t DESC_MASK_VERT   = 0xFFFFFFFFFFFFFFF0;
 	const uint64_t DESC_MASK_UVS    = 0xFFFFFFFFFFFFFF0F;
 	const uint64_t DESC_MASK_NBT    = 0xFFFFFFFFFFFFF0FF;
@@ -105,16 +119,19 @@ namespace Niflib {
 		uint64_t getData() const;
 
 		// Sets a specific flag
-		void SetFlag(VertexFlags flag);
+		void SetFlag(VertexAttribute flag);
 
 		// Removes a specific flag
-		void RemoveFlag(VertexFlags flag);
+		void RemoveFlag(VertexAttribute flag);
 
 		// Checks for a specific flag
-		bool HasFlag(VertexFlags flag) const;
+		bool HasFlag(VertexAttribute flag) const;
 
 		// Sets the vertex size
 		void SetSize(uint64_t size);
+
+		// Gets the vertex size in bytes
+		uint64_t BSVertexDesc::GetVertexSize() const;
 
 		// Sets the dynamic vertex size
 		void MakeDynamic();
@@ -126,8 +143,9 @@ namespace Niflib {
 		void SetAttributeOffset(VertexAttribute attr, uint64_t offset);
 		void ClearAttributeOffsets();
 
-		VertexFlags GetFlags() const;
-		void SetFlags(VertexFlags flags);
+		VertexAttribute GetFlags() const;
+		void SetFlags(VertexAttribute flags);
+		void ResetAttributeOffsets(int stream);
 	};
 
 }

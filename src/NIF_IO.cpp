@@ -754,6 +754,7 @@ void NifStream(BSVertexDesc & data, istream & in, const NifInfo & info) {
 }
 
 void NifStream(BSVertexDesc const & data, ostream & out, const NifInfo & info) {
+	const_cast<BSVertexDesc&>(data).ResetAttributeOffsets(info.userVersion2);
 	WriteUInt64(data.getData(), out);
 }
 
