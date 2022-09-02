@@ -684,17 +684,23 @@ class MapVisitor {
 
 		template <> inline void visit(bhkRigidBody& obj, const NifInfo& info) {
 			if (isNotAlreadyVisited(obj)) {
-				obj.GetShape()->accept(*visitor, info);
-				registerObject(obj);
-				visitChildren(obj, info);
+				if (obj.GetShape()!=NULL)
+				{
+					obj.GetShape()->accept(*visitor, info);
+					registerObject(obj);
+					visitChildren(obj, info);
+				}
 			}
 		}
 
 		template <> inline void visit(bhkRigidBodyT& obj, const NifInfo& info) {
 			if (isNotAlreadyVisited(obj)) {
-				obj.GetShape()->accept(*visitor, info);
-				registerObject(obj);
-				visitChildren(obj, info);
+				if (obj.GetShape()!=NULL)
+				{
+					obj.GetShape()->accept(*visitor, info);
+					registerObject(obj);
+					visitChildren(obj, info);
+				}
 			}
 		}
 
