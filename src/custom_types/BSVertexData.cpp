@@ -16,7 +16,7 @@ All rights reserved.  Please see niflib.h for license. */
 using namespace Niflib;
 
 //Constructor
-BSVertexData::BSVertexData() : bitangentX((hfloat)0), unknownShort1((unsigned int)0), bitangentX2(0.0f), bitangentY((byte)0), bitangentZ((byte)0), unknownInt2((unsigned int)0) {};
+BSVertexData::BSVertexData() : bitangentX((hfloat)0), unknownShort1((unsigned int)0), bitangentX2(0.0f), bitangentY((Byte)0), bitangentZ((Byte)0), unknownInt2((unsigned int)0) {};
 
 //Copy Constructor
 BSVertexData::BSVertexData( const BSVertexData & src ) {
@@ -126,7 +126,7 @@ void BSVertexData::SetBitangent(const Vector3& b)
 
 void BSVertexData::SetBoneWeight(int idx, int bone, float weight)
 {
-	boneIndices[idx] = byte(bone);
+	boneIndices[idx] = Byte(bone);
 	boneWeights[idx] = ConvertFloatToHFloat(weight);
 }
 

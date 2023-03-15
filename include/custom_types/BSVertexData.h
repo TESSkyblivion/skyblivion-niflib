@@ -41,17 +41,17 @@ struct BSVertexData : Native {
 	/*! Unknown. */
 	ByteVector3 normal;
 	/*! Unknown. */
-	byte bitangentY;
+	Byte bitangentY;
 	/*! Unknown. */
 	ByteVector3 tangent;
 	/*! Unknown. */
-	byte bitangentZ;
+	Byte bitangentZ;
 	/*! Unknown. */
 	ByteColor4 vertexColors;
 	/*! Unknown. */
 	array<4,hfloat > boneWeights;
 	/*! Unknown. */
-	array<4,byte > boneIndices;
+	array<4,Byte > boneIndices;
 	/*! Unknown. */
 	unsigned int unknownInt2;
 	//--BEGIN MISC CUSTOM CODE--//

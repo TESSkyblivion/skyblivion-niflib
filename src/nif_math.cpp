@@ -5,6 +5,7 @@ All rights reserved.  Please see niflib.h for license. */
 #include <iomanip>
 #include "half.h"
 using namespace Niflib;
+using namespace std;
 
 //Constants
 
@@ -40,7 +41,7 @@ hfloat Niflib::ConvertFloatToHFloat(float f) {
 }
 
 
-float Niflib::ConvertByteToFloat(byte value) {
+float Niflib::ConvertByteToFloat(Byte value) {
 	return (float(value) - 127.5f)  / 127.5f;
 }
 
@@ -51,8 +52,8 @@ double round(double number)
 }
 #endif
 
-byte Niflib::ConvertFloatToByte(float value) {
-	return byte(round(value * 127.5f + 127.5f)) ;
+Byte Niflib::ConvertFloatToByte(float value) {
+	return Byte(round(value * 127.5f + 127.5f)) ;
 }
 
 /* TexCoord Methods

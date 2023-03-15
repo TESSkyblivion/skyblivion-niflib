@@ -10,8 +10,6 @@ All rights reserved.  Please see niflib.h for license. */
 #include <stdexcept>
 namespace Niflib {
 
-using namespace std;
-
 const char FIX_LINK_POP_ERROR[] = "Trying to pop a link from empty stack. This is probably a bug.";
 const char FIX_LINK_INDEX_ERROR[] = "Object index was not found in object map.  This NIF file may be invalid or imporperly supported.";
 const char FIX_LINK_CAST_ERROR[] = "Link could not be cast to required type during file read. This NIF file may be invalid or improperly supported.";

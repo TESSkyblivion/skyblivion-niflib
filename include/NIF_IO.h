@@ -17,7 +17,16 @@ All rights reserved.  Please see niflib.h for license. */
 #include "nif_versions.h"
 #include <nif_members_expr.h>
 
+#ifndef NULL
+#define NULL 0
+#endif
+
+#define MAXARRAYDUMP 20
+
 namespace Niflib {
+
+
+	class NiObject;
 
 	template<typename T>
 	static constexpr bool IsVisitableRef = is_base_of_template_t<Ref, T>::value;
@@ -34,42 +43,32 @@ namespace Niflib {
 	static constexpr bool IsIterable = is_iterable<T>::value &&
 		!std::is_base_of<IndexString, T>::value;
 
-	using namespace std;
-
-#ifndef NULL
-#define NULL 0
-#endif
-
-#define MAXARRAYDUMP 20
-
-	class NiObject;
-
 	//--IO Functions--//
 
 	//-- Read Utility Functions--//
-	int ReadInt(istream& in);
-	unsigned int ReadUInt(istream& in);
-	uint64_t ReadUInt64(istream& in);
-	unsigned short ReadUShort(istream& in);
-	short ReadShort(istream& in);
-	byte ReadByte(istream& in);
-	float ReadFloat(istream &in);
-	string ReadString(istream &in);
-	bool ReadBool(istream &in, unsigned int version);
+	int ReadInt(std::istream& in);
+	unsigned int ReadUInt(std::istream& in);
+	uint64_t ReadUInt64(std::istream& in);
+	unsigned short ReadUShort(std::istream& in);
+	short ReadShort(std::istream& in);
+	Byte ReadByte(std::istream& in);
+	float ReadFloat(std::istream &in);
+	string ReadString(std::istream &in);
+	bool ReadBool(std::istream &in, unsigned int version);
 
 	//-- Write Utility Functions --//
-	void WriteInt(int val, ostream& out);
-	void WriteUInt(unsigned int val, ostream& out);
-	void WriteUInt64(uint64_t val, ostream& out);
-	void WritePtr32(void * val, ostream& out);
-	void WriteUShort(unsigned short val, ostream& out);
-	void WriteShort(short val, ostream& out);
-	void WriteByte(byte val, ostream& out);
-	void WriteFloat(float val, ostream& out);
-	void WriteString(string const & val, ostream& out);
-	void WriteBool(bool val, ostream& out, unsigned int version);
+	void WriteInt(int val, std::ostream& out);
+	void WriteUInt(unsigned int val, std::ostream& out);
+	void WriteUInt64(uint64_t val, std::ostream& out);
+	void WritePtr32(void * val, std::ostream& out);
+	void WriteUShort(unsigned short val, std::ostream& out);
+	void WriteShort(short val, std::ostream& out);
+	void WriteByte(Byte val, std::ostream& out);
+	void WriteFloat(float val, std::ostream& out);
+	void WriteString(string const & val, std::ostream& out);
+	void WriteBool(bool val, std::ostream& out, unsigned int version);
 
-	void WriteRef(const Ref<NiObject> & ref, ostream& out, const NifInfo& info,
+	void WriteRef(const Ref<NiObject> & ref, std::ostream& out, const NifInfo& info,
 		const map<Ref<NiObject>, unsigned int> & link_map, list<NiObject *> & missing_link_stack);
 
 	//-- BitField Helper functions --//
@@ -127,148 +126,148 @@ namespace Niflib {
 	//--Basic Types--//
 
 	//int
-	void NifStream(int & val, istream& in, const NifInfo & info);
-	void NifStream(int const & val, ostream& out, const NifInfo & info);
+	void NifStream(int & val, std::istream& in, const NifInfo & info);
+	void NifStream(int const & val, std::ostream& out, const NifInfo & info);
 
 	//unsigned int
-	void NifStream(unsigned int & val, istream& in, const NifInfo & info);
-	void NifStream(unsigned int const & val, ostream& out, const NifInfo & info);
+	void NifStream(unsigned int & val, std::istream& in, const NifInfo & info);
+	void NifStream(unsigned int const & val, std::ostream& out, const NifInfo & info);
 
 	//unsigned short
-	void NifStream(unsigned short & val, istream& in, const NifInfo & info);
-	void NifStream(unsigned short const & val, ostream& out, const NifInfo & info);
+	void NifStream(unsigned short & val, std::istream& in, const NifInfo & info);
+	void NifStream(unsigned short const & val, std::ostream& out, const NifInfo & info);
 
 	//short
-	void NifStream(short & val, istream& in, const NifInfo & info);
-	void NifStream(short const & val, ostream& out, const NifInfo & info);
+	void NifStream(short & val, std::istream& in, const NifInfo & info);
+	void NifStream(short const & val, std::ostream& out, const NifInfo & info);
 
 	//half float
-	void NifStream(hfloat & val, istream& in, const NifInfo & info);
-	void NifStream(hfloat const & val, ostream& out, const NifInfo & info);
+	void NifStream(hfloat & val, std::istream& in, const NifInfo & info);
+	void NifStream(hfloat const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, hfloat const & val);
 
 	//byte
-	void NifStream(byte & val, istream& in, const NifInfo & info);
-	void NifStream(byte const & val, ostream& out, const NifInfo & info);
+	void NifStream(Byte & val, std::istream& in, const NifInfo & info);
+	void NifStream(Byte const & val, std::ostream& out, const NifInfo & info);
 
 	//bool
-	void NifStream(bool & val, istream& in, const NifInfo & info);  // version is significant
-	void NifStream(bool const & val, ostream& out, const NifInfo & info); // version is significant
+	void NifStream(bool & val, std::istream& in, const NifInfo & info);  // version is significant
+	void NifStream(bool const & val, std::ostream& out, const NifInfo & info); // version is significant
 
 	//float
-	void NifStream(float & val, istream& in, const NifInfo & info);
-	void NifStream(float const & val, ostream& out, const NifInfo & info);
+	void NifStream(float & val, std::istream& in, const NifInfo & info);
+	void NifStream(float const & val, std::ostream& out, const NifInfo & info);
 
 	//string
-	void NifStream(string & val, istream& in, const NifInfo & info);
-	void NifStream(string const & val, ostream& out, const NifInfo & info);
+	void NifStream(string & val, std::istream& in, const NifInfo & info);
+	void NifStream(string const & val, std::ostream& out, const NifInfo & info);
 
 	//--Structs--//
 
 	//TexCoord
-	void NifStream(TexCoord & val, istream& in, const NifInfo & info);
-	void NifStream(TexCoord const & val, ostream& out, const NifInfo & info);
+	void NifStream(TexCoord & val, std::istream& in, const NifInfo & info);
+	void NifStream(TexCoord const & val, std::ostream& out, const NifInfo & info);
 
 	//Triangle
-	void NifStream(Triangle & val, istream& in, const NifInfo & info);
-	void NifStream(Triangle const & val, ostream& out, const NifInfo & info);
+	void NifStream(Triangle & val, std::istream& in, const NifInfo & info);
+	void NifStream(Triangle const & val, std::ostream& out, const NifInfo & info);
 
 	//Vector3
-	void NifStream(Vector3 & val, istream& in, const NifInfo & info);
-	void NifStream(Vector3 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Vector3 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Vector3 const & val, std::ostream& out, const NifInfo & info);
 
 	//Vector4
-	void NifStream(Vector4 & val, istream& in, const NifInfo & info);
-	void NifStream(Vector4 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Vector4 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Vector4 const & val, std::ostream& out, const NifInfo & info);
 
 	//Float2
-	void NifStream(Float2 & val, istream& in, const NifInfo & info);
-	void NifStream(Float2 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Float2 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Float2 const & val, std::ostream& out, const NifInfo & info);
 
 	//Matrix22
-	void NifStream(Matrix22 & val, istream& in, const NifInfo & info);
-	void NifStream(Matrix22 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Matrix22 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Matrix22 const & val, std::ostream& out, const NifInfo & info);
 
 	//Float3
-	void NifStream(Float3 & val, istream& in, const NifInfo & info);
-	void NifStream(Float3 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Float3 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Float3 const & val, std::ostream& out, const NifInfo & info);
 
 	//Matrix33
-	void NifStream(Matrix33 & val, istream& in, const NifInfo & info);
-	void NifStream(Matrix33 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Matrix33 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Matrix33 const & val, std::ostream& out, const NifInfo & info);
 
 	//Float4
-	void NifStream(Float4 & val, istream& in, const NifInfo & info);
-	void NifStream(Float4 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Float4 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Float4 const & val, std::ostream& out, const NifInfo & info);
 
 	//Matrix34
-	void NifStream(Matrix34 & val, istream& in, const NifInfo & info);
-	void NifStream(Matrix34 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Matrix34 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Matrix34 const & val, std::ostream& out, const NifInfo & info);
 
 	//Matrix44
-	void NifStream(Matrix44 & val, istream& in, const NifInfo & info);
-	void NifStream(Matrix44 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Matrix44 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Matrix44 const & val, std::ostream& out, const NifInfo & info);
 
 	//Color3
-	void NifStream(Color3 & val, istream& in, const NifInfo & info);
-	void NifStream(Color3 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Color3 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Color3 const & val, std::ostream& out, const NifInfo & info);
 
 	//Color4
-	void NifStream(Color4 & val, istream& in, const NifInfo & info);
-	void NifStream(Color4 const & val, ostream& out, const NifInfo & info);
+	void NifStream(Color4 & val, std::istream& in, const NifInfo & info);
+	void NifStream(Color4 const & val, std::ostream& out, const NifInfo & info);
 
 	//Quaternion
-	void NifStream(Quaternion & val, istream& in, const NifInfo & info);
-	void NifStream(Quaternion const & val, ostream& out, const NifInfo & info);
+	void NifStream(Quaternion & val, std::istream& in, const NifInfo & info);
+	void NifStream(Quaternion const & val, std::ostream& out, const NifInfo & info);
 
 	//HeaderString
-	void NifStream(HeaderString & val, istream& in, NifInfo & info); //Sets the passed in info
-	void NifStream(HeaderString const & val, ostream& out, const NifInfo & info);
+	void NifStream(HeaderString & val, std::istream& in, NifInfo & info); //Sets the passed in info
+	void NifStream(HeaderString const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, HeaderString const & val);
 
 	//LineString
-	void NifStream(LineString & val, istream& in, const NifInfo & info);
-	void NifStream(LineString const & val, ostream& out, const NifInfo & info);
+	void NifStream(LineString & val, std::istream& in, const NifInfo & info);
+	void NifStream(LineString const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, LineString const & val);
 
 	//ByteArray
-	void NifStream(ByteArray & val, istream& in, const NifInfo & info);
-	void NifStream(ByteArray const & val, ostream& out, const NifInfo & info);
+	void NifStream(ByteArray & val, std::istream& in, const NifInfo & info);
+	void NifStream(ByteArray const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, ByteArray const & val);
 
 	//ShortString
-	void NifStream(ShortString & val, istream& in, const NifInfo & info);
-	void NifStream(ShortString const & val, ostream& out, const NifInfo & info);
+	void NifStream(ShortString & val, std::istream& in, const NifInfo & info);
+	void NifStream(ShortString const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, ShortString const & val);
 
 	//IndexString
-	void NifStream(IndexString & val, istream& in, const NifInfo & info);
-	void NifStream(IndexString const & val, ostream& out, const NifInfo & info);
+	void NifStream(IndexString & val, std::istream& in, const NifInfo & info);
+	void NifStream(IndexString const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, IndexString const & val);
 
 	//Char8String
-	void NifStream(Char8String & val, istream& in, const NifInfo & info);
-	void NifStream(Char8String const & val, ostream& out, const NifInfo & info);
+	void NifStream(Char8String & val, std::istream& in, const NifInfo & info);
+	void NifStream(Char8String const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, Char8String const & val);
 
 	//InertiaMatrix
-	void NifStream(InertiaMatrix & val, istream& in, const NifInfo & info);
-	void NifStream(InertiaMatrix const & val, ostream& out, const NifInfo & info);
+	void NifStream(InertiaMatrix & val, std::istream& in, const NifInfo & info);
+	void NifStream(InertiaMatrix const & val, std::ostream& out, const NifInfo & info);
 
 	//ByteColor4
 	struct ByteColor4;
-	void NifStream(ByteColor4 & val, istream& in, const NifInfo & info);
-	void NifStream(ByteColor4 const & val, ostream& out, const NifInfo & info);
+	void NifStream(ByteColor4 & val, std::istream& in, const NifInfo & info);
+	void NifStream(ByteColor4 const & val, std::ostream& out, const NifInfo & info);
 	ostream & operator<<(ostream & out, ByteColor4 const & val);
 
 	//--Templates--//
 
-	void NifStream(Key<Quaternion> & key, istream& file, const NifInfo & info, KeyType type);
-	void NifStream(Key<Quaternion> const & key, ostream& file, const NifInfo & info, KeyType type);
+	void NifStream(Key<Quaternion> & key, std::istream& file, const NifInfo & info, KeyType type);
+	void NifStream(Key<Quaternion> const & key, std::ostream& file, const NifInfo & info, KeyType type);
 
 	//Key<T>
 	template <class T>
-	void NifStream(Key<T> & key, istream& file, const NifInfo & info, KeyType type) {
+	void NifStream(Key<T> & key, std::istream& file, const NifInfo & info, KeyType type) {
 		key.time = ReadFloat(file);
 
 		//If key type is not 1, 2, or 3, throw an exception
@@ -293,12 +292,12 @@ namespace Niflib {
 	}
 
 	template <class T>
-	void NifStream(Key<T> & key, istream & file, const NifInfo & info, int type) {
+	void NifStream(Key<T> & key, std::istream & file, const NifInfo & info, int type) {
 		NifStream(key, file, info, (KeyType)type);
 	}
 
 	template <class T>
-	void NifStream(Key<T> const & key, ostream& file, const NifInfo & info, KeyType type) {
+	void NifStream(Key<T> const & key, std::ostream& file, const NifInfo & info, KeyType type) {
 		WriteFloat(key.time, file);
 
 		//If key type is not 1, 2, or 3, throw an exception
@@ -323,33 +322,33 @@ namespace Niflib {
 	}
 
 	template <class T>
-	void NifStream(Key<T> const & key, ostream & file, const NifInfo & info, int type) {
+	void NifStream(Key<T> const & key, std::ostream & file, const NifInfo & info, int type) {
 		NifStream(key, file, info, (KeyType)type);
 	}
 
-	template <> void NifStream(Key<IndexString> & key, istream& file, const NifInfo & info, KeyType type);
-	template <> void NifStream(Key<IndexString> const & key, ostream& file, const NifInfo & info, KeyType type);
+	template <> void NifStream(Key<IndexString> & key, std::istream& file, const NifInfo & info, KeyType type);
+	template <> void NifStream(Key<IndexString> const & key, std::ostream& file, const NifInfo & info, KeyType type);
 
 	// BSVertexDesc
 	struct BSVertexDesc;
-	void NifStream(BSVertexDesc & data, istream & in, const NifInfo & info);
-	void NifStream(BSVertexDesc const & data, ostream & out, const NifInfo & info);
+	void NifStream(BSVertexDesc & data, std::istream & in, const NifInfo & info);
+	void NifStream(BSVertexDesc const & data, std::ostream & out, const NifInfo & info);
 
 	ostream & operator<< (ostream& out, const BSVertexDesc& data);
 
 	// BSVertexData
 	struct BSVertexData;
-	void NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BSVertexDesc vertexFlags);
-	void NifStream(BSVertexData const & data, ostream & out, const NifInfo & info, const BSVertexDesc vertexFlags);
+	void NifStream(BSVertexData & data, std::istream & in, const NifInfo & info, const BSVertexDesc vertexFlags);
+	void NifStream(BSVertexData const & data, std::ostream & out, const NifInfo & info, const BSVertexDesc vertexFlags);
 
 	ostream & operator<< (ostream& out, const BSVertexData& data);
 
 	//The HexString function creates a formatted hex display of the given data for use in printing
 	//a debug string for information that is not understood
-	string HexString(const byte * src, unsigned int len);
+	string HexString(const Byte * src, unsigned int len);
 
 	//Byte
-	ostream & operator<<(ostream & out, byte const & val);
+	ostream & operator<<(ostream & out, Byte const & val);
 
 	// strInfo
 	struct NifInfo;

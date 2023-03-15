@@ -13,7 +13,6 @@ All rights reserved.  Please see niflib.h for license. */
 
 namespace Niflib
 {
-	using namespace std;
 
 	// Forward define of referenced classes
 	class NiProperty;
@@ -59,7 +58,7 @@ namespace Niflib
 			bool stripify = false,
 			bool tangent_space = false,
 			float min_vertex_weight = 0.001f,
-			byte tspace_flags = 0
+			Byte tspace_flags = 0
 		) const;
 
 		/* 

@@ -8,9 +8,9 @@ All rights reserved.  Please see niflib.h for license. */
 #include <vector>
 #include <list>
 
-#include <RefObject.h>
-
 namespace Niflib {
+
+using namespace std;
 
 /**
  * Smart Pointer Template
@@ -194,15 +194,17 @@ ostream & operator<<(ostream & os, const Ref<T> & ref) {
 	return os;
 }
 
-template <class T> Ref<T> StaticCast(RefObject* object) {
+class NiObject;
+
+template <class T> Ref<T> StaticCast(NiObject * object) {
 	return (T*)object;
 }
 
-template <class T> Ref<const T> StaticCast(const RefObject* object) {
+template <class T> Ref<const T> StaticCast(const NiObject * object) {
 	return (const T*)object;
 }
 
-template <class T> Ref<T> DynamicCast(RefObject* object) {
+template <class T> Ref<T> DynamicCast(NiObject * object) {
 	if (object && object->IsDerivedType(T::TYPE)) {
 		return (T*)object;
 	}
@@ -235,9 +237,7 @@ template <class T> Ref<T> DynamicCast(RefObject* object) {
 template <typename U, typename T>
 vector<Ref<U> > DynamicCast(vector<Ref<T> > const & objs) {
 	vector<Ref<U> > retval;
-	const auto itr = objs.begin();
-	const auto end = objs.end();
-	for (itr; itr != end; ++itr) {
+	for (vector<Ref<T> >::const_iterator itr = objs.begin(), end = objs.end(); itr != end; ++itr) {
 		Ref<U> obj = DynamicCast<U>(*itr);
 		if (obj) retval.insert(retval.end(), obj);
 	}
@@ -252,9 +252,7 @@ vector<Ref<U> > DynamicCast(vector<Ref<T> > const & objs) {
 template <typename U, typename T>
 inline list<Ref<U> > DynamicCast(list<Ref<T> > const & objs) {
 	list<Ref<U> > retval;
-	const auto itr = objs.begin();
-	const auto end = objs.end();
-	for (; itr != end; ++itr) {
+	for (list<Ref<T> >::const_iterator itr = objs.begin(), end = objs.end(); itr != end; ++itr) {
 		Ref<U> obj = DynamicCast<U>(*itr);
 		if (obj) retval.insert(retval.end(), obj);
 	}

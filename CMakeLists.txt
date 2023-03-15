@@ -119,6 +119,7 @@ endif()
 target_compile_definitions(niflib PUBLIC "_CRT_SECURE_NO_DEPRECATE")
 target_compile_definitions(niflib PUBLIC "_CRT_NONSTDC_NO_DEPRECATE")
 target_compile_definitions(niflib PUBLIC "_SCL_SECURE_NO_WARNINGS")
+set_target_properties(niflib PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 
 ############################################################################
 #Documentation

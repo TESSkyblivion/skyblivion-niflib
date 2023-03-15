@@ -48,18 +48,18 @@ public:
 	/*! Return mass and inertia matrix for a complex polyhedron
 	 */
 	static void CalcMassPropertiesPolyhedron(
-		const vector<Vector3>& vertices, 
-		const vector<Triangle>& triangles, 
+		const std::vector<Vector3>& vertices, 
+		const std::vector<Triangle>& triangles, 
 		float density, bool solid,
 		float& mass, float& volume, Vector3& center, InertiaMatrix &inertia);
 
 	/*! Combine mass properties for a number of objects */
 	static void CombineMassProperties(
-		vector<float> masses, 
-		vector<float> volumes, 
-		vector<Vector3> centers, 
-		vector<InertiaMatrix> inertias,
-		vector<Matrix44> transforms,
+		std::vector<float> masses, 
+		std::vector<float> volumes, 
+		std::vector<Vector3> centers, 
+		std::vector<InertiaMatrix> inertias,
+		std::vector<Matrix44> transforms,
 		float& mass, float& volume, Vector3& center, InertiaMatrix &inertia);
 
 public:

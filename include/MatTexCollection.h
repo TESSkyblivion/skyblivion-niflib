@@ -13,7 +13,6 @@ All rights reserved.  Please see niflib.h for license. */
 
 namespace Niflib {
 
-using namespace std;
 
 const unsigned int NO_MATERIAL = 0xFFFFFFFF;
 const unsigned int NO_TEXTURE = 0xFFFFFFFF;

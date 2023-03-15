@@ -6,7 +6,9 @@ All rights reserved.  Please see niflib.h for license. */
 #include "../include/NIF_IO.h"
 #include "../include/niflib.h"
 #include "../include/gen/Header.h"
-namespace Niflib {
+
+using namespace Niflib;
+using namespace std;
 
 //--Endian Support Functions--//
 EndianType DetectEndianType();
@@ -111,7 +113,7 @@ float SwapEndian( float in ) {
 
 //--Read utility functions--//
 
-int ReadInt( istream& in ){
+int Niflib::ReadInt( istream& in ){
 
 	int tmp = 0;
 	in.read( (char*)&tmp, 4 );
@@ -120,7 +122,7 @@ int ReadInt( istream& in ){
 	return tmp;
 }
 
-unsigned int ReadUInt( istream& in ){
+unsigned int Niflib::ReadUInt( istream& in ){
 
 	unsigned int tmp = 0;
 	in.read( (char*)&tmp, 4 );
@@ -129,7 +131,7 @@ unsigned int ReadUInt( istream& in ){
 	return tmp;
 }
 
-uint64_t ReadUInt64(istream& in) {
+uint64_t Niflib::ReadUInt64(istream& in) {
 
 	uint64_t tmp = 0;
 	in.read((char*)&tmp, 8);
@@ -138,7 +140,7 @@ uint64_t ReadUInt64(istream& in) {
 	return tmp;
 }
 
-unsigned short ReadUShort( istream& in ){
+unsigned short Niflib::ReadUShort( istream& in ){
 
 	unsigned short tmp = 0;
 	in.read( (char*)&tmp, 2 );
@@ -147,7 +149,7 @@ unsigned short ReadUShort( istream& in ){
 	return tmp;
 }
 
-short ReadShort( istream& in ){
+short Niflib::ReadShort( istream& in ){
 
 	short tmp = 0;
 	in.read( (char*)&tmp, 2 );
@@ -156,15 +158,15 @@ short ReadShort( istream& in ){
 	return tmp;
 }
 
-byte ReadByte( istream& in ){
+Byte Niflib::ReadByte( istream& in ){
 
-	byte tmp = 0;
+	Byte tmp = 0;
 	in.read( (char*)&tmp, 1 );
 	if (in.fail())
 	  throw runtime_error("premature end of stream");
 	return tmp;
 }
-float ReadFloat( istream &in ){
+float Niflib::ReadFloat( istream &in ){
 
 	float tmp = 0;
 	in.read( reinterpret_cast<char*>(&tmp), sizeof(tmp) );
@@ -173,7 +175,7 @@ float ReadFloat( istream &in ){
 	return tmp;
 }
 
-string ReadString( istream &in ) {
+string Niflib::ReadString( istream &in ) {
 	unsigned int len = ReadUInt( in );
 	string out;
 	if ( len > 0x4000 )
@@ -187,7 +189,7 @@ string ReadString( istream &in ) {
 	return out;
 }
 
-bool ReadBool( istream &in, unsigned int version ) {
+bool Niflib::ReadBool( istream &in, unsigned int version ) {
 	if ( version <= 0x04010001 ) {
 		//Bools are stored as integers before version 4.1.0.1
 		return (ReadUInt( in ) != 0);
@@ -199,22 +201,22 @@ bool ReadBool( istream &in, unsigned int version ) {
 
 //-- Write utility functions--//
 
-void WriteInt( int val, ostream& out ){
+void Niflib::WriteInt( int val, ostream& out ){
 
 	out.write( (char*)&val, 4 );
 }
 
-void WriteUInt( unsigned int val, ostream& out ){
+void Niflib::WriteUInt( unsigned int val, ostream& out ){
 
 	out.write( (char*)&val, 4 );
 }
 
-void WriteUInt64(uint64_t val, ostream& out) {
+void Niflib::WriteUInt64(uint64_t val, ostream& out) {
 
 	out.write((char*)&val, 8);
 }
 
-void WritePtr32( void * val, ostream& out ){
+void Niflib::WritePtr32( void * val, ostream& out ){
 #if __SIZEOF_POINTER__ == 4
   // 32 bit
   WriteUInt( (unsigned int)val, out );
@@ -236,31 +238,31 @@ void WritePtr32( void * val, ostream& out ){
 #endif
 }
 
-void WriteUShort( unsigned short val, ostream& out ){
+void Niflib::WriteUShort( unsigned short val, ostream& out ){
 
 	out.write( (char*)&val, 2 );
 }
 
-void WriteShort( short val, ostream& out ){
+void Niflib::WriteShort( short val, ostream& out ){
 
 	out.write( (char*)&val, 2 );
 }
 
-void WriteByte( byte val, ostream& out ){
+void Niflib::WriteByte( Byte val, ostream& out ){
 
 	out.write( (char*)&val, 1 );
 }
 
-void WriteFloat( float val, ostream& out ){
+void Niflib::WriteFloat( float val, ostream& out ){
 	out.write( reinterpret_cast<char*>(&val), sizeof(val) );
 }
 
-void WriteString( string const & val, ostream& out ) {
+void Niflib::WriteString( string const & val, ostream& out ) {
 	WriteUInt( (unsigned int)(val.size()), out );
 	out.write( val.c_str(), std::streamsize(val.size()) );
 }
 
-void WriteBool( bool val, ostream& out, unsigned int version ) {
+void Niflib::WriteBool( bool val, ostream& out, unsigned int version ) {
 	if ( version < 0x04010001 ) {
 		//Bools are stored as integers before version 4.1.0.1
 		if (val)
@@ -276,7 +278,7 @@ void WriteBool( bool val, ostream& out, unsigned int version ) {
 	}
 }
 
-void WriteRef( const Ref<NiObject>& ref, ostream & out, const NifInfo & info,
+void Niflib::WriteRef( const Ref<NiObject>& ref, ostream & out, const NifInfo & info,
 			   const map<Ref<NiObject>, unsigned int> & link_map, list<NiObject *> & missing_link_stack )
 {
 	if ( info.version < VER_3_3_0_13 ) {
@@ -306,7 +308,7 @@ void WriteRef( const Ref<NiObject>& ref, ostream & out, const NifInfo & info,
 //--Basic Types--//
 
 //int
-void NifStream( int & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( int & val, istream& in, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		val = ReadInt( in );
 	} else {
@@ -314,7 +316,7 @@ void NifStream( int & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( int const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( int const & val, ostream& out, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		WriteInt( val, out );
 	} else {
@@ -323,7 +325,7 @@ void NifStream( int const & val, ostream& out, const NifInfo & info ) {
 }
 
 //unsigned int
-void NifStream( unsigned int & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( unsigned int & val, istream& in, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		val = ReadUInt( in );
 	} else {
@@ -331,7 +333,7 @@ void NifStream( unsigned int & val, istream& in, const NifInfo & info ) {
 	}
 };
 
-void NifStream( unsigned int const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( unsigned int const & val, ostream& out, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		WriteUInt( val, out );
 	} else {
@@ -340,7 +342,7 @@ void NifStream( unsigned int const & val, ostream& out, const NifInfo & info ) {
 }
 
 //unsigned short
-void NifStream( unsigned short & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( unsigned short & val, istream& in, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		val = ReadUShort( in );
 	} else {
@@ -348,7 +350,7 @@ void NifStream( unsigned short & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( unsigned short const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( unsigned short const & val, ostream& out, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		WriteUShort( val, out );
 	} else {
@@ -357,7 +359,7 @@ void NifStream( unsigned short const & val, ostream& out, const NifInfo & info )
 }
 
 //short
-void NifStream( short & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( short & val, istream& in, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		val = ReadShort( in );
 	} else {
@@ -365,7 +367,7 @@ void NifStream( short & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( short const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( short const & val, ostream& out, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		WriteShort( val, out );
 	} else {
@@ -374,7 +376,7 @@ void NifStream( short const & val, ostream& out, const NifInfo & info ) {
 }
 
 //hfloat
-void NifStream(hfloat & val, istream& in, const NifInfo & info) {
+void Niflib::NifStream(hfloat & val, istream& in, const NifInfo & info) {
 	if (info.endian == sys_endian) {
 		val.value = ReadShort(in);
 	}
@@ -383,7 +385,7 @@ void NifStream(hfloat & val, istream& in, const NifInfo & info) {
 	}
 }
 
-void NifStream(hfloat const & val, ostream& out, const NifInfo & info) {
+void Niflib::NifStream(hfloat const & val, ostream& out, const NifInfo & info) {
 	if (info.endian == sys_endian) {
 		WriteShort(val.value, out);
 	}
@@ -392,30 +394,30 @@ void NifStream(hfloat const & val, ostream& out, const NifInfo & info) {
 	}
 }
 
-ostream & operator<<(ostream & out, hfloat const & val) {
+ostream & Niflib::operator<<(ostream & out, hfloat const & val) {
 	return out << val.value;
 }
 
 //byte
-void NifStream( byte & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Byte & val, istream& in, const NifInfo & info ) {
 	val = ReadByte( in );
 }
 
-void NifStream( byte const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Byte const & val, ostream& out, const NifInfo & info ) {
 	WriteByte( val, out );
 }
 
 //bool
-void NifStream( bool & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( bool & val, istream& in, const NifInfo & info ) {
 	val = ReadBool( in, info.version );
 }
 
-void NifStream( bool const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( bool const & val, ostream& out, const NifInfo & info ) {
 	WriteBool( val, out, info.version );
 }
 
 //float
-void NifStream( float & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( float & val, istream& in, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		val = ReadFloat( in );
 	} else {
@@ -423,7 +425,7 @@ void NifStream( float & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( float const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( float const & val, ostream& out, const NifInfo & info ) {
 	if ( info.endian == sys_endian ) {
 		WriteFloat( val, out );
 	} else {
@@ -432,18 +434,18 @@ void NifStream( float const & val, ostream& out, const NifInfo & info ) {
 }
 
 //string
-void NifStream( string & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( string & val, istream& in, const NifInfo & info ) {
 	val = ReadString( in );
 }
 
-void NifStream( string const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( string const & val, ostream& out, const NifInfo & info ) {
 	WriteString( val, out );
 }
 
 //--Structs--//
 
 //HeaderString
-void NifStream( HeaderString & val, istream& in, NifInfo & info ) {
+void Niflib::NifStream( HeaderString & val, istream& in, NifInfo & info ) {
 	char tmp[256];
 	in.getline( tmp, 256 );
 	val.header = tmp;
@@ -476,7 +478,7 @@ void NifStream( HeaderString & val, istream& in, NifInfo & info ) {
 	//}
 };
 
-void NifStream( HeaderString const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( HeaderString const & val, ostream& out, const NifInfo & info ) {
 	stringstream header_string;
 	if ( info.version <= VER_10_0_1_0 ) {
 		header_string << "NetImmerse File Format, Version ";
@@ -488,28 +490,28 @@ void NifStream( HeaderString const & val, ostream& out, const NifInfo & info ) {
 	out << header_string.str() << "\n";
 };
 
-ostream & operator<<( ostream & out, HeaderString const & val ) {
+ostream & Niflib::operator<<( ostream & out, HeaderString const & val ) {
 	return out << val.header;
 }
 
 //LineString
-void NifStream( LineString & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( LineString & val, istream& in, const NifInfo & info ) {
 	char tmp[256];
 	in.getline( tmp, 256 );
 	val.line = tmp;
 };
 
-void NifStream( LineString const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( LineString const & val, ostream& out, const NifInfo & info ) {
 	out << val.line << "\n";
 };
 
-ostream & operator<<( ostream & out, LineString const & val ) {
+ostream & Niflib::operator<<( ostream & out, LineString const & val ) {
 	return out << val.line;
 }
 
 //ShortString
-void NifStream( ShortString & val, istream& in, const NifInfo & info ) {
-	byte len = ReadByte( in );
+void Niflib::NifStream( ShortString & val, istream& in, const NifInfo & info ) {
+	Byte len = ReadByte( in );
 	char * buffer = new char[len];
 	in.read( buffer, len );
 	if (in.fail())
@@ -518,62 +520,62 @@ void NifStream( ShortString & val, istream& in, const NifInfo & info ) {
 	delete [] buffer;
 };
 
-void NifStream( ShortString const & val, ostream& out, const NifInfo & info ) {
-	WriteByte( byte(val.str.size() + 1), out );
+void Niflib::NifStream( ShortString const & val, ostream& out, const NifInfo & info ) {
+	WriteByte( Byte(val.str.size() + 1), out );
 	out.write( val.str.c_str(), std::streamsize(val.str.size()) );
 	WriteByte( 0, out );
 };
 
-ostream & operator<<( ostream & out, ShortString const & val ) {
+ostream & Niflib::operator<<( ostream & out, ShortString const & val ) {
 	return out << val.str;
 }
 
 //TexCoord
-void NifStream( TexCoord & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( TexCoord & val, istream& in, const NifInfo & info ) {
 	val.u = ReadFloat( in );
 	val.v = ReadFloat( in );
 };
 
-void NifStream( TexCoord const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( TexCoord const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.u, out );
 	WriteFloat( val.v, out );
 };
 
 //Triangle
-void NifStream( Triangle & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Triangle & val, istream& in, const NifInfo & info ) {
 	val.v1 = ReadUShort( in );
 	val.v2 = ReadUShort( in );
 	val.v3 = ReadUShort( in );
 };
 
-void NifStream( Triangle const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Triangle const & val, ostream& out, const NifInfo & info ) {
 	WriteUShort( val.v1, out );
 	WriteUShort( val.v2, out );
 	WriteUShort( val.v3, out );
 };
 
 //Vector3
-void NifStream( Vector3 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Vector3 & val, istream& in, const NifInfo & info ) {
 	val.x = ReadFloat( in );
 	val.y = ReadFloat( in );
 	val.z = ReadFloat( in );
 };
 
-void NifStream( Vector3 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Vector3 const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.x, out );
 	WriteFloat( val.y, out );
 	WriteFloat( val.z, out );
 };
 
 //Vector3
-void NifStream( Vector4 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Vector4 & val, istream& in, const NifInfo & info ) {
 	val.x = ReadFloat( in );
 	val.y = ReadFloat( in );
 	val.z = ReadFloat( in );
 	val.w = ReadFloat( in );
 };
 
-void NifStream( Vector4 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Vector4 const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.x, out );
 	WriteFloat( val.y, out );
 	WriteFloat( val.z, out );
@@ -581,18 +583,18 @@ void NifStream( Vector4 const & val, ostream& out, const NifInfo & info ) {
 };
 
 //Float2
-void NifStream( Float2 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Float2 & val, istream& in, const NifInfo & info ) {
 	val.data[0] = ReadFloat( in );
 	val.data[1] = ReadFloat( in );
 };
 
-void NifStream( Float2 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Float2 const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.data[0], out );
 	WriteFloat( val.data[1], out );
 };
 
 //Matrix22
-void NifStream( Matrix22 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Matrix22 & val, istream& in, const NifInfo & info ) {
 	for (int c = 0; c < 2; ++c) {
 		for (int r = 0; r < 2; ++r) {
 			val[r][c] = ReadFloat( in );
@@ -600,7 +602,7 @@ void NifStream( Matrix22 & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( Matrix22 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Matrix22 const & val, ostream& out, const NifInfo & info ) {
 	for (int c = 0; c < 2; ++c) {
 		for (int r = 0; r < 2; ++r) {
 			WriteFloat( val[r][c], out );
@@ -609,20 +611,20 @@ void NifStream( Matrix22 const & val, ostream& out, const NifInfo & info ) {
 }
 
 //Float3
-void NifStream( Float3 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Float3 & val, istream& in, const NifInfo & info ) {
 	val.data[0] = ReadFloat( in );
 	val.data[1] = ReadFloat( in );
 	val.data[2] = ReadFloat( in );
 };
 
-void NifStream( Float3 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Float3 const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.data[0], out );
 	WriteFloat( val.data[1], out );
 	WriteFloat( val.data[2], out );
 };
 
 //Matrix33
-void NifStream( Matrix33 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Matrix33 & val, istream& in, const NifInfo & info ) {
 	for (int c = 0; c < 3; ++c) {
 		for (int r = 0; r < 3; ++r) {
 			val[r][c] = ReadFloat( in );
@@ -630,7 +632,7 @@ void NifStream( Matrix33 & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( Matrix33 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Matrix33 const & val, ostream& out, const NifInfo & info ) {
 	for (int c = 0; c < 3; ++c) {
 		for (int r = 0; r < 3; ++r) {
 			WriteFloat( val[r][c], out );
@@ -639,14 +641,14 @@ void NifStream( Matrix33 const & val, ostream& out, const NifInfo & info ) {
 }
 
 //Float4
-void NifStream( Float4 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Float4 & val, istream& in, const NifInfo & info ) {
 	val.data[0] = ReadFloat( in );
 	val.data[1] = ReadFloat( in );
 	val.data[2] = ReadFloat( in );
 	val.data[3] = ReadFloat( in );
 };
 
-void NifStream( Float4 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Float4 const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.data[0], out );
 	WriteFloat( val.data[1], out );
 	WriteFloat( val.data[2], out );
@@ -654,7 +656,7 @@ void NifStream( Float4 const & val, ostream& out, const NifInfo & info ) {
 };
 
 //Matrix34
-void NifStream(Matrix34 & val, istream& in, const NifInfo & info) {
+void Niflib::NifStream(Matrix34 & val, istream& in, const NifInfo & info) {
 	for (int c = 0; c < 4; ++c) {
 		for (int r = 0; r < 3; ++r) {
 			val[r][c] = ReadFloat(in);
@@ -662,7 +664,7 @@ void NifStream(Matrix34 & val, istream& in, const NifInfo & info) {
 	}
 }
 
-void NifStream(Matrix34 const & val, ostream& out, const NifInfo & info) {
+void Niflib::NifStream(Matrix34 const & val, ostream& out, const NifInfo & info) {
 	for (int c = 0; c < 4; ++c) {
 		for (int r = 0; r < 3; ++r) {
 			WriteFloat(val[r][c], out);
@@ -671,7 +673,7 @@ void NifStream(Matrix34 const & val, ostream& out, const NifInfo & info) {
 }
 
 //Matrix44
-void NifStream( Matrix44 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Matrix44 & val, istream& in, const NifInfo & info ) {
 	for (int c = 0; c < 4; ++c) {
 		for (int r = 0; r < 4; ++r) {
 			val[r][c] = ReadFloat( in );
@@ -679,7 +681,7 @@ void NifStream( Matrix44 & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( Matrix44 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Matrix44 const & val, ostream& out, const NifInfo & info ) {
 	for (int c = 0; c < 4; ++c) {
 		for (int r = 0; r < 4; ++r) {
 			WriteFloat( val[r][c], out );
@@ -688,27 +690,27 @@ void NifStream( Matrix44 const & val, ostream& out, const NifInfo & info ) {
 }
 
 //Color3
-void NifStream( Color3 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Color3 & val, istream& in, const NifInfo & info ) {
 	val.r = ReadFloat( in );
 	val.g = ReadFloat( in );
 	val.b = ReadFloat( in );
 };
 
-void NifStream( Color3 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Color3 const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.r, out );
 	WriteFloat( val.g, out );
 	WriteFloat( val.b, out );
 };
 
 //Color4
-void NifStream( Color4 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Color4 & val, istream& in, const NifInfo & info ) {
 	val.r = ReadFloat( in );
 	val.g = ReadFloat( in );
 	val.b = ReadFloat( in );
 	val.a = ReadFloat( in );
 };
 
-void NifStream( Color4 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Color4 const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.r, out );
 	WriteFloat( val.g, out );
 	WriteFloat( val.b, out );
@@ -716,54 +718,54 @@ void NifStream( Color4 const & val, ostream& out, const NifInfo & info ) {
 };
 
 //Quaternion
-void NifStream( Quaternion & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Quaternion & val, istream& in, const NifInfo & info ) {
 	val.w = ReadFloat( in );
 	val.x = ReadFloat( in );
 	val.y = ReadFloat( in );
 	val.z = ReadFloat( in );
 };
 
-void NifStream( Quaternion const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Quaternion const & val, ostream& out, const NifInfo & info ) {
 	WriteFloat( val.w, out );
 	WriteFloat( val.x, out );
 	WriteFloat( val.y, out );
 	WriteFloat( val.z, out );
 };
 
-void NifStream(ByteArray & data, istream & in, const NifInfo & info) {
+void Niflib::NifStream(ByteArray & data, istream & in, const NifInfo & info) {
 	data.resize(ReadUInt(in));
 	for (size_t b = 0; b < data.size(); b++) {
 		data[b] = ReadByte(in);
 	}
 }
 
-void NifStream(ByteArray const & data, ostream & out, const NifInfo & info) {
+void Niflib::NifStream(ByteArray const & data, ostream & out, const NifInfo & info) {
 	WriteUInt( data.size(), out );
 	for (size_t b = 0; b < data.size(); b++) {
 		WriteByte( data[b], out );
 	}
 }
 
-ostream & operator<<(ostream & out, const Niflib::ByteArray& data) {
+ostream & Niflib::operator<<(ostream & out, const Niflib::ByteArray& data) {
 	out << "Size: " << data.size() << "\n";
 	return out << HexString(&data[0], data.size());
 }
 
-void NifStream(BSVertexDesc & data, istream & in, const NifInfo & info) {
+void Niflib::NifStream(BSVertexDesc & data, istream & in, const NifInfo & info) {
 	data.setData(ReadUInt64(in));
 }
 
-void NifStream(BSVertexDesc const & data, ostream & out, const NifInfo & info) {
+void Niflib::NifStream(BSVertexDesc const & data, ostream & out, const NifInfo & info) {
 	const_cast<BSVertexDesc&>(data).ResetAttributeOffsets(info.userVersion2);
 	WriteUInt64(data.getData(), out);
 }
 
-ostream & operator<<(ostream & out, const Niflib::BSVertexDesc& data) {
+ostream & Niflib::operator<<(ostream & out, const Niflib::BSVertexDesc& data) {
 	return out << data.desc;
 }
 
 //TODO
-void NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BSVertexDesc desc)
+void Niflib::NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BSVertexDesc desc)
 {
 	//MSVC COMPLAINS
 	if ((desc.VA_Vertex) && (desc.VA_Full_Precision) == 0 && info.userVersion2 == 130) {
@@ -825,7 +827,7 @@ void NifStream(BSVertexData & data, istream & in, const NifInfo & info, const BS
 }
 
 //TODO
-void NifStream(BSVertexData const & data, ostream & out, const NifInfo & info, const BSVertexDesc desc)
+void Niflib::NifStream(BSVertexData const & data, ostream & out, const NifInfo & info, const BSVertexDesc desc)
 {
 	if ((desc.VA_Vertex) && (desc.VA_Full_Precision) == 0 && info.userVersion2 == 130) {
 
@@ -886,14 +888,14 @@ void NifStream(BSVertexData const & data, ostream & out, const NifInfo & info, c
 	}
 }
 
-ostream & operator<<( ostream & out, const Niflib::BSVertexData& data) {
+ostream & Niflib::operator<<( ostream & out, const Niflib::BSVertexData& data) {
 	//TODO
 	return out << "TODO";
 }
 
 //The HexString function creates a formatted hex display of the given data for use in printing
 //a debug string for information that is not understood
-string HexString( const byte * src, unsigned int len ) {
+string Niflib::HexString( const Byte * src, unsigned int len ) {
 	stringstream out;
 	
 	//Display Data in Hex form
@@ -916,11 +918,11 @@ string HexString( const byte * src, unsigned int len ) {
 }
 
 //Byte
-ostream & operator<<( ostream & out, byte const & val ) {
+ostream & Niflib::operator<<( ostream & out, Byte const & val ) {
 	return out << (unsigned int)(val);
 }
 
-void NifStream( Key<Quaternion> & key, istream& file, const NifInfo & info, KeyType type ) {
+void Niflib::NifStream( Key<Quaternion> & key, istream& file, const NifInfo & info, KeyType type ) {
 	key.time = ReadFloat( file );
 
 	//If key type is not 1, 2, or 3, throw an exception
@@ -940,7 +942,7 @@ void NifStream( Key<Quaternion> & key, istream& file, const NifInfo & info, KeyT
 }
 
 
-void NifStream( Key<Quaternion> const & key, ostream& file, const NifInfo & info,  KeyType type ) {
+void Niflib::NifStream( Key<Quaternion> const & key, ostream& file, const NifInfo & info,  KeyType type ) {
 	WriteFloat( key.time, file );
 
 	//If key type is not 1, 2, or 3, throw an exception
@@ -959,7 +961,7 @@ void NifStream( Key<Quaternion> const & key, ostream& file, const NifInfo & info
 	}
 }
 
-void ForcedFromIndexString(IndexString const &value, Header* header, unsigned int& idx)
+void Niflib::ForcedFromIndexString(IndexString const &value, Header* header, unsigned int& idx)
 {
 	if (header == NULL)
 		throw runtime_error("stream not properly configured");
@@ -985,7 +987,7 @@ void ForcedFromIndexString(IndexString const &value, Header* header, unsigned in
 	//}
 }
 
-void FromIndexString(IndexString const &value, Header* header, unsigned int& idx)
+void Niflib::FromIndexString(IndexString const &value, Header* header, unsigned int& idx)
 {
 	if (header == NULL)
 		throw runtime_error("stream not properly configured");
@@ -1010,16 +1012,16 @@ void FromIndexString(IndexString const &value, Header* header, unsigned int& idx
 	}
 }
 
-void FromIndexString(Key<IndexString> const &value, Header* header, unsigned int& idx) {
+void Niflib::FromIndexString(Key<IndexString> const &value, Header* header, unsigned int& idx) {
 	FromIndexString(value.data, header, idx);
 }
 
-void FromIndexString(std::vector<IndexString> const &value, Header* header, unsigned int& idx) {
+void Niflib::FromIndexString(std::vector<IndexString> const &value, Header* header, unsigned int& idx) {
 	for (size_t i = 0; i < value.size(); i++)
 		FromIndexString(value[i], header, idx);
 }
 
-void FromIndexString(std::vector<Key<IndexString>> const &value, Header* header, unsigned int& idx) {
+void Niflib::FromIndexString(std::vector<Key<IndexString>> const &value, Header* header, unsigned int& idx) {
 	for (size_t i = 0; i < value.size(); i++)
 		FromIndexString(value[i].data, header, idx);
 }
@@ -1038,7 +1040,7 @@ static void ToIndexString(unsigned int idx, Header* header, IndexString & value)
 	}
 }
 
-void NifStream( IndexString & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( IndexString & val, istream& in, const NifInfo & info ) {
 	if (info.version >= VER_20_1_0_3) {
 		std::streampos pos = in.tellg();
 
@@ -1048,7 +1050,7 @@ void NifStream( IndexString & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( IndexString const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( IndexString const & val, ostream& out, const NifInfo & info ) {
 	if (info.version >= VER_20_1_0_3) {
 		unsigned idx = 0xffffffff;
 		FromIndexString(val, hdrInfo::getInfo(out), idx);
@@ -1058,12 +1060,12 @@ void NifStream( IndexString const & val, ostream& out, const NifInfo & info ) {
 	}
 }
 
-ostream & operator<<( ostream & out, IndexString const & val ) {
+ostream & Niflib::operator<<( ostream & out, IndexString const & val ) {
 	out << static_cast<string const &>(val);
 	return out;
 }
 
-template <> void NifStream( Key<IndexString> & key, istream& file, const NifInfo & info, KeyType type )
+template <> void Niflib::NifStream( Key<IndexString> & key, istream& file, const NifInfo & info, KeyType type )
 {
 	if (info.version >= VER_20_1_0_3) {
 		Key<int> ikey;
@@ -1084,7 +1086,7 @@ template <> void NifStream( Key<IndexString> & key, istream& file, const NifInfo
 	}
 }
 
-template <> void NifStream( Key<IndexString> const & key, ostream& file, const NifInfo & info,  KeyType type ) {
+template <> void Niflib::NifStream( Key<IndexString> const & key, ostream& file, const NifInfo & info,  KeyType type ) {
 	if (info.version >= VER_20_1_0_3) {
 		Key<unsigned int> ikey;
 		ikey.time = key.time;
@@ -1108,13 +1110,13 @@ template <> void NifStream( Key<IndexString> const & key, ostream& file, const N
 const int strInfo::infoIdx = ios_base::xalloc();
 const int hdrInfo::infoIdx = ios_base::xalloc();
 
-std::streamsize NifStreamBuf::xsputn(const char_type *_Ptr, std::streamsize _Count) {
+std::streamsize Niflib::NifStreamBuf::xsputn(const char_type *_Ptr, std::streamsize _Count) {
 	pos += _Count;
 	if (size < pos) size = pos;
 	return _Count;
 }
 
-std::streampos NifStreamBuf::seekoff(std::streamoff offset, std::ios_base::seekdir dir, std::ios_base::openmode mode)
+std::streampos Niflib::NifStreamBuf::seekoff(std::streamoff offset, std::ios_base::seekdir dir, std::ios_base::openmode mode)
 {	// change position by offset, according to way and mode
 	switch (dir)
 	{
@@ -1133,19 +1135,19 @@ std::streampos NifStreamBuf::seekoff(std::streamoff offset, std::ios_base::seekd
 	return streampos(-1);
 }
 
-std::streampos NifStreamBuf::seekpos(std::streampos offset, std::ios_base::openmode mode)
+std::streampos Niflib::NifStreamBuf::seekpos(std::streampos offset, std::ios_base::openmode mode)
 {	// change to specified position, according to mode
 	pos = offset;
 	return (pos >= 0 && pos < size) ? (streampos(-1)) : pos;
 }
 
-void NifStream( Char8String & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( Char8String & val, istream& in, const NifInfo & info ) {
 	val.resize(8, '\x0');
 	for (int i=0; i<8; ++i)
 		in.read( &val[i], 1 );
 }
 
-void NifStream( Char8String const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( Char8String const & val, ostream& out, const NifInfo & info ) {
 	size_t i = 0, n = std::min<size_t>(8, val.size());
 	for (i=0;i<n;++i)
 		out.write( &val[i], 1 );
@@ -1153,13 +1155,13 @@ void NifStream( Char8String const & val, ostream& out, const NifInfo & info ) {
 		out.write( "\x0", 1 );
 }
 
-ostream & operator<<( ostream & out, Char8String const & val ) {
+ostream & Niflib::operator<<( ostream & out, Char8String const & val ) {
 	out << static_cast<string const &>(val);
 	return out;
 }
 
 //InertiaMatrix
-void NifStream( InertiaMatrix & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( InertiaMatrix & val, istream& in, const NifInfo & info ) {
 	for (int r = 0; r < 3; ++r) {
 		for (int c = 0; c < 4; ++c) {
 			val[r][c] = ReadFloat( in );
@@ -1167,7 +1169,7 @@ void NifStream( InertiaMatrix & val, istream& in, const NifInfo & info ) {
 	}
 }
 
-void NifStream( InertiaMatrix const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( InertiaMatrix const & val, ostream& out, const NifInfo & info ) {
 	for (int r = 0; r < 3; ++r) {
 		for (int c = 0; c < 4; ++c) {
 			WriteFloat( val[r][c], out );
@@ -1176,44 +1178,43 @@ void NifStream( InertiaMatrix const & val, ostream& out, const NifInfo & info ) 
 }
 
 //ByteColor4
-void NifStream( ByteColor4 & val, istream& in, const NifInfo & info ) {
+void Niflib::NifStream( ByteColor4 & val, istream& in, const NifInfo & info ) {
   val.r = ReadByte(in);
   val.g = ReadByte(in);
   val.b = ReadByte(in);
   val.a = ReadByte(in);
 }
 
-void NifStream( ByteColor4 const & val, ostream& out, const NifInfo & info ) {
+void Niflib::NifStream( ByteColor4 const & val, ostream& out, const NifInfo & info ) {
   WriteByte( val.r, out);
   WriteByte( val.g, out);
   WriteByte( val.b, out);
   WriteByte( val.a, out);
 }
 
-ostream & operator<<( ostream & out, ByteColor4 const & val ) {
+ostream & Niflib::operator<<( ostream & out, ByteColor4 const & val ) {
   out << "RGBA: " << val.r << " " << val.g << " " << val.b << " " << val.a;
   return out;
 }
 
-ostream & operator<<( ostream & out, hdrInfo const & val ) {
+ostream & Niflib::operator<<( ostream & out, hdrInfo const & val ) {
 	out.pword(hdrInfo::infoIdx) = (void*)val.info;
 	return (out);
 }
 
-istream & operator>>( istream & istr, hdrInfo & val ) {
+istream & Niflib::operator>>( istream & istr, hdrInfo & val ) {
 	istr.pword(hdrInfo::infoIdx) = (void*)val.info;
 	return (istr);
 }
 
 
-ostream & operator<<( ostream & out, strInfo const & val ) {
+ostream & Niflib::operator<<( ostream & out, strInfo const & val ) {
 	out.pword(strInfo::infoIdx) = (void*)val.info;
 	return (out);
 }
 
-istream & operator>>( istream & istr, strInfo & val ) {
+istream & Niflib::operator>>( istream & istr, strInfo & val ) {
 	istr.pword(strInfo::infoIdx) = (void*)val.info;
 	return (istr);
 }
 
-}

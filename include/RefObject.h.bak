@@ -5,6 +5,7 @@ All rights reserved.  Please see niflib.h for license. */
 #define _REF_OBJECT_H_
 
 #include "Type.h"
+#include "Ref.h"
 #include "nif_basic_types.h"
 #include <iostream>
 #include <fstream>
@@ -17,9 +18,18 @@ All rights reserved.  Please see niflib.h for license. */
 
 namespace Niflib {
 
-	template<class T> class Ref;
-
 using namespace std;
+
+class RefObject;
+
+template <class T> Ref<const T> DynamicCast(const NiObject * object) {
+	if (object && object->IsDerivedType(T::TYPE)) {
+		return (const T*)object;
+	}
+	else {
+		return NULL;
+	}
+}
 
 /*! Abstract reference tracked object */
 class RefObject {

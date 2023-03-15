@@ -61,6 +61,7 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/quickhull )
 include_directories(${PROJECT_SOURCE_DIR}/lib/v-hacd/src/VHACD_Lib/public )
 
 add_executable(test_niflib ${SRCS} ${SRCS_MIKTT} ${SRCS_BOUNDM} ${SRCS_QUICKHULL})
+set_target_properties(test_niflib PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 target_link_libraries(test_niflib
 	mikktspace
 	niflib

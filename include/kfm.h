@@ -8,7 +8,6 @@
 #include "Ref.h"
 namespace Niflib {
 
-using namespace std;
 
 //Classes used
 class NiObject;

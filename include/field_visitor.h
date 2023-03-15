@@ -637,7 +637,6 @@ namespace Niflib {
 		virtual inline void visit( vector<Vector4 >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( BSCPCullingType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPhysXRigidBodySrc >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<20,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiAVObject *&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector< vector<ByteColor4 > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<ConstraintInfo >&, const unsigned int field_index ) = 0;
@@ -658,7 +657,6 @@ namespace Niflib {
 		virtual inline void visit( NxSpringDesc&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiTextKeyExtraData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPSSimulator >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( vector< array<5,byte > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<BSShaderTextureSet >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPosData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<hkPackedNiTriStripsData >&, const unsigned int field_index ) = 0;
@@ -682,6 +680,7 @@ namespace Niflib {
 		virtual inline void visit( Ref<bhkShape >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( InertiaMatrix&, const unsigned int field_index ) = 0;
 		virtual inline void visit( PixelLayout&, const unsigned int field_index ) = 0;
+		virtual inline void visit( vector<Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<HavokFilter >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<NiAVObject * >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<PhysXStateName >&, const unsigned int field_index ) = 0;
@@ -692,11 +691,11 @@ namespace Niflib {
 		virtual inline void visit( NiPSysColliderManager *&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<ComponentFormat >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiRawImageData >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( vector< vector<Byte > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( bhkPositionConstraintMotor&, const unsigned int field_index ) = 0;
 		virtual inline void visit( StencilAction&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NxJointType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Quaternion&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<184,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<BSConnectPoint >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiSwitchFlags&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NxCapsule&, const unsigned int field_index ) = 0;
@@ -709,8 +708,9 @@ namespace Niflib {
 		virtual inline void visit( vector<ExtraMeshDataEpicMickey >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( VectorFlags&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiDataStream >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<40,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<string >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( CapsuleBV&, const unsigned int field_index ) = 0;
+		virtual inline void visit( vector<BoundingVolume >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( SkyObjectType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<BSPackedAdditionalDataBlock >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ColliderType&, const unsigned int field_index ) = 0;
@@ -748,6 +748,8 @@ namespace Niflib {
 		virtual inline void visit( hkWorldObjCinfoProperty&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<12,float >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<BSGeometryPerSegmentSharedData >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( vector< array<5,Byte > >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<6,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ZCompareMode&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ImageType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<BSSkin__BoneData >&, const unsigned int field_index ) = 0;
@@ -760,7 +762,6 @@ namespace Niflib {
 		virtual inline void visit( Ref<NiObject >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Matrix22&, const unsigned int field_index ) = 0;
 		virtual inline void visit( InterpBlendFlags&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<7,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( bhkVelocityConstraintMotor&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiSourceTexture >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<float >&, const unsigned int field_index ) = 0;
@@ -780,8 +781,6 @@ namespace Niflib {
 		virtual inline void visit( StiffSpringDescriptor&, const unsigned int field_index ) = 0;
 		virtual inline void visit( EmitFrom&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector< array<4,unsigned short > >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( vector<Key<byte > >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( byte&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiSourceTexture > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( unsigned int&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<10,short >&, const unsigned int field_index ) = 0;
@@ -795,7 +794,6 @@ namespace Niflib {
 		virtual inline void visit( vector<Quaternion >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<unsigned short >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( BSDismemberBodyPartType&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<14,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ShortString&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiNode > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( VelocityType&, const unsigned int field_index ) = 0;
@@ -810,7 +808,6 @@ namespace Niflib {
 		virtual inline void visit( vector<Ref<NiObject > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<InterpBlendItem >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<SkinInfo >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<3,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiObjectNET *&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiParticleSystem *&, const unsigned int field_index ) = 0;
 		virtual inline void visit( DataStreamUsage&, const unsigned int field_index ) = 0;
@@ -818,12 +815,12 @@ namespace Niflib {
 		virtual inline void visit( RagdollDescriptor&, const unsigned int field_index ) = 0;
 		virtual inline void visit( SemanticData&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Fallout3HavokMaterial&, const unsigned int field_index ) = 0;
-		virtual inline void visit( KeyGroup<byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( hkSolverDeactivation&, const unsigned int field_index ) = 0;
+		virtual inline void visit( PSForceType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( PixelTiling&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiFloatData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( EffectShaderControlledColor&, const unsigned int field_index ) = 0;
-		virtual inline void visit( AlignMethod&, const unsigned int field_index ) = 0;
+		virtual inline void visit( vector<ConstraintData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiDynamicEffect *&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<IndexString >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<BSPackedGeomObject >&, const unsigned int field_index ) = 0;
@@ -832,10 +829,11 @@ namespace Niflib {
 		virtual inline void visit( Triangle&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<bhkCMSDBigTris >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<PhysXBodyStoredVels >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<5,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( MalleableDescriptor&, const unsigned int field_index ) = 0;
 		virtual inline void visit( MaterialData&, const unsigned int field_index ) = 0;
+		virtual inline void visit( KeyGroup<Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ReferenceSystemDescriptor&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<8,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( hfloat&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<2,NiPhysXJointActor >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<TriangleData >&, const unsigned int field_index ) = 0;
@@ -846,18 +844,18 @@ namespace Niflib {
 		virtual inline void visit( NiControllerManager *&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Fallout4ShaderPropertyFlags1&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Fallout4ShaderPropertyFlags2&, const unsigned int field_index ) = 0;
-		virtual inline void visit( vector<BoundingVolume >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiSkinData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( KeyGroup<Vector3 >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<24,short >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ByteArray&, const unsigned int field_index ) = 0;
-		virtual inline void visit( PSForceType&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<4,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<4,unsigned int >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( hkResponseType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<BSGeometrySegmentData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( TexDesc&, const unsigned int field_index ) = 0;
 		virtual inline void visit( JointAxisPoint&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPhysXMeshDesc >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<7,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( LimitedHingeDescriptor&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiMesh > >&, const unsigned int field_index ) = 0;
 		template <typename T> inline void visit( vector<Key<T > >&, const unsigned int field_index );
@@ -865,16 +863,18 @@ namespace Niflib {
 		virtual inline void visit( vector<Ref<NiPSCollider > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<SemanticData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<16,ByteColor4 >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( Byte&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<4,PixelFormatComponent >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( SkyrimShaderPropertyFlags2&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NxShapeType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<NiNode * >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<292,byte >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( CapsuleBV&, const unsigned int field_index ) = 0;
 		virtual inline void visit( FurnitureEntryPoints&, const unsigned int field_index ) = 0;
 		virtual inline void visit( OblivionHavokMaterial&, const unsigned int field_index ) = 0;
 		virtual inline void visit( PixelComponent&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ApplyMode&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Particle >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<184,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<ElementReference >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<ParticleDesc >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiBinaryVoxelData >&, const unsigned int field_index ) = 0;
@@ -886,9 +886,9 @@ namespace Niflib {
 		virtual inline void visit( vector<Ref<NiMeshHWInstance > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<6,unsigned int >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiTriBasedGeom > >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<4,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<NiPhysXJointLimit >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiExtraData > >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array< 7, array<12,Byte > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( SkyrimWaterShaderFlags&, const unsigned int field_index ) = 0;
 		virtual inline void visit( ByteColor4&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<BoneData >&, const unsigned int field_index ) = 0;
@@ -897,7 +897,6 @@ namespace Niflib {
 		virtual inline void visit( Ref<NiAlphaProperty >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<SyncPoint >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NxD6JointDriveType&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<40,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( OblivionLayer&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiEvaluator > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( LightingShaderControlledColor&, const unsigned int field_index ) = 0;
@@ -911,6 +910,7 @@ namespace Niflib {
 		virtual inline void visit( vector<Key<float > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( PlatformID&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NxCombineMode&, const unsigned int field_index ) = 0;
+		virtual inline void visit( AlignMethod&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector< vector<unsigned int > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NxD6JointMotion&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<BSAnimNote > >&, const unsigned int field_index ) = 0;
@@ -919,7 +919,7 @@ namespace Niflib {
 		virtual inline void visit( PathFlags&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiParticleSystemController *&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<NiTransform >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( Ref<AbstractAdditionalGeometryData >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( Color3&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Color4&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPSysData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( HalfSpaceBV&, const unsigned int field_index ) = 0;
@@ -931,7 +931,6 @@ namespace Niflib {
 		virtual inline void visit( BroadPhaseType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<bhkConvexShape > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( PSLoopBehavior&, const unsigned int field_index ) = 0;
-		virtual inline void visit( vector<byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Vector3&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Vector4&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiMorphData >&, const unsigned int field_index ) = 0;
@@ -945,15 +944,13 @@ namespace Niflib {
 		virtual inline void visit( StringPalette&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<BSAnimNotes > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiPhysXDest > >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<12,byte >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( vector< vector<byte > >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( vector<Key<Byte > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Ref<NiPhysXJointDesc > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector< vector<TexCoord > >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<5,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Triangle >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( hkDeactivatorType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiExtraData >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( vector<ConstraintData >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<3,KeyGroup<float > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPhysXPropDesc >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( HavokFilter&, const unsigned int field_index ) = 0;
 		virtual inline void visit( bhkEntity *&, const unsigned int field_index ) = 0;
@@ -977,6 +974,7 @@ namespace Niflib {
 		virtual inline void visit( Ref<NiVisData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( BSShaderType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( TexType&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<292,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<bhkSystem >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( TexCoord&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<bhkWorldObject >&, const unsigned int field_index ) = 0;
@@ -999,7 +997,6 @@ namespace Niflib {
 		virtual inline void visit( StencilDrawMode&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiCollisionObject >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiTransform&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array< 7, array<12,byte > >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NiQuatTransform&, const unsigned int field_index ) = 0;
 		virtual inline void visit( CollisionMode&, const unsigned int field_index ) = 0;
 		virtual inline void visit( TextureType&, const unsigned int field_index ) = 0;
@@ -1007,10 +1004,11 @@ namespace Niflib {
 		virtual inline void visit( BSValueNodeFlags&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiImage >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector< array<6,unsigned short > >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<3,KeyGroup<float > >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( Color3&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<3,Byte >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( Ref<AbstractAdditionalGeometryData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( unsigned short&, const unsigned int field_index ) = 0;
 		virtual inline void visit( hkQualityType&, const unsigned int field_index ) = 0;
+		virtual inline void visit( vector<BoneTransform >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<int >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( TransformMember&, const unsigned int field_index ) = 0;
 		virtual inline void visit( bhkCOFlags&, const unsigned int field_index ) = 0;
@@ -1031,10 +1029,10 @@ namespace Niflib {
 		virtual inline void visit( int&, const unsigned int field_index ) = 0;
 		virtual inline void visit( HavokMaterial&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<Morph >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( array<6,byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiKeyframeData >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( TexFilterMode&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<DataStreamRef >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<14,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( bool&, const unsigned int field_index ) = 0;
 		virtual inline void visit( MoppDataBuildType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPSysEmitterCtlrData >&, const unsigned int field_index ) = 0;
@@ -1042,14 +1040,16 @@ namespace Niflib {
 		virtual inline void visit( AccumFlags&, const unsigned int field_index ) = 0;
 		virtual inline void visit( MotorType&, const unsigned int field_index ) = 0;
 		virtual inline void visit( BSLightingShaderPropertyShaderType&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<20,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPhysXActorDesc >&, const unsigned int field_index ) = 0;
-		virtual inline void visit( vector<BoneTransform >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<12,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( array<21,float >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiPSysModifier >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( TexClampMode&, const unsigned int field_index ) = 0;
 		virtual inline void visit( BSShaderFlags&, const unsigned int field_index ) = 0;
 		virtual inline void visit( NxJointLimitSoftDesc&, const unsigned int field_index ) = 0;
 		virtual inline void visit( Ref<NiSkinPartition >&, const unsigned int field_index ) = 0;
+		virtual inline void visit( array<8,Byte >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<PhysXMaterialRef >&, const unsigned int field_index ) = 0;
 		virtual inline void visit( vector<unsigned int >&, const unsigned int field_index ) = 0;
 
@@ -1071,7 +1071,6 @@ namespace Niflib {
 		virtual inline void visit( vector<Vector4 >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( BSCPCullingType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPhysXRigidBodySrc >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<20,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiAVObject *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector< vector<ByteColor4 > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<ConstraintInfo >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1092,7 +1091,6 @@ namespace Niflib {
 		virtual inline void visit( NxSpringDesc& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiTextKeyExtraData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPSSimulator >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( vector< array<5,byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<BSShaderTextureSet >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPosData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<hkPackedNiTriStripsData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1116,6 +1114,7 @@ namespace Niflib {
 		virtual inline void visit( Ref<bhkShape >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( InertiaMatrix& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( PixelLayout& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( vector<Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<HavokFilter >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<NiAVObject * >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<PhysXStateName >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1126,11 +1125,11 @@ namespace Niflib {
 		virtual inline void visit( NiPSysColliderManager *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<ComponentFormat >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiRawImageData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( vector< vector<Byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( bhkPositionConstraintMotor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( StencilAction& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NxJointType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Quaternion& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<184,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<BSConnectPoint >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiSwitchFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NxCapsule& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1143,8 +1142,9 @@ namespace Niflib {
 		virtual inline void visit( vector<ExtraMeshDataEpicMickey >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( VectorFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiDataStream >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<40,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<string >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( CapsuleBV& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( vector<BoundingVolume >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( SkyObjectType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<BSPackedAdditionalDataBlock >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ColliderType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1182,6 +1182,8 @@ namespace Niflib {
 		virtual inline void visit( hkWorldObjCinfoProperty& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<12,float >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<BSGeometryPerSegmentSharedData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( vector< array<5,Byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<6,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ZCompareMode& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ImageType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<BSSkin__BoneData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1194,7 +1196,6 @@ namespace Niflib {
 		virtual inline void visit( Ref<NiObject >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Matrix22& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( InterpBlendFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<7,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( bhkVelocityConstraintMotor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiSourceTexture >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<float >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1214,8 +1215,6 @@ namespace Niflib {
 		virtual inline void visit( StiffSpringDescriptor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( EmitFrom& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector< array<4,unsigned short > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( vector<Key<byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( byte& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiSourceTexture > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( unsigned int& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<10,short >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1229,7 +1228,6 @@ namespace Niflib {
 		virtual inline void visit( vector<Quaternion >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<unsigned short >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( BSDismemberBodyPartType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<14,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ShortString& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiNode > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( VelocityType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1244,7 +1242,6 @@ namespace Niflib {
 		virtual inline void visit( vector<Ref<NiObject > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<InterpBlendItem >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<SkinInfo >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<3,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiObjectNET *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiParticleSystem *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( DataStreamUsage& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1252,12 +1249,12 @@ namespace Niflib {
 		virtual inline void visit( RagdollDescriptor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( SemanticData& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Fallout3HavokMaterial& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( KeyGroup<byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( hkSolverDeactivation& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( PSForceType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( PixelTiling& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiFloatData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( EffectShaderControlledColor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( AlignMethod& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( vector<ConstraintData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiDynamicEffect *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<IndexString >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<BSPackedGeomObject >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1266,10 +1263,11 @@ namespace Niflib {
 		virtual inline void visit( Triangle& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<bhkCMSDBigTris >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<PhysXBodyStoredVels >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<5,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( MalleableDescriptor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( MaterialData& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( KeyGroup<Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ReferenceSystemDescriptor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<8,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( hfloat& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<2,NiPhysXJointActor >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<TriangleData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1280,18 +1278,18 @@ namespace Niflib {
 		virtual inline void visit( NiControllerManager *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Fallout4ShaderPropertyFlags1& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Fallout4ShaderPropertyFlags2& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( vector<BoundingVolume >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiSkinData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( KeyGroup<Vector3 >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<24,short >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ByteArray& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( PSForceType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<4,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<4,unsigned int >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( hkResponseType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<BSGeometrySegmentData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( TexDesc& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( JointAxisPoint& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPhysXMeshDesc >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<7,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( LimitedHingeDescriptor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiMesh > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		template <typename T> inline void visit( vector<Key<T > >&, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1299,16 +1297,18 @@ namespace Niflib {
 		virtual inline void visit( vector<Ref<NiPSCollider > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<SemanticData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<16,ByteColor4 >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( Byte& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<4,PixelFormatComponent >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( SkyrimShaderPropertyFlags2& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NxShapeType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<NiNode * >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<292,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( CapsuleBV& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( FurnitureEntryPoints& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( OblivionHavokMaterial& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( PixelComponent& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ApplyMode& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Particle >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<184,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<ElementReference >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<ParticleDesc >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiBinaryVoxelData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1320,9 +1320,9 @@ namespace Niflib {
 		virtual inline void visit( vector<Ref<NiMeshHWInstance > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<6,unsigned int >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiTriBasedGeom > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<4,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<NiPhysXJointLimit >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiExtraData > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array< 7, array<12,Byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( SkyrimWaterShaderFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( ByteColor4& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<BoneData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1331,7 +1331,6 @@ namespace Niflib {
 		virtual inline void visit( Ref<NiAlphaProperty >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<SyncPoint >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NxD6JointDriveType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<40,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( OblivionLayer& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiEvaluator > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( LightingShaderControlledColor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1345,6 +1344,7 @@ namespace Niflib {
 		virtual inline void visit( vector<Key<float > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( PlatformID& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NxCombineMode& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( AlignMethod& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector< vector<unsigned int > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NxD6JointMotion& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<BSAnimNote > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1353,7 +1353,7 @@ namespace Niflib {
 		virtual inline void visit( PathFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiParticleSystemController *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<NiTransform >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( Ref<AbstractAdditionalGeometryData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( Color3& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Color4& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPSysData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( HalfSpaceBV& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1365,7 +1365,6 @@ namespace Niflib {
 		virtual inline void visit( BroadPhaseType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<bhkConvexShape > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( PSLoopBehavior& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( vector<byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Vector3& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Vector4& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiMorphData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1379,15 +1378,13 @@ namespace Niflib {
 		virtual inline void visit( StringPalette& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<BSAnimNotes > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiPhysXDest > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<12,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( vector< vector<byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( vector<Key<Byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiPhysXJointDesc > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector< vector<TexCoord > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<5,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Triangle >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( hkDeactivatorType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiExtraData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( vector<ConstraintData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<3,KeyGroup<float > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPhysXPropDesc >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( HavokFilter& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( bhkEntity *& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1411,6 +1408,7 @@ namespace Niflib {
 		virtual inline void visit( Ref<NiVisData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( BSShaderType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( TexType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<292,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<bhkSystem >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( TexCoord& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<bhkWorldObject >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1433,7 +1431,6 @@ namespace Niflib {
 		virtual inline void visit( StencilDrawMode& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiCollisionObject >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiTransform& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array< 7, array<12,byte > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NiQuatTransform& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( CollisionMode& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( TextureType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1441,10 +1438,11 @@ namespace Niflib {
 		virtual inline void visit( BSValueNodeFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiImage >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector< array<6,unsigned short > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<3,KeyGroup<float > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( Color3& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<3,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( Ref<AbstractAdditionalGeometryData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( unsigned short& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( hkQualityType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( vector<BoneTransform >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<int >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( TransformMember& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( bhkCOFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1465,10 +1463,10 @@ namespace Niflib {
 		virtual inline void visit( int& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( HavokMaterial& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Morph >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( array<6,byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiKeyframeData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( TexFilterMode& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<DataStreamRef >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<14,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( bool& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( MoppDataBuildType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPSysEmitterCtlrData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
@@ -1476,14 +1474,16 @@ namespace Niflib {
 		virtual inline void visit( AccumFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( MotorType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( BSLightingShaderPropertyShaderType& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<20,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPhysXActorDesc >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		virtual inline void visit( vector<BoneTransform >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<12,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( array<21,float >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiPSysModifier >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( TexClampMode& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( BSShaderFlags& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( NxJointLimitSoftDesc& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( Ref<NiSkinPartition >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		virtual inline void visit( array<8,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<PhysXMaterialRef >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<unsigned int >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 	protected:

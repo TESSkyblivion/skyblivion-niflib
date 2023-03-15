@@ -527,7 +527,6 @@ if GENALLFILES:
     out.code( '//To change this file, alter the niftools/docsys/gen_niflib.py Python script.' )
     out.code()
     out.code( '#include <iostream>' )
-    out.code( 'using namespace std;' )
     out.code()
     out.write('namespace Niflib {\n')
     out.code()
@@ -540,7 +539,7 @@ if GENALLFILES:
           out.code('%s = %s, /*!< %s */'%(o.cname, o.value, o.description))
         out.code('};')
         out.code()
-        out.code('ostream & operator<<( ostream & out, %s const & val );'%x.cname)
+        out.code('std::ostream & operator<<( std::ostream & out, %s const & val );'%x.cname)
         out.code()
 
     out.write('}\n')
@@ -561,7 +560,6 @@ if GENALLFILES:
     out.code('#define _NIF_ENUMS_INTL_H_')
     out.code()
     out.code( '#include <iostream>' )
-    out.code( 'using namespace std;' )
     out.code()
     out.code('#include "../nif_basic_types.h"')
     out.code()
@@ -573,8 +571,8 @@ if GENALLFILES:
             out.code()
             out.code( '//---' + x.cname + '---//')
             out.code()
-        out.code('void NifStream( %s & val, istream& in, const NifInfo & info = NifInfo() );'%x.cname)
-        out.code('void NifStream( %s const & val, ostream& out, const NifInfo & info = NifInfo() );'%x.cname)
+        out.code('void NifStream( %s & val, std::istream& in, const NifInfo & info = NifInfo() );'%x.cname)
+        out.code('void NifStream( %s const & val, std::ostream& out, const NifInfo & info = NifInfo() );'%x.cname)
         out.code()
 
     out.write('}\n')
@@ -858,8 +856,8 @@ for n in block_names:
     out.code()
     out.code( x.code_include_h() )
     out.write( "namespace Niflib {\n" )
-    if not x.inherit:
-        out.code( 'using namespace std;' )
+    #if not x.inherit:
+    #    out.code( 'using namespace std;' )
     out.code( 'struct Header;' )
     out.code( x.code_fwd_decl() )
     cmp = out.get_dependent_arg_class(x)

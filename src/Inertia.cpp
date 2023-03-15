@@ -10,6 +10,7 @@ All rights reserved.  Please see niflib.h for license. */
 #define _USE_MATH_DEFINES
 #include <math.h>
 using namespace Niflib;
+using namespace std;
 
 static Inertia::fnCalcMassPropertiesSphere extCalcMassPropertiesSphereRoutine = NULL;
 static Inertia::fnCalcMassPropertiesBox extCalcMassPropertiesBoxRoutine = NULL;

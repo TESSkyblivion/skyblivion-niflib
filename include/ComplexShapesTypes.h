@@ -11,7 +11,6 @@ All rights reserved.  Please see niflib.h for license. */
 
 namespace Niflib
 {
-	using namespace std;
 
 	// Forward define of referenced classes
 	class NiProperty;

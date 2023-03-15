@@ -14,7 +14,7 @@ namespace Niflib {
 class NifQHull {
 public:
 
-	static vector<Triangle> compute_convex_hull(const vector<Vector3>& verts);
+	static std::vector<Triangle> compute_convex_hull(const std::vector<Vector3>& verts);
 
 private:
 	explicit NifQHull();

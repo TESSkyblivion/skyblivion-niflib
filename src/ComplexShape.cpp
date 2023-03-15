@@ -854,7 +854,7 @@ void ComplexShape::Merge(NiAVObject* root)
 	//Done Merging
 }
 
-Ref<NiAVObject> ComplexShape::Split(NiNode* parent, Matrix44& transform, int max_bones_per_partition, bool stripify, bool tangent_space, float min_vertex_weight, byte tspace_flags) const
+Ref<NiAVObject> ComplexShape::Split(NiNode* parent, Matrix44& transform, int max_bones_per_partition, bool stripify, bool tangent_space, float min_vertex_weight, Byte tspace_flags) const
 {
 	//Make sure parent is not NULL
 	if (parent == NULL)

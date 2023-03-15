@@ -23,7 +23,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
 
 void findFiles(path startingDir, string extension, vector<path>& results) {
 	if (!exists(startingDir) || !is_directory(startingDir)) return;
-	for (auto& dirEntry : std::experimental::filesystem::recursive_directory_iterator(startingDir))
+	for (auto& dirEntry : std::filesystem::recursive_directory_iterator(startingDir))
 	{
 		if (is_directory(dirEntry.path()))
 			continue;

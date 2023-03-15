@@ -119,14 +119,14 @@ c_types_set = Set()
 
 NATIVETYPES = {
     'bool' : 'bool',
-    'byte' : 'byte',
+    'byte' : 'Byte',
     'uint' : 'unsigned int',
     'ulittle32' : 'unsigned int',
     'ushort' : 'unsigned short',
     'int' : 'int',
     'short' : 'short',
     'BlockTypeIndex' : 'unsigned short',
-    'char' : 'byte',
+    'char' : 'Byte',
     'FileVersion' : 'unsigned int',
     'Flags' : 'unsigned short',
     'float' : 'float',
@@ -1639,7 +1639,7 @@ class Member:
         
         # Format default value so that it can be used in a C++ initializer list
         if not self.default and (not self.arr1.lhs and not self.arr2.lhs):
-            if self.type in ["unsigned int", "unsigned short", "byte", "int", "short", "char"]:
+            if self.type in ["unsigned int", "unsigned short", "byte", "Byte", "int", "short", "char"]:
                 self.default = "0"
             elif self.type == "bool":
                 self.default = "false"
@@ -1670,6 +1670,8 @@ class Member:
 #                self.default += "f"
             elif self.type in ["Ref", "Ptr", "bool", "Vector3"]:
                 pass
+            elif self.type in ["byte"]:
+                self.default = "(Byte)%s"%(self.default)
             elif self.default.find(',') != -1:
                 pass 
             else:
