@@ -177,8 +177,22 @@ namespace Niflib {
 		//Iterable
 		template<typename T, typename std::enable_if<IsIterable<T>>::type* = nullptr >
 		inline void visit(T& field) {
-			for (T::iterator it = field.begin(); it != field.end(); ++it)
+			typename T::iterator it = field.begin();
+			for (it; it != field.end(); ++it)
+			{
 				visit(*it);
+			}
+		}
+
+		//C++17 does weird things with this
+		template<>
+		inline void visit(std::vector<bool> &field) {
+			std::vector<bool>::iterator it = field.begin();
+			for (it; it != field.end(); ++it)
+			{
+				auto&& field = *it;
+				visit(field);
+			}
 		}
 
 		//Single value, handle
