@@ -235,9 +235,9 @@ template <class T> Ref<T> DynamicCast(RefObject* object) {
 template <typename U, typename T>
 vector<Ref<U> > DynamicCast(vector<Ref<T> > const & objs) {
 	vector<Ref<U> > retval;
-	const auto itr = objs.begin();
-	const auto end = objs.end();
-	for (itr; itr != end; ++itr) {
+	auto itr = objs.begin();
+	auto end = objs.end();
+	for (itr; itr != end; itr++) {
 		Ref<U> obj = DynamicCast<U>(*itr);
 		if (obj) retval.insert(retval.end(), obj);
 	}

@@ -1292,7 +1292,7 @@ namespace Niflib {
 		virtual inline void visit( array<7,Byte >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( LimitedHingeDescriptor& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiMesh > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
-		template <typename T> inline void visit( vector<Key<T > >&, const unsigned int field_index ) { delegate.visit(in, field_index);}
+		template <typename T> inline void visit( vector<Key<T > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector< vector<float > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<Ref<NiPSCollider > >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
 		virtual inline void visit( vector<SemanticData >& in, const unsigned int field_index ) { delegate.visit(in, field_index);}
